@@ -10,6 +10,9 @@ Simple websocket chat written in nodejs
   - Easy user managemet through web panel
   - Links highlight
 
+### Requiremets
+
+  - nodejs >= 10.15.3
 
 ### Installation
 
