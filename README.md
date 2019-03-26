@@ -37,4 +37,4 @@ If you have configured SSL on apache you don't need to provide certificates for 
 
 #### index.js
 
-Please provide ssl certificates if you want to use https otherwise the server will start as http
+You need to provide ssl certificates if you want to use https otherwise the server will start as http
