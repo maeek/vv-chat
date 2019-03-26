@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#191E2F">
+    <meta name="description" content="Chat that doesn't store your messages">
+    <meta name="og:description" content="Chat that doesn't store your messages">
+    <meta property="og:url" content="htttps://vv.eswomp.it/">
+    <meta property="og:title" content="VV-Chat">
+    <meta property="og:image" content="https://chat.eswomp.it/static/vv_cc.png">
+    <title>VV-Chat Login</title>
+    <script defer src="/js/func.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|KoHo:100,400,900|Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="page-login">
+    <div class="page__wrapper">
+        <div class="panel__div panel__div--left">
+        </div>
+        <div class="panel__div panel__div--right">
+            <div class="container">
+                <div class="logo__div">
+                    <h1 class="title vv noselect"><span class="vv--dots">VV</span></h1>
+                </div>
+                <div class="spacer"></div>
+                <div class="description noselect">Chat that doesn't save your messages!</div>
+                <form action="/login" method="POST">
+                    <div class="input_cont">
+                        <div class="title noselect">Login</div>
+                        <div class="input__div">
+                            <input type="text" name="username">
+                        </div>
+                    </div>
+                    <div class="input_cont">
+                        <div class="title noselect">Password</div>
+                        <div class="input__div">
+                            <input type="password" name="password">
+                        </div>
+                    </div>
+                    <div class="input_cont">
+                        <div class="input__div noselect">
+                            <button>Start Chatting <i class="material-icons">fingerprint</i></button>
+                        </div>
+                    </div>
+                </form>
+                <div class="spacer" style="margin-top:1.5rem"></div>
+                <div class="footer">
+                    <div class="branding noselect">1.0.0</div>
+                    <div class="branding"><a href="https://github.com/maeek/websocket-chat">Github</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script defer>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (document.querySelector('input[name="username"]').value.trim().length > 1 && document.querySelector('input[name="password"]').value.trim().length > 1) {
+                return true;
+            } else {
+                if (document.querySelector('input[name="username"]').value.trim().length < 1)
+                    document.querySelector('input[name="username"]').style["box-shadow"] = '0px 3px 1px #ff4747';
+                if (document.querySelector('input[name="password"]').value.trim().length < 1)
+                    document.querySelector('input[name="password"]').style["box-shadow"] = '0px 3px 1px #ff4747';
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#191E2F">
+    <meta name="description" content="Chat that doesn't store your messages">
+    <meta name="og:description" content="Chat that doesn't store your messages">
+    <meta property="og:url" content="htttps://vv.eswomp.it/">
+    <meta property="og:title" content="VV-Chat">
+    <meta property="og:image" content="https://chat.eswomp.it/static/vv_cc.png">
+    <title>VV-Chat Setup</title>
+    <script src="/js/js.cookie.min.js"></script>
+    <script defer src="/js/func.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|KoHo:100,400,900|Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="page-login">
+    <div class="page__wrapper">
+        <div class="panel__div panel__div--right">
+            <div class="container">
+                <div class="logo__div">
+                    <h1 class="title vv noselect"><span class="vv--dots">&nbsp;</span></h1>
+                </div>
+                <div class="spacer"></div>
+                <div class="description noselect">Almost there! Just update your password.</div>
+                <form action="/setup" method="POST">
+                    <div class="input_cont">
+                        <div class="title noselect">Type new password</div>
+                        <div class="input__div">
+                            <input type="password" name="password">
+                        </div>
+                    </div>
+                    <div class="input_cont">
+                        <div class="title noselect">Type new password again</div>
+                        <div class="input__div">
+                            <input type="password" name="repassword">
+                        </div>
+                    </div>
+                    <div class="input_cont">
+                        <div class="input__div noselect">
+                            <button>Update password <i class="material-icons">arrow_right_alt</i></button>
+                            <div class="branding" style="text-align: center;margin-bottom: 1.5rem;"><a href="/logout">Sign out</a></div>
+                        </div>
+                    </div>
+                </form>
+                <div class="spacer"></div>
+                <div class="footer">
+                    <div class="branding noselect">1.0.0</div>
+                    <div class="branding"><a href="https://github.com/maeek/websocket-chat">Github</a></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <script defer>
+        window.addEventListener("DOMContentLoaded", function() {
+            document.querySelector(".vv--dots").innerHTML = Cookies.get("user").substring(0, 1).toLowerCase();
+        });
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (document.querySelector('input[name="repassword"]').value.trim().length >= 5 && document.querySelector('input[name="password"]').value.trim().length >= 5) {
+                return true;
+            } else {
+                if (document.querySelector('input[name="repassword"]').value.trim().length <= 5)
+                    document.querySelector('input[name="repassword"]').style["box-shadow"] = '0px 3px 1px #ff4747';
+                if (document.querySelector('input[name="password"]').value.trim().length <= 5)
+                    document.querySelector('input[name="password"]').style["box-shadow"] = '0px 3px 1px #ff4747';
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
+</body>
+
+</html>

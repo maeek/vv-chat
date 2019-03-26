@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8,user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="#191E2F">
+    <meta name="description" content="Chat that doesn't store your messages">
+    <meta name="og:description" content="Chat that doesn't store your messages">
+    <meta property="og:url" content="htttps://vv.eswomp.it/">
+    <meta property="og:title" content="VV-Chat">
+    <meta property="og:image" content="https://chat.eswomp.it/static/vv_cc.png">
+    <title>VV-Chat</title>
+    <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display:100,400,900|KoHo:100,400,900|Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <script src="/js/js.cookie.min.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <script src="/js/func.js"></script>
+    <script defer src="/js/manage.js"></script>
+</head>
+
+<body class="page-manage">
+    <div class="page__wrapper">
+        <nav class="panel panel--top">
+            <div class="title noselect">
+                <h1 class="noselect">VV-chAt</h1>
+                <div class="version">1.0.0</div>
+                <div class="mgmt--title"><i class="material-icons">keyboard_arrow_right</i> Management</div>
+            </div>
+            <div class="info">
+                <i class="material-icons settings refresh--users noselect" title="Refresh users">refresh</i>
+                <a href="/logout" class="logout noselect" title="Sign out">
+                    <i class="material-icons">exit_to_app</i>
+                </a>
+            </div>
+        </nav>
+        <div class="panel panel--middle">
+            <ul class="users__table">
+                <li class="user--record user--add">
+                    <div class="user--name">Add user</div>
+                    <div class="actions noselect">
+                        <div><i class="material-icons">add</i></div>
+                    </div>
+                </li>
+                <li class="loader__div">
+                    <div class="lds-roller">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                </li>
+            </ul>
+            <div class="endRecords"></div>
+        </div>
+        <footer class="panel panel--bottom noselect">
+            <div class="root--info">
+                <span>This account has administrative privileges. You won't be able to chat from this account. <a href="/logout">Switch to different account</a></span>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>

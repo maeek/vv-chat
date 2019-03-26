@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=0.8,user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="theme-color" content="#191E2F" />
+    <meta name="description" content="Chat that doesn't store your messages" />
+    <meta name="og:description" content="Chat that doesn't store your messages" />
+    <meta property="og:url" content="htttps://vv.eswomp.it/" />
+    <meta property="og:title" content="VV-Chat" />
+    <meta property="og:image" content="https://chat.eswomp.it/static/vv_cc.png" />
+    <title>VV-Chat</title>
+    <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|KoHo:100,400,900|Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <script src="/js/js.cookie.min.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <script defer src="/js/func.js"></script>
+    <script defer src="/js/client.js"></script>
+
+</head>
+
+<body class="page-chat">
+    <div class="page__wrapper">
+        <nav class="panel panel--top">
+            <div class="title">
+                <h1 class="noselect">VV-chAt</h1>
+                <div class="version noselect">1.0.0</div>
+            </div>
+            <div class="info">
+                <div class="users noselect" title="Online users"><i class="material-icons">people</i><span id="uc">0</span></div>
+                <i class="material-icons noselect clear_chat" title="Delete local chat history">delete_sweep</i>
+                <a href="/logout" class="logout noselect" title="Sign out">
+                    <i class="material-icons">exit_to_app</i>
+                </a>
+            </div>
+        </nav>
+        <div class="panel panel--middle"></div>
+        <footer class="panel panel--bottom">
+            <div class="text">
+                <textarea type="text" class="textField" name="textField" placeholder="Type message here..."></textarea>
+            </div>
+            <div class="actions noselect">
+                <i class="material-icons photo" title="Send photo">photo</i>
+                <input type="file" style="display:none">
+                <i class="material-icons send" title="Send message">send</i>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
