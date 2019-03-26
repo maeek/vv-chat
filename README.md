@@ -3,10 +3,10 @@ Simple websocket chat written in nodejs
 
 ### Features
 
-  - HTTPS support
   - No chat history on the server
-  - Remove the messages that you sent
   - Send photos
+  - HTTPS support
+  - Remove the messages that you sent
   - Easy user managemet through web panel
   - Links highlight
 
