@@ -1,11 +1,11 @@
 {
-    "name": "websocket-chat",
+    "name": "vv-chat",
     "version": "1.0.0",
     "description": "",
     "private": true,
     "main": "index.js",
     "scripts": {
-        "build": "babel index.js src/client.js -d dist && mv dist/src/client.js dist/public/js/client.js",
+        "build": "./node_modules/.bin/babel index.js src/client.js -d dist && mv dist/src/client.js dist/public/js/client.js",
         "start": "npm run build && node dist/index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
@@ -14,6 +14,7 @@
         "url": "git+https://github.com/maeek/vv-chat.git"
     },
     "keywords": [
+        "vv-chat",
         "websocket",
         "chat",
         "nodejs"
@@ -25,26 +26,26 @@
     },
     "homepage": "https://github.com/maeek/vv-chat#readme",
     "devDependencies": {
-        "@babel/core": "^7.3.4",
+        "@babel/core": "^7.4.0",
         "@babel/plugin-proposal-async-generator-functions": "^7.2.0",
         "@babel/plugin-proposal-json-strings": "^7.2.0",
-        "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
+        "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
         "@babel/plugin-proposal-optional-catch-binding": "^7.2.0",
-        "@babel/plugin-proposal-unicode-property-regex": "^7.2.0",
+        "@babel/plugin-proposal-unicode-property-regex": "^7.4.0",
         "@babel/plugin-syntax-async-generators": "^7.2.0",
         "@babel/plugin-syntax-json-strings": "^7.2.0",
         "@babel/plugin-syntax-object-rest-spread": "^7.2.0",
         "@babel/plugin-syntax-optional-catch-binding": "^7.2.0",
         "@babel/plugin-transform-arrow-functions": "^7.2.0",
-        "@babel/plugin-transform-async-to-generator": "^7.3.4",
+        "@babel/plugin-transform-async-to-generator": "^7.4.0",
         "@babel/plugin-transform-block-scoped-functions": "^7.2.0",
-        "@babel/preset-env": "^7.3.4",
+        "@babel/preset-env": "^7.4.2",
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.3",
         "babel-preset-env": "^1.7.0"
     },
     "dependencies": {
-        "bcrypt": "^3.0.4",
+        "bcrypt": "^3.0.5",
         "body-parser": "^1.18.3",
         "cookie": "^0.3.1",
         "cookie-parser": "^1.4.4",
