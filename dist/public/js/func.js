@@ -51,13 +51,13 @@ function appendDOM(HTML, element = String, scroll = true) {
 
     for (var i = 0; i < childNodes.length; i++) {
         document.querySelector(element).append(childNodes[i]);
-    }    
-    
+    }
+
     if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
             middleDiv.scrollHeight,
             middleDiv.offsetHeight,
             middleDiv.clientHeight,
-        ) - 250 && scroll) {
+        ) - 150 && scroll) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
     }
 }
@@ -121,7 +121,7 @@ function appendMessage() {
                     </div>;`;
         appendDOM(HTML, ".panel--middle", true);
         const middleDiv = document.querySelector(".panel--middle");
-        middleDiv.scrollTop = middleDiv.scrollHeight;        
+        middleDiv.scrollTop = middleDiv.scrollHeight;
         document.querySelector(".textField").value = "";
         document.querySelector(".textField").focus();
     }
@@ -152,7 +152,7 @@ function appendImage(files) {
                         <div class="who noselect">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                     </div>`;
                 if (document.querySelectorAll(".typing").length > 0) document.querySelector(".typing").remove();
-                    
+
                 const panelMiddle = document.querySelector(".panel--middle");
                 getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
                     appendDOM(HTML, ".panel--middle", false);
@@ -161,7 +161,7 @@ function appendImage(files) {
                             panelMiddle.scrollHeight,
                             panelMiddle.offsetHeight,
                             panelMiddle.clientHeight,
-                        ) - 250)
+                        ) - 150)
                         panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
                     else
                         panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
@@ -189,5 +189,5 @@ function newNotf(user, image = false) {
         sound.play();
     } catch (e) {
         return false;
-    }   
+    }
 }

@@ -8,7 +8,8 @@
 
 'use strict';
 
-let socket = io.connect(`/chat`), notf;
+let socket = io.connect(`/chat`),
+    notf;
 const middleDiv = document.querySelector(".panel--middle");
 
 
@@ -17,15 +18,15 @@ window.addEventListener("DOMContentLoaded", function() {
     const wh = (document.height !== undefined) ? document.height : document.body.offsetHeight;
     const calc = wh - document.querySelector(".panel--top").clientHeight - document.querySelector(".panel--bottom").clientHeight;
     el.style["max-height"] = calc + "px";
-    
+
     window.addEventListener("resize", function() {
         const el = document.querySelector(".panel--middle");
         const wh = (document.height !== undefined) ? document.height : document.body.offsetHeight;
         const calc = wh - document.querySelector(".panel--top").clientHeight - document.querySelector(".panel--bottom").clientHeight;
         el.style["max-height"] = calc + "px";
     });
-    
-    document.querySelector(".textField").focus();    
+
+    document.querySelector(".textField").focus();
 });
 
 /*
@@ -148,7 +149,7 @@ socket.on("image", function(image) {
                 middleDiv.scrollHeight,
                 middleDiv.offsetHeight,
                 middleDiv.clientHeight,
-            ) - 250)
+            ) - 150)
             middleDiv.scrollTop = middleDiv.scrollHeight + dims.h;
         else
             middleDiv.scrollTop = middleDiv.scrollTop - dims.h;
@@ -203,7 +204,7 @@ document.querySelector(".textField").addEventListener("paste", function(pasteEve
                         middleDiv.scrollHeight,
                         middleDiv.offsetHeight,
                         middleDiv.clientHeight,
-                    ) - 250)
+                    ) - 150)
                     middleDiv.scrollTop = middleDiv.scrollHeight + dims.h;
                 else
                     middleDiv.scrollTop = middleDiv.scrollTop - dims.h;
