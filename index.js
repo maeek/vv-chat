@@ -103,7 +103,6 @@ let session = expressSession({
     resave: true,
     saveUninitialized: false,
     cookie: {
-        secure: true,
         httpOnly: true,
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
     }
