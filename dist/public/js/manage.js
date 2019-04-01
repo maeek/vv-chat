@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.0
+ *   Version: 1.0.1
  * 
  */
 
@@ -70,19 +70,19 @@ function getUsers() {
 
         }
         document.querySelector(".loader__div").remove();
-    }).catch(e => {
+    }).catch(() => {
         error(`Connection failed`);
     });
 }
 window.addEventListener("DOMContentLoaded", function() {
     const el = document.querySelector(".panel--middle");
     const wh = (document.height !== undefined) ? document.height : document.body.offsetHeight;
-    const calc = wh - document.querySelector(".panel--top").clientHeight - document.querySelector(".panel--bottom").clientHeight;
+    const calc = wh - document.querySelector(".panel--top").offsetHeight - document.querySelector(".panel--bottom").offsetHeight;
     el.style["max-height"] = calc + "px";
     window.addEventListener("resize", function() {
         const el = document.querySelector(".panel--middle");
         const wh = (document.height !== undefined) ? document.height : document.body.offsetHeight;
-        const calc = wh - document.querySelector(".panel--top").clientHeight - document.querySelector(".panel--bottom").clientHeight;
+        const calc = wh - document.querySelector(".panel--top").offsetHeight - document.querySelector(".panel--bottom").offsetHeight;
         el.style["max-height"] = calc + "px";
     });
     getUsers();
@@ -145,7 +145,7 @@ window.addEvent(document.body, "click", function(e) {
                 } else {
                     error(`Couldn't remove user.`);
                 }
-            }).catch(e => {
+            }).catch(() => {
                 error(`Connection failed`);
             });
     }
@@ -172,7 +172,7 @@ window.addEvent(document.body, "click", function(e) {
                     s.parentNode.querySelector("input").value = res.password;
                 else
                     error(`Failed to reset password`);
-            }).catch(e => {
+            }).catch(() => {
                 error(`Connection failed`);
             });
     }
@@ -248,7 +248,7 @@ window.addEvent(document.body, "click", function(e) {
                         error(`Failed to create user`);
                     }
 
-                }).catch(e => {
+                }).catch(() => {
                     error(`Connection failed`);
                 });
         } else {

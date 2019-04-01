@@ -270,7 +270,9 @@ form .title {
     justify-content: flex-start;
     font-weight: 100;
 }
-
+input[type="file"] {
+    display: none;
+}
 .input__div {
     width: auto;
     margin: .1rem .8rem;
@@ -499,6 +501,7 @@ form .title {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
+    flex: 0 0 auto;
     -webkit-box-pack: justify;
     -ms-flex-pack: justify;
     justify-content: space-between;
@@ -618,7 +621,6 @@ form .title {
 .message {
     padding: .4rem .8rem;
     border-radius: 20px;
-    margin: .1rem 0;
     color: #FFF;
     word-wrap: break-word;
     max-width: 650px;
@@ -960,7 +962,6 @@ form .title {
     flex: 1 0 100%;
     text-align: center;
     padding: .5rem 1rem;
-    /* border-top: 1px solid #3b4463; */
 }
 
 .root--info a {
@@ -1057,7 +1058,6 @@ form .title {
     background: -webkit-linear-gradient(right, #21273c, #232b46);
     background: -o-linear-gradient(right, #21273c, #232b46);
     background: linear-gradient(270deg, #21273c, #232b46);
-    /*#1d2336*/
     font-family: 'KoHo', sans-serif;
     margin: .3rem 0;
     -webkit-box-shadow: 0 1px 5px #1b1f2f;
@@ -1096,26 +1096,6 @@ form .title {
 }
 
 
-/* ul li.user--record:first-child {
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-}
-
-ul li.user--record:first-child .actions {
-    border-top-right-radius: 30px;
-} */
-
-
-/* 
-ul li.user--record:last-child {
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
-}
-
-ul li.user--record:last-child .actions {
-    border-bottom-right-radius: 30px;
-} */
-
 .user--record .actions i {
     font-size: inherit;
     padding: .3rem;
@@ -1136,8 +1116,6 @@ ul li.user--record:last-child .actions {
     -webkit-box-shadow: none;
     box-shadow: none;
     background: transparent;
-    /* background: url(/static/bg.png); */
-    /* background-size: 600px 600px; */
 }
 
 .endRecords {
@@ -1253,14 +1231,14 @@ ul li.user--record:last-child .actions {
 .tost {
     position: fixed;
     left: 50%;
-    top: 4rem;
-    transform: translateX(-50%) translateY(-2rem);
+    bottom: 5rem;
+    transform: translateX(-50%) translateY(2rem);
     transition: all .3s;
     border-radius: 30px;
     background: #151a2bbd;
-    padding: .5rem 1rem;
-    font-weight: 900;
-    color: #ff6e6e;
+    padding: 0;
+    font-weight: 400;
+    color: #F0F0F0;
     font-family: 'KoHo', sans-serif;
     overflow: hidden;
     width: auto;
@@ -1268,6 +1246,17 @@ ul li.user--record:last-child .actions {
     cursor: default;
     white-space: nowrap;
     opacity: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.tost--error {
+    top: 4rem;
+    bottom: initial;
+    color: #ff6e6e;
+    padding: .5rem 1rem;
 }
 
 .tost-enter {
@@ -1280,8 +1269,15 @@ ul li.user--record:last-child .actions {
     opacity: 0;
 }
 
+.tost .who {
+    margin: 0;
+}
+
+.tost .text {
+    padding: 0 1rem;
+}
+
 .user--add {
-    /* background: linear-gradient(270deg, #191e2f, #1f273e); */
     background: -webkit-gradient(linear, right top, left top, from(#003d65), to(#00558a));
     background: -webkit-linear-gradient(right, #003d65, #00558a);
     background: -o-linear-gradient(right, #003d65, #00558a);
@@ -1328,6 +1324,11 @@ ul li.user--record:last-child .actions {
 
 .user--add-cont .user--name {
     padding: .6rem 1rem;
+}
+
+.page-manage .panel--top,
+.page-manage .panel--bottom {
+    border-radius: 0;
 }
 
 .loader__div {
@@ -1454,6 +1455,108 @@ ul li.user--record:last-child .actions {
     left: 10px;
 }
 
+.settings__div {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background: rgba(0, 0, 0, .6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+    flex-direction: column;
+}
+
+.settings__cont {
+    margin: 2rem 0;
+    max-width: 600px;
+    width: 100%;
+    background: #3B415A;
+    padding: 1rem;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    font-family: 'KoHo', sans-serif;
+    color: #FEFEFE;
+    position: relative;
+}
+
+.settings__cont .title {
+    font-family: 'KoHo', sans-serif;
+    font-weight: 400;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 0;
+}
+
+.settings__cont .description {
+    padding: 0;
+    margin: .2rem 0 1.4rem 0;
+}
+
+.settings__cont .input__div {
+    padding: .5rem 1rem;
+    margin: .3rem 0 1rem;
+    width: 100%;
+}
+
+.settings__cont .input__div button {
+    margin: 0;
+    background: #282d42;
+    -webkit-box-shadow: 0px 3px 1px #2e344c;
+    box-shadow: 0px 3px 1px #2e344c;
+}
+
+.settings__cont .input__div button:hover,
+.settings__cont .input__div button:focus {
+    background: rgb(32, 71, 116);
+    color: #1fa9ff;
+    -webkit-box-shadow: 0px 3px 1px #333b5d;
+    box-shadow: 0px 3px 1px #0b3463;
+}
+
+.settings__cont .input__div button i {
+    font-size: 1rem;
+}
+
+.settings__cont .spacer {
+    background: #475177;
+    width: 100%;
+    margin: 0 0 1rem 0;
+}
+
+.settings__cont .footer {
+    width: 100%;
+}
+
+.settings__exit {
+    position: absolute;
+    top: -.3rem;
+    right: 0;
+    padding: .3rem 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    border-radius: 30px;
+    background: #282d42;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background .3s;
+}
+
+.settings__exit i {
+    font-size: 1.2rem;
+}
+
+.settings__exit:hover {
+    background: #00558a;
+}
+
 @-webkit-keyframes lds-roller {
     0% {
         -webkit-transform: rotate(0deg);
@@ -1534,5 +1637,8 @@ ul li.user--record:last-child .actions {
     }
     .user--input input {
         font-size: .8rem;
+    }
+    .settings__cont {
+        max-width: 90%;
     }
 }

@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.0
+ *   Version: 1.0.1
  * 
  */
 
@@ -35,7 +35,7 @@ window.hasClass = function(elem, cls) {
 };
 
 function getImageDimensions(file) {
-    return new Promise(function(resolved, rejected) {
+    return new Promise(function(resolved) {
         var i = new Image()
         i.onload = function() {
             resolved({ w: i.width, h: i.height })
@@ -57,14 +57,14 @@ function appendDOM(HTML, element = String, scroll = true) {
             middleDiv.scrollHeight,
             middleDiv.offsetHeight,
             middleDiv.clientHeight,
-        ) - 150 && scroll) {
+        ) - 250 && scroll) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
     }
 }
 
 function error(message) {
     const errID = "errID-" + randomString();
-    const HTML = `<div data-eid="${errID}" class="tost noselect">Error: ${message}</div>`;
+    const HTML = `<div data-eid="${errID}" class="tost tost--error noselect">Error: ${message}</div>`;
     if (document.querySelectorAll(".tost").length > 0) document.querySelector(".tost").remove();
     appendDOM(HTML, 'body');
     document.querySelector(".tost").classList.add("tost-enter");
@@ -128,7 +128,7 @@ function appendMessage() {
 }
 
 function appendImage(files) {
-    for (let i = 0, f; f = files[i]; i++) {
+    for (let i = 0; f = files[i]; i++) {
         const file = files[i];
 
         if (file.type.indexOf("image") >= 0) {
@@ -161,7 +161,7 @@ function appendImage(files) {
                             panelMiddle.scrollHeight,
                             panelMiddle.offsetHeight,
                             panelMiddle.clientHeight,
-                        ) - 150)
+                        ) - 250)
                         panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
                     else
                         panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
