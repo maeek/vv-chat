@@ -326,7 +326,7 @@ app.route('/setup')
                             }
                             return el;
                         });
-                        fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
+                        fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
                         req.session.setup = false;
                         res.redirect("/chat");
                     }
