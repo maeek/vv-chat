@@ -1617,6 +1617,10 @@ input[type="file"] {
         -webkit-box-flex: 0;
         -ms-flex: 0 0 auto;
         flex: 0 0 auto;
+        border-radius: 0;
+    }
+    .panel--top {
+        border-radius: 0;
     }
     .page-chat .panel--top .title,
     .page-manage .panel--top .title {
