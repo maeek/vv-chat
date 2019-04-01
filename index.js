@@ -319,7 +319,7 @@ app.route('/setup')
                 let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
                 bcrypt.hash(password, salt, function(err, hash) {
                     if (!err) {
-                        userObj.users = userObj.users.filter(el => {
+                        usersObj.users = usersObj.users.filter(el => {
                             if (el.username == name) {
                                 el.password = hash;
                                 el.first = false;
