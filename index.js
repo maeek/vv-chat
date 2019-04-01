@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.0
+ *   Version: 1.0.1
  * 
  */
 
@@ -319,14 +319,14 @@ app.route('/setup')
                 let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
                 bcrypt.hash(password, salt, function(err, hash) {
                     if (!err) {
-                        userObj.users = userObj.users.filter(el => {
+                        usersObj.users = usersObj.users.filter(el => {
                             if (el.username == name) {
                                 el.password = hash;
                                 el.first = false;
                             }
                             return el;
                         });
-                        fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
+                        fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
                         req.session.setup = false;
                         res.redirect("/chat");
                     }

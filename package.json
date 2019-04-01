@@ -1,7 +1,7 @@
 {
     "name": "vv-chat",
-    "version": "1.0.0",
-    "description": "",
+    "version": "1.0.1",
+    "description": "Simple websocket chat",
     "private": true,
     "main": "index.js",
     "scripts": {
