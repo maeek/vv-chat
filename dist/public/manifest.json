@@ -1,0 +1,15 @@
+{
+    "short_name": "VV-Chat",
+    "name": "VV-Chat",
+    "icons": [{
+        "src": "/static/vv.png",
+        "type": "image/png",
+        "sizes": "200x200"
+    }],
+    "start_url": "/",
+    "orientation": "portrait",
+    "background_color": "#191E2F",
+    "display": "fullscreen",
+    "scope": "/",
+    "theme_color": "#191E2F"
+}
