@@ -203,7 +203,7 @@ window.addEventListener("DOMContentLoaded", function() {
                             <div class="subtitle noselect">Change password</div>
                             <div class="input__div"><div class="input__div--wrapper"><input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters"><i class="material-icons noselect change--password">done</i></div></div>
                             <div class="footer">
-                                <div class="branding noselect">1.1.0</div>
+                                <div class="branding noselect">1.0.2</div>
                                 <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                             </div>
                         </div>
