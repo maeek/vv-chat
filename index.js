@@ -7,7 +7,6 @@
  */
 
 
-
 'use strict'
 const config = {
     name: "VV-Chat",
@@ -16,9 +15,9 @@ const config = {
     sessionSecret: 'chattyPatty',
     usersFile: "src/users.json",
     certificateFiles: {
-        cert: 'path_to_cert.pem',
-        ca: 'path_to_ca.pem',
-        priv: 'path_to_privkey.pem'
+        cert: '/etc/letsencrypt/live/chat.eswomp.it/cert.pem',
+        ca: '/etc/letsencrypt/live/chat.eswomp.it/chain.pem',
+        priv: '/etc/letsencrypt/live/chat.eswomp.it/privkey.pem'
     }
 }
 
@@ -75,7 +74,6 @@ if (certFlag) {
 
 const io = require('socket.io')(server);
 const bodyParser = require('body-parser');
-const cookie = require('cookie');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const expressSession = require('express-session');
@@ -240,7 +238,7 @@ app.route('/manage')
                     (function() {
                         let userObj = JSON.parse(fs.readFileSync(config.usersFile));
                         const user = req.body.user.toLowerCase().trim();
-                        const format = /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+                        const format = /[ !@#$%^&*()_+\-=[]{};':"\\|,.<>\/?]/;
                         const salt = bcrypt.genSaltSync();
                         const newPassword = randomString();
                         bcrypt.hash(newPassword, salt, function(err, hash) {
@@ -308,30 +306,60 @@ app.route('/setup')
         }
     })
     .post((req, res) => {
-        if (req.session.user && req.cookies.user_sid && req.session.setup) {
-            const password = req.body.password;
-            const repassword = req.body.repassword;
-            const name = req.session.user;
-            if (password != repassword) {
-                res.redirect("/setup");
-            } else {
-                const salt = bcrypt.genSaltSync();
-                let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                bcrypt.hash(password, salt, function(err, hash) {
-                    if (!err) {
-                        usersObj.users = usersObj.users.filter(el => {
-                            if (el.username == name) {
-                                el.password = hash;
-                                el.first = false;
-                            }
-                            return el;
-                        });
-                        fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                        req.session.setup = false;
-                        res.redirect("/chat");
-                    }
+        if (req.session.user && req.cookies.user_sid) {
+            if (req.session.setup) {
+                const password = req.body.password;
+                const repassword = req.body.repassword;
+                const name = req.session.user;
+                if (password != repassword && password.length < 5) {
+                    res.redirect("/setup");
+                } else {
+                    const salt = bcrypt.genSaltSync();
+                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    bcrypt.hash(password, salt, function(err, hash) {
+                        if (!err) {
+                            usersObj.users = usersObj.users.filter(el => {
+                                if (el.username == name) {
+                                    el.password = hash;
+                                    el.first = false;
+                                }
+                                return el;
+                            });
+                            fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
+                            req.session.setup = false;
+                            res.redirect("/chat");
+                        }
 
-                });
+                    });
+                }
+            } else {
+                const password = req.body.password;
+                if (password.length > 4) {
+                    const name = req.session.user;
+                    const salt = bcrypt.genSaltSync();
+                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    bcrypt.hash(password, salt, function(err, hash) {
+                        if (!err) {
+                            usersObj.users = usersObj.users.filter(el => {
+                                if (el.username == name)
+                                    el.password = hash;
+                                return el;
+                            });
+                            fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
+                            res.json({
+                                status: true
+                            });
+                        } else {
+                            res.json({
+                                status: false
+                            });
+                        }
+                    });
+                } else {
+                    res.json({
+                        status: false
+                    });
+                }
             }
         }
     });
@@ -367,7 +395,7 @@ app.get('/logout', (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, '/public')));
-app.use(function(req, res, next) {
+app.use(function(req, res) {
     res.status(404).sendFile(__dirname + "/public/error.html");
 });
 
@@ -397,7 +425,6 @@ io.of('/chat').on('connection', function(socket) {
     });
 
     socket.on("message", function(message) {
-        const cookies = cookie.parse(socket.handshake.headers.cookie)
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
             if (message.message != "" && message.message.length > 0)
                 socket.to("room").emit("message", message);
@@ -407,7 +434,6 @@ io.of('/chat').on('connection', function(socket) {
     });
 
     socket.on("image", function(image) {
-        const cookies = cookie.parse(socket.handshake.headers.cookie)
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
             if (image.type.indexOf("image") >= 0) {
                 socket.to("room").emit("image", {
@@ -424,7 +450,7 @@ io.of('/chat').on('connection', function(socket) {
     });
     socket.on("reverseMessage", function(mid) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            if (mid.indexOf(socket.id) >= 0) {
+            if (mid.indexOf(socket.id) > 0) {
                 socket.nsp.to("room").emit("reverseMessage", mid);
             }
         }

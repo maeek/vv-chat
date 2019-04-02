@@ -191,3 +191,67 @@ function newNotf(user, image = false) {
         return false;
     }
 }
+
+
+window.addEventListener("DOMContentLoaded", function() {
+    document.querySelector(".settings--popup").addEventListener("click", function() {
+        const HTML = `<div class="settings__div">
+                        <div class="settings__cont">
+                            <div class="settings__exit noselect"><i class="material-icons">close</i></div>
+                            <div class="title noselect">Settings</div>
+                            <p class="description noselect">Change settings for your account.</p>
+                            <div class="subtitle noselect">Change password</div>
+                            <div class="input__div"><div class="input__div--wrapper"><input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters"><i class="material-icons noselect change--password">done</i></div></div>
+                            <div class="footer">
+                                <div class="branding noselect">1.1.0</div>
+                                <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
+                            </div>
+                        </div>
+                    </div>`;
+        appendDOM(HTML, 'body', false);
+        document.querySelector(".settings__div").classList.add("anim--opacity");
+        document.querySelector(".settings__cont").classList.add("anim--opacity", "anim--scale");
+    });
+    window.addEvent(document.querySelector("body"), "click", function(e) {
+        let s = window.findParent(e.srcElement || e.target, function(elm) {
+            return window.hasClass(elm, "settings__exit");
+        }, this);
+        if (s) {
+            s.parentNode.classList.remove("anim--opacity", "anim--scale");
+            s.parentNode.parentNode.classList.remove("anim--opacity");
+            setTimeout(function() {
+                s.parentNode.parentNode.remove();
+            }, 300);
+        }
+    });
+    window.addEvent(document.querySelector("body"), "click", function(e) {
+        let s = window.findParent(e.srcElement || e.target, function(elm) {
+            return window.hasClass(elm, "change--password");
+        }, this);
+        if (s) {
+            const newPassDiv = s.parentNode.querySelector("input[name='resetPassword']");
+            if (newPassDiv.value.length > 4) {
+                fetch("/setup", {
+                    body: JSON.stringify({
+                        password: newPassDiv.value
+                    }),
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST"
+                }).then(res => res.json()).then(data => {
+                    if (data.status) {
+                        s.parentNode.classList.add("change--password--success");
+                        newPassDiv.value = "";
+                    } else {
+                        s.parentNode.classList.add("change--password--error");
+                    }
+                });
+            } else {
+                s.parentNode.classList.add("change--password--error");
+                setTimeout(() => { s.parentNode.classList.remove("change--password--error") }, 4000);
+            }
+        }
+    });
+});
