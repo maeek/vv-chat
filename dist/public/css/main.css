@@ -1172,6 +1172,7 @@ input[type="file"] {
     box-shadow: none;
     width: initial;
     flex: 1 0 auto;
+    padding: .5rem .8rem;
 }
 
 .settings__cont .input__div button {
@@ -1197,7 +1198,7 @@ input[type="file"] {
 .settings__cont .input__div--wrapper i {
     font-size: 1rem;
     display: flex;
-    padding: 1rem 1.5rem;
+    padding: .7rem 1.5rem;
     background: #282d42;
     border-radius: 30px;
     cursor: pointer;
