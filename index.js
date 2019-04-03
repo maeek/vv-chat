@@ -403,7 +403,9 @@ app.use(function(req, res) {
 
 io.of("/chat").use(sharedsession(session, { autoSave: true }));
 io.of('/chat').on('connection', function(socket) {
-    socket.join("room");
+    if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
+        socket.join("room");
+    };
 
     socket.on("userConnected", function() {
         io.of('/chat').in("room").clients((error, clients) => {
