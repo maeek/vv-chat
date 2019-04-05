@@ -114,6 +114,12 @@ h1 {
     font-size: inherit;
 }
 
+h1 a {
+    text-decoration: none;
+    color: inherit;
+    font-weight: inherit;
+}
+
 .vv {
     border-radius: 50%;
     padding: 1rem;
