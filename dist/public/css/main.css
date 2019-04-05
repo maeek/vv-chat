@@ -1162,7 +1162,7 @@ input[type="file"] {
     border-radius: 30px;
     width: 100%;
     transition: box-shadow .2s;
-    margin:.2rem;
+    margin: .2rem;
 }
 
 .settings__cont .input__div input {
@@ -1192,13 +1192,15 @@ input[type="file"] {
 .change--password--success {
     box-shadow: 0px 3px #7cf577;
 }
+
 .settings__cont .input__div--wrapper.input__div--wrapper--nobg {
     background: transparent;
 }
+
 .settings__cont .input__div--wrapper i {
     font-size: 1rem;
     display: flex;
-    padding: .7rem 1.5rem;
+    padding: .7rem 1.4rem;
     background: #475177;
     border-radius: 30px;
     cursor: pointer;
@@ -1245,9 +1247,6 @@ input[type="file"] {
     background: #00558a;
 }
 
-
-
-
 input[type="checkbox"] {
     display: none;
 }
@@ -1258,48 +1257,53 @@ input[type="checkbox"] {
     font-weight: 100;
 }
 
-input[type="checkbox"] ~ .checkboxWrapper {
-    padding: 1.2rem 2rem;
+input[type="checkbox"]~.checkboxWrapper {
+    padding: 1rem 1.8rem;
     border-radius: 30px;
     margin: 0 0 0 .5rem;
     position: relative;
-    background: #475177;    
+    background: #475177;
     border: 1px solid #343a56;
 }
 
-input[type="checkbox"] ~ .checkboxWrapper::after {
+input[type="checkbox"]~.checkboxWrapper::after {
     position: absolute;
     font-family: 'Material Icons';
     content: "volume_up";
     -webkit-font-feature-settings: 'liga';
-    top:0;left:0;
-    height: 2.4rem;
-    width: 2.4rem;
+    top: 0;
+    left: 0;
+    height: 2rem;
+    width: 2rem;
     border-radius: 30px;
     background: #0069ab;
     font-size: 1.5rem;
-    color:#FEFEFE;
+    color: #FEFEFE;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: left .3s, background .3s;
     box-shadow: 1px 1px 2px #343a53;
 }
-input[type="checkbox"]:checked ~ .checkboxWrapper::after {
+
+input[type="checkbox"]:checked~.checkboxWrapper::after {
     content: "volume_off";
-    left:1.7rem;
-    background: #ff6e6e;
-    
+    left: 1.7rem;
+    background: #ABABAB;
 }
-input[type="checkbox"] ~ .checkboxWrapper.vibrate::after {
-    content:"vibration";
+
+input[type="checkbox"]~.checkboxWrapper.vibrate::after {
+    content: "vibration";
 }
-input[type="checkbox"]:checked ~ .checkboxWrapper.vibrate::after {
-    content:"stay_current_portrait";
+
+input[type="checkbox"]:checked~.checkboxWrapper.vibrate::after {
+    content: "stay_current_portrait";
 }
-input[type="checkbox"]:disabled ~ .checkboxWrapper::after {
+
+input[type="checkbox"]:disabled~.checkboxWrapper::after {
     background: #3a3f56;
 }
+
 .anim--opacity {
     opacity: 1;
 }
