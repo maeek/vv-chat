@@ -173,12 +173,19 @@ function appendImage(files) {
     }
 }
 
+let unread = 0;
+
 function newNotf(user, image = false) {
     const title = "VV-Chat";
     document.title = `${escapeHtml(user.toUpperCase())} sent${(image)?" photo":" message"}`;
     clearTimeout(notf);
+    if (!document.hasFocus())
+        unread++;
     notf = setTimeout(() => {
         document.title = title;
+        if (!document.hasFocus()) {
+            document.title = `( ${unread} ) VV-Chat`;
+        }
     }, 2000);
     try {
         navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
@@ -194,7 +201,10 @@ function newNotf(user, image = false) {
         return false;
     }
 }
-
+window.onfocus = function() {
+    unread = 0;
+    document.title = `VV-Chat`;
+}
 
 window.addEventListener("DOMContentLoaded", function() {
     document.querySelector(".settings--popup").addEventListener("click", function() {
