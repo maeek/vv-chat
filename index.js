@@ -15,9 +15,9 @@ const config = {
     sessionSecret: 'chattyPatty',
     usersFile: "src/users.json",
     certificateFiles: {
-        cert: '/etc/letsencrypt/live/chat.eswomp.it/cert.pem',
-        ca: '/etc/letsencrypt/live/chat.eswomp.it/chain.pem',
-        priv: '/etc/letsencrypt/live/chat.eswomp.it/privkey.pem'
+        cert: 'path_to_cert.pem',
+        ca: 'path_to_chain.pem',
+        priv: 'path_to_privkey.pem'
     }
 }
 
