@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.2
+ *   Version: 1.0.3
  * 
  */
 
@@ -62,7 +62,7 @@ function appendDOM(HTML, element = String, scroll = true) {
     }
 }
 
-function error(message) {
+function error(message, timeout = 2000) {
     const errID = "errID-" + randomString();
     const HTML = `<div data-eid="${errID}" class="tost tost--error noselect">Error: ${message}</div>`;
     if (document.querySelectorAll(".tost").length > 0) document.querySelector(".tost").remove();
@@ -75,7 +75,7 @@ function error(message) {
             document.querySelector(`.tost[data-eid="${errID}"]`).remove();
         }, 300);
 
-    }, 2000);
+    }, timeout);
 }
 
 function escapeHtml(unsafe) {
@@ -183,10 +183,13 @@ function newNotf(user, image = false) {
     try {
         navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
         if (navigator.vibrate) {
-            navigator.vibrate(150);
+            if (!localStorage.getItem("disableVibration"))
+                navigator.vibrate(150);
         }
-        sound.src = "/static/pull-out.ogg";
-        sound.play();
+        if (!localStorage.getItem("mute")) {
+            sound.src = "/static/pull-out.ogg";
+            sound.play();
+        }
     } catch (e) {
         return false;
     }
@@ -200,8 +203,24 @@ window.addEventListener("DOMContentLoaded", function() {
                             <div class="settings__exit noselect"><i class="material-icons">close</i></div>
                             <div class="title noselect">Settings</div>
                             <p class="description noselect">Change settings for your account.</p>
+                            <div class="subtitle noselect">Notifications</div>
+                            <div class="input__div">
+                                <div class="input__div--wrapper input__div--wrapper--nobg">
+                                    <span>Mute notifications sound</span>
+                                    <label><input type="checkbox" name="muteNotifications" class="mute"><div class="checkboxWrapper"></div></label>
+                                </div>
+                                <div class="input__div--wrapper input__div--wrapper--nobg">
+                                    <span>Disable vibration - mobile only</span>
+                                    <label><input type="checkbox" name="disableVibration" class="disableVibration"><div class="checkboxWrapper vibrate"></div></label>
+                                </div>
+                            </div>
                             <div class="subtitle noselect">Change password</div>
-                            <div class="input__div"><div class="input__div--wrapper"><input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters"><i class="material-icons noselect change--password">done</i></div></div>
+                            <div class="input__div">
+                                <div class="input__div--wrapper">
+                                    <input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters">
+                                    <i class="material-icons noselect change--password">done</i>
+                                </div>
+                            </div>
                             <div class="footer">
                                 <div class="branding noselect">1.0.2</div>
                                 <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
@@ -209,6 +228,10 @@ window.addEventListener("DOMContentLoaded", function() {
                         </div>
                     </div>`;
         appendDOM(HTML, 'body', false);
+        if (localStorage.getItem("mute"))
+            document.querySelector(".mute").checked = true;
+        if (localStorage.getItem("disableVibration"))
+            document.querySelector(".disableVibration").checked = true;
         document.querySelector(".settings__div").classList.add("anim--opacity");
         document.querySelector(".settings__cont").classList.add("anim--opacity", "anim--scale");
     });
@@ -222,6 +245,30 @@ window.addEventListener("DOMContentLoaded", function() {
             setTimeout(function() {
                 s.parentNode.parentNode.remove();
             }, 300);
+        }
+    });
+    window.addEvent(document.querySelector("body"), "input", function(e) {
+        let s = window.findParent(e.srcElement || e.target, function(elm) {
+            return window.hasClass(elm, "mute");
+        }, this);
+        if (s) {
+            const mute = s.checked;
+            if (mute)
+                localStorage.setItem("mute", true);
+            else
+                localStorage.removeItem("mute");
+        }
+    });
+    window.addEvent(document.querySelector("body"), "input", function(e) {
+        let s = window.findParent(e.srcElement || e.target, function(elm) {
+            return window.hasClass(elm, "disableVibration");
+        }, this);
+        if (s) {
+            const mute = s.checked;
+            if (mute)
+                localStorage.setItem("disableVibration", true);
+            else
+                localStorage.removeItem("disableVibration");
         }
     });
     window.addEvent(document.querySelector("body"), "click", function(e) {

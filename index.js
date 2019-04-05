@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.2
+ *   Version: 1.0.3
  * 
  */
 
@@ -408,25 +408,29 @@ io.of('/chat').on('connection', function(socket) {
     };
 
     socket.on("userConnected", function() {
-        io.of('/chat').in("room").clients((error, clients) => {
-            socket.to("room").emit("userConnected", {
-                status: true,
-                self: false,
-                username: socket.handshake.session.user,
-                time: new Date().toJSON().substring(10, 19).replace('T', ' '),
-                users: clients.length
+        if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
+            io.of('/chat').in("room").clients((error, clients) => {
+                socket.to("room").emit("userConnected", {
+                    status: true,
+                    self: false,
+                    username: socket.handshake.session.user,
+                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    users: clients.length
+                });
+                socket.emit("userConnected", {
+                    status: true,
+                    self: true,
+                    username: socket.handshake.session.user,
+                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    users: clients.length
+                })
             });
-            socket.emit("userConnected", {
-                status: true,
-                self: true,
-                username: socket.handshake.session.user,
-                time: new Date().toJSON().substring(10, 19).replace('T', ' '),
-                users: clients.length
-            })
-        });
+        } else {
+            socket.emit("invalidSession", true);
+        }
     });
 
-    socket.on("message", function(message) {
+    socket.on("message", function(data) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
             if (data.message != "" && data.message.length > 0)
                 socket.to("room").emit("message", {
