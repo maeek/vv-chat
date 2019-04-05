@@ -306,65 +306,60 @@ app.route('/setup')
         }
     })
     .post((req, res) => {
-            if (req.session.user && req.cookies.user_sid) {
-                if (req.session.setup) {
-                    const password = req.body.password;
-                    const repassword = req.body.repassword;
+        if (req.session.user && req.cookies.user_sid) {
+            if (req.session.setup) {
+                const password = req.body.password;
+                const repassword = req.body.repassword;
+                const name = req.session.user;
+                if (password != repassword && password.length < 5) {
+                    res.redirect("/setup");
+                } else {
+                    const salt = bcrypt.genSaltSync();
+                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    bcrypt.hash(password, salt, function(err, hash) {
+                        if (!err) {
+                            usersObj.users = usersObj.users.filter(el => {
+                                if (el.username == name) {
+                                    el.password = hash;
+                                    el.first = false;
+                                }
+                                return el;
+                            });
+                            fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
+                            req.session.setup = false;
+                            res.redirect("/chat");
+                        }
+
+                    });
+                }
+            } else {
+                const oldPassword = req.body.oldPassword;
+                const password = req.body.password;
+                if (password.length > 4) {
                     const name = req.session.user;
-                    if (password != repassword && password.length < 5) {
-                        res.redirect("/setup");
-                    } else {
-                        const salt = bcrypt.genSaltSync();
-                        let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    const salt = bcrypt.genSaltSync();
+                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    const userHash = usersObj.users.filter(user => {
+                        return user.username == req.session.user;
+                    });
+                    if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
                         bcrypt.hash(password, salt, function(err, hash) {
                             if (!err) {
                                 usersObj.users = usersObj.users.filter(el => {
-                                    if (el.username == name) {
+                                    if (el.username == name)
                                         el.password = hash;
-                                        el.first = false;
-                                    }
                                     return el;
                                 });
                                 fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                                req.session.setup = false;
-                                res.redirect("/chat");
+                                res.json({
+                                    status: true
+                                });
+                            } else {
+                                res.json({
+                                    status: false
+                                });
                             }
-
                         });
-                    }
-                } else {
-                    const oldPassword = req.body.oldPassword;
-                    const password = req.body.password;
-                    if (password.length > 4) {
-                        const name = req.session.user;
-                        const salt = bcrypt.genSaltSync();
-                        let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const userHash = usersObj.users.filter(user => {
-                            return user.username == req.session.user;
-                        });
-                        if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
-                            bcrypt.hash(password, salt, function(err, hash) {
-                                if (!err) {
-                                    usersObj.users = usersObj.users.filter(el => {
-                                        if (el.username == name)
-                                            el.password = hash;
-                                        return el;
-                                    });
-                                    fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                                    res.json({
-                                        status: true
-                                    });
-                                } else {
-                                    res.json({
-                                        status: false
-                                    });
-                                }
-                            });
-                        } else {
-                            res.json({
-                                status: false
-                            });
-                        }
                     } else {
                         res.json({
                             status: false

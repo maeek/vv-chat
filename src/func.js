@@ -223,6 +223,7 @@ window.addEventListener("DOMContentLoaded", function() {
                                     <input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters">
                                     <i class="material-icons noselect change--password">done</i>
                                 </div>
+                                <div class="status__div"></div>
                             </div>
                             <div class="footer">
                                 <div class="branding noselect">1.0.3</div>
@@ -294,16 +295,21 @@ window.addEventListener("DOMContentLoaded", function() {
                     method: "POST"
                 }).then(res => res.json()).then(data => {
                     if (data.status) {
-                        s.parentNode.classList.add("change--password--success");
+                        document.querySelector(".status__div").classList.remove("statusError");
+                        document.querySelector(".status__div").classList.add("statusSuccess");
+                        document.querySelector(".status__div").innerHTML = `Password updated`;
                         newPassDiv.value = "";
                         oldPassDiv.value = "";
                     } else {
-                        s.parentNode.classList.add("change--password--error");
+                        document.querySelector(".status__div").classList.remove("statusSuccess");
+                        document.querySelector(".status__div").classList.add("statusError");
+                        document.querySelector(".status__div").innerHTML = `Failed to update password`;
                     }
                 });
             } else {
-                s.parentNode.classList.add("change--password--error");
-                setTimeout(() => { s.parentNode.classList.remove("change--password--error") }, 4000);
+                document.querySelector(".status__div").classList.remove("statusSuccess");
+                document.querySelector(".status__div").classList.add("statusError");
+                document.querySelector(".status__div").innerHTML = `Password to short`;
             }
         }
     });

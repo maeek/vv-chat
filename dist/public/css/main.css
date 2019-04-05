@@ -1170,7 +1170,7 @@ input[type="file"] {
     box-shadow: none;
     width: initial;
     flex: 1 0 auto;
-    padding: .5rem .8rem;
+    padding: .75rem .8rem;
 }
 
 .settings__cont .input__div button {
@@ -1200,7 +1200,7 @@ input[type="file"] {
 .settings__cont .input__div--wrapper i {
     font-size: 1rem;
     display: flex;
-    padding: .7rem 1.4rem;
+    padding: .72rem 1.4rem;
     background: #475177;
     border-radius: 30px;
     cursor: pointer;
@@ -1302,6 +1302,24 @@ input[type="checkbox"]:checked~.checkboxWrapper.vibrate::after {
 
 input[type="checkbox"]:disabled~.checkboxWrapper::after {
     background: #3a3f56;
+}
+
+.status__div {
+    display: none;
+    text-align: center;
+    width: 100%;
+    margin: .4rem 0;
+    font-size: .8rem;
+}
+
+.statusError {
+    display: block;
+    color: #ffa7a7;
+}
+
+.statusSuccess {
+    display: block;
+    color: #afffa7;
 }
 
 .anim--opacity {
