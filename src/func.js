@@ -268,11 +268,16 @@ window.addEventListener("DOMContentLoaded", function() {
             return window.hasClass(elm, "disableVibration");
         }, this);
         if (s) {
-            const mute = s.checked;
-            if (mute)
+            const vibe = s.checked;
+            if (vibe) {
                 localStorage.setItem("disableVibration", true);
-            else
+            } else {
+                navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+                if (navigator.vibrate) {
+                    navigator.vibrate(100);
+                }
                 localStorage.removeItem("disableVibration");
+            }
         }
     });
     window.addEvent(document.querySelector("body"), "click", function(e) {
