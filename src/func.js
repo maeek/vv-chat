@@ -210,12 +210,15 @@ window.addEventListener("DOMContentLoaded", function() {
                                     <label><input type="checkbox" name="muteNotifications" class="mute"><div class="checkboxWrapper"></div></label>
                                 </div>
                                 <div class="input__div--wrapper input__div--wrapper--nobg">
-                                    <span>Disable vibration - mobile only</span>
+                                    <span>Disable vibration</span>
                                     <label><input type="checkbox" name="disableVibration" class="disableVibration"><div class="checkboxWrapper vibrate"></div></label>
                                 </div>
                             </div>
                             <div class="subtitle noselect">Change password</div>
                             <div class="input__div">
+                                <div class="input__div--wrapper">
+                                        <input type="password" name="resetPasswordOld" placeholder="Type old password">
+                                    </div>    
                                 <div class="input__div--wrapper">
                                     <input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters">
                                     <i class="material-icons noselect change--password">done</i>
@@ -276,11 +279,13 @@ window.addEventListener("DOMContentLoaded", function() {
             return window.hasClass(elm, "change--password");
         }, this);
         if (s) {
+            const oldPassDiv = s.parentNode.parentNode.querySelector("input[name='resetPasswordOld']");
             const newPassDiv = s.parentNode.querySelector("input[name='resetPassword']");
             if (newPassDiv.value.length > 4) {
                 fetch("/setup", {
                     body: JSON.stringify({
-                        password: newPassDiv.value
+                        oldPassword: oldPassDiv.value.trim(),
+                        password: newPassDiv.value.trim()
                     }),
                     headers: {
                         'Accept': 'application/json',
@@ -291,6 +296,7 @@ window.addEventListener("DOMContentLoaded", function() {
                     if (data.status) {
                         s.parentNode.classList.add("change--password--success");
                         newPassDiv.value = "";
+                        oldPassDiv.value = "";
                     } else {
                         s.parentNode.classList.add("change--password--error");
                     }
