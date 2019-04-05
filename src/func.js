@@ -222,7 +222,7 @@ window.addEventListener("DOMContentLoaded", function() {
                                 </div>
                             </div>
                             <div class="footer">
-                                <div class="branding noselect">1.0.2</div>
+                                <div class="branding noselect">1.0.3</div>
                                 <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                             </div>
                         </div>
