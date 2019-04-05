@@ -13,7 +13,7 @@ Simple websocket chat written in javascript
 ### Requiremets
 
   - nodejs >= 10.15.3
-  - npm >= 6.9.0
+  - npm
 
 ### Installation
 
