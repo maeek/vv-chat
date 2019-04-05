@@ -270,8 +270,6 @@ input[type="file"] {
 .page-chat .panel--top,
 .page-manage .panel--top {
     background: #191e2f;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
     align-items: flex-start;
     overflow: hidden;
     flex: 0 0 auto;
@@ -385,8 +383,6 @@ input[type="file"] {
     transition: background .3s;
     color: #F0F0F0;
     position: relative;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
     border-top: 4px solid #2d3246;
 }
 

@@ -428,8 +428,13 @@ io.of('/chat').on('connection', function(socket) {
 
     socket.on("message", function(message) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            if (message.message != "" && message.message.length > 0)
-                socket.to("room").emit("message", message);
+            if (data.message != "" && data.message.length > 0)
+                socket.to("room").emit("message", {
+                    username: socket.handshake.session.user,
+                    message: data.message,
+                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    mid: data.mid
+                });
         } else {
             socket.leave("room");
         }
@@ -439,9 +444,10 @@ io.of('/chat').on('connection', function(socket) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
             if (image.type.indexOf("image") >= 0) {
                 socket.to("room").emit("image", {
-                    username: image.username,
+                    username: socket.handshake.session.user,
                     name: image.name,
                     type: image.type,
+                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
                     img: image.blob,
                     mid: image.mid
                 });
