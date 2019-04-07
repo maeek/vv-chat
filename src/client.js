@@ -387,7 +387,7 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
 $(".panel--middle").addEventListener('click', function(e) {
     if (e.target && hasClass(e.target.parentNode, 'message--image')) {
         const data = e.target.getAttribute("src");
-        const HTML = `<div class="modal__div anim--opacity">
+        const HTML = `<div class="modal__div">
                         <div class="gallery__cont">
                             <div class="modal__exit noselect"><i class="material-icons">close</i></div>
                             <div class="img__div">

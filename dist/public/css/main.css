@@ -1111,7 +1111,7 @@ input[type="file"] {
     overflow: auto;
     flex-direction: column;
     opacity: 0;
-    transition: transform .3s, opacity .3s;
+    transition: opacity .3s;
 }
 
 .gallery__cont {
@@ -1134,7 +1134,7 @@ input[type="file"] {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transform: scale(.3);
+    transform: scale(.8);
     transition: transform .3s;
 }
 
