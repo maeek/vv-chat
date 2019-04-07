@@ -1157,7 +1157,7 @@ input[type="file"] {
     font-family: 'KoHo', sans-serif;
     color: #FEFEFE;
     position: relative;
-    transform: scale(0.3);
+    transform: scale(0.8);
     opacity: .3;
     transition: transform .3s, opacity .3s;
 }
