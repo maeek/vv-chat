@@ -132,7 +132,7 @@ function appendMessage() {
 }
 
 function appendImage(files) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
         if (file.type.indexOf("image") >= 0) {
@@ -328,7 +328,10 @@ $("input[type='file']").addEventListener('input', function(e) {
     e.stopPropagation();
     e.preventDefault();
     let files = e.target.files;
-    appendImage(files);
+    if (files.length < 5)
+        appendImage(files);
+    else
+        error('Selected too many photos, limit is 4')
 }, false);
 
 $(".photo").addEventListener("click", function(e) {
@@ -341,7 +344,7 @@ $(".photo").addEventListener("click", function(e) {
 
 $(".textField").addEventListener("paste", function(pasteEvent) {
     let items = pasteEvent.clipboardData.items;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < items.length; i++) {
         if (items[i].type.indexOf("image") == -1) continue;
         let blob = items[i].getAsFile();
         let fileReader = new FileReader();

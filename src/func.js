@@ -42,6 +42,7 @@ function appendDOM(HTML, element = String, scroll = true) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
     }
 }
+let errTim;
 
 function error(message, timeout = 2000) {
     const errID = "errID-" + randomString();
@@ -49,7 +50,8 @@ function error(message, timeout = 2000) {
     if ($$(".tost").length > 0) $(".tost").remove();
     appendDOM(HTML, 'body');
     $(".tost").classList.add("tost-enter");
-    setTimeout(function() {
+    clearTimeout(errTim);
+    errTim = setTimeout(function() {
         $(`.tost[data-eid="${errID}"]`).classList.remove("tost-enter");
         $(`.tost[data-eid="${errID}"]`).classList.add("tost-leave");
         setTimeout(function() {
