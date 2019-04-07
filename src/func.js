@@ -33,7 +33,6 @@ function appendDOM(HTML, element = String, scroll = true) {
     for (var i = 0; i < childNodes.length; i++) {
         $(element).append(childNodes[i]);
     }
-
     if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
             middleDiv.scrollHeight,
             middleDiv.offsetHeight,
@@ -42,6 +41,7 @@ function appendDOM(HTML, element = String, scroll = true) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
     }
 }
+
 let errTim;
 
 function error(message, timeout = 2000) {
