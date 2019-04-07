@@ -2,12 +2,12 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.3
+ *   Version: 1.0.4
  * 
  */
 
 function getUsers() {
-    document.querySelector(".users__table").innerHTML = "";
+    $(".users__table").innerHTML = "";
     appendDOM(`<li class="user--record user--add">
                     <div class="user--name">Add user</div>
                     <div class="actions noselect">
@@ -36,7 +36,7 @@ function getUsers() {
         },
         method: "POST"
     }).then(data => data.json()).then(users => {
-        document.querySelector(".users__table").innerHTML = "";
+        $(".users__table").innerHTML = "";
         appendDOM(`<li class="user--record user--add">
                         <div class="user--name">Add user</div>
                         <div class="actions noselect">
@@ -69,30 +69,27 @@ function getUsers() {
             appendDOM(HTML, ".users__table");
 
         }
-        document.querySelector(".loader__div").remove();
+        $(".loader__div").remove();
     }).catch(() => {
         error(`Connection failed`);
     });
 }
 window.addEventListener("DOMContentLoaded", function() {
-    const el = document.querySelector(".panel--middle");
+    const el = $(".panel--middle");
     const wh = (document.height !== undefined) ? document.height : document.body.offsetHeight;
-    const calc = wh - document.querySelector(".panel--top").offsetHeight - document.querySelector(".panel--bottom").offsetHeight;
+    const calc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
     el.style["max-height"] = calc + "px";
     window.addEventListener("resize", function() {
-        const el = document.querySelector(".panel--middle");
+        const el = $(".panel--middle");
         const wh = (document.height !== undefined) ? document.height : document.body.offsetHeight;
-        const calc = wh - document.querySelector(".panel--top").offsetHeight - document.querySelector(".panel--bottom").offsetHeight;
+        const calc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
         el.style["max-height"] = calc + "px";
     });
     getUsers();
 });
-
-window.addEvent(document.body, "click", function(e) {
-    var s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "user--reset");
-    }, this);
-    if (s) {
+document.addEventListener('click', function(e) {
+    if (e.target && hasClass(e.target, 'user--reset') || hasClass(e.target.parentNode, 'user--reset')) {
+        const s = hasClass(e.target, 'user--reset') ? e.target : e.target.parentNode;
         if (!s.classList.contains("reset--show")) {
 
             s.parentNode.querySelector(".user--input").style.width = "auto";
@@ -109,21 +106,10 @@ window.addEvent(document.body, "click", function(e) {
             s.classList.remove("reset--show");
             s.parentNode.querySelector("input").value = "···";
         }
-    }
-});
-window.addEvent(document.body, "click", function(e) {
-    var s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "copy__clipboard");
-    }, this);
-    if (s) {
-        navigator.clipboard.writeText(s.parentNode.querySelector("input").value)
-    }
-});
-window.addEvent(document.body, "click", function(e) {
-    var s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "user--remove");
-    }, this);
-    if (s) {
+    } else if (e.target && hasClass(e.target, 'copy__clipboard')) {
+        navigator.clipboard.writeText(e.target.parentNode.querySelector("input").value);
+    } else if (e.target && hasClass(e.target, 'user--remove') || hasClass(e.target.parentNode, 'user--remove')) {
+        const s = hasClass(e.target, 'user--remove') ? e.target : e.target.parentNode;
         const user = s.parentNode.getAttribute("data-user");
         fetch("/manage", {
                 body: JSON.stringify({
@@ -148,14 +134,8 @@ window.addEvent(document.body, "click", function(e) {
             }).catch(() => {
                 error(`Connection failed`);
             });
-    }
-});
-window.addEvent(document.body, "click", function(e) {
-    var s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "reset--pass");
-    }, this);
-    if (s) {
-        const user = s.parentNode.parentNode.getAttribute("data-user");
+    } else if (e.target && hasClass(e.target, 'reset--pass')) {
+        const user = e.target.parentNode.parentNode.getAttribute("data-user");
         fetch("/manage", {
                 body: JSON.stringify({
                     action: "resetPassword",
@@ -169,48 +149,33 @@ window.addEvent(document.body, "click", function(e) {
             }).then(data => data.json())
             .then(res => {
                 if (res.status)
-                    s.parentNode.querySelector("input").value = res.password;
+                    e.target.parentNode.querySelector("input").value = res.password;
                 else
                     error(`Failed to reset password`);
             }).catch(() => {
                 error(`Connection failed`);
             });
-    }
-});
-
-
-window.addEvent(document.body, "click", function(e) {
-    var s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "user--add");
-    }, this);
-    if (s) {
+    } else if (e.target && hasClass(e.target, 'user--add') || hasClass(e.target.parentNode, 'user--add')) {
         const HTML = `<li class="user--record user--add-cont">
-                    <div class="user--name"><input name="newUser" type="text" maxlength="30" placeholder="Type new user name. At least 3 letters"></div>
-                    <div class="actions noselect">
-                        <div class="user--cancel"><i class="material-icons">close</i></div>
-                        <div class="user--confirm"><i class="material-icons">add</i></div>
-                    </div>
-                </li>`;
-        if (document.querySelectorAll('.user--add-cont').length == 0) {
+                        <div class="user--name"><input name="newUser" type="text" maxlength="30" placeholder="Type new user name. At least 3 letters"></div>
+                        <div class="actions noselect">
+                            <div class="user--cancel"><i class="material-icons">close</i></div>
+                            <div class="user--confirm"><i class="material-icons">add</i></div>
+                        </div>
+                    </li>`;
+        if ($$('.user--add-cont').length == 0) {
             appendDOM(HTML, '.users__table');
-            document.querySelector(".user--add-cont").classList.add("user--add-transition");
-            document.querySelector('input[name="newUser"]').focus();
-            document.querySelector('.user--cancel').addEventListener('click', function() {
-                document.querySelector(".user--add-cont").classList.remove("user--add-transition");
+            $(".user--add-cont").classList.add("user--add-transition");
+            $('input[name="newUser"]').focus();
+            $('.user--cancel').addEventListener('click', function() {
+                $(".user--add-cont").classList.remove("user--add-transition");
                 setTimeout(function() {
-                    document.querySelector('.user--add-cont').remove();
+                    $('.user--add-cont').remove();
                 }, 200);
             });
         }
-    }
-});
-
-window.addEvent(document.body, "click", function(e) {
-    var s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "user--confirm");
-    }, this);
-    if (s) {
-        const name = document.querySelector('input[name="newUser"]').value.toLowerCase().trim();
+    } else if (e.target && hasClass(e.target, 'user--confirm') || hasClass(e.target.parentNode, 'user--confirm')) {
+        const name = $('input[name="newUser"]').value.toLowerCase().trim();
         if (name.length > 2 && name != "" && name.length <= 30) {
             fetch("/manage", {
                     body: JSON.stringify({
@@ -235,9 +200,9 @@ window.addEvent(document.body, "click", function(e) {
                                 </div>
                             </li>`;
 
-                        document.querySelector('.user--add-cont').remove();
+                        $('.user--add-cont').remove();
                         appendDOM(HTML, '.users__table');
-                        const newDiv = document.querySelectorAll(".user--record .actions");
+                        const newDiv = $$(".user--record .actions");
                         let ww = newDiv[newDiv.length - 1].querySelector(".user--input").offsetWidth;
                         newDiv[newDiv.length - 1].querySelector(".user--input").style.width = "0";
                         setTimeout(function() {
@@ -252,10 +217,10 @@ window.addEvent(document.body, "click", function(e) {
                     error(`Connection failed`);
                 });
         } else {
-            document.querySelector('input[name="newUser"]').focus();
+            $('input[name="newUser"]').focus();
         }
     }
 });
-document.querySelector(".refresh--users").addEventListener("click", function() {
+$(".refresh--users").addEventListener("click", function() {
     getUsers();
 }, false);

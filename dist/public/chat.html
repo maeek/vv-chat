@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/css/main.css">
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
     <script src="/js/js.cookie.min.js"></script>
-    <script defer src="/js/socket.io.js"></script>
+    <script src="/js/socket.io.js"></script>
     <script defer src="/js/func.js"></script>
     <script defer src="/js/client.js"></script>
 
@@ -27,7 +27,7 @@
         <nav class="panel panel--top">
             <div class="title">
                 <h1 class="noselect"><a href="/">VV-chAt</a></h1>
-                <div class="version noselect">1.0.3</div>
+                <div class="version noselect">1.0.4</div>
             </div>
             <div class="info">
                 <div class="users noselect" title="Online users"><i class="material-icons">people</i><span id="uc">0</span></div>
@@ -38,18 +38,19 @@
                 </a>
             </div>
         </nav>
-        <div class="panel panel--middle"></div>
+        <ul class="panel panel--middle"></ul>
         <footer class="panel panel--bottom">
             <div class="text">
                 <textarea type="text" class="textField" name="textField" placeholder="Type message here..."></textarea>
             </div>
             <div class="actions noselect">
                 <i class="material-icons photo" title="Send photo">photo</i>
-                <input type="file">
+                <input type="file" multiple>
                 <i class="material-icons send" title="Send message">send</i>
             </div>
         </footer>
     </div>
+
 </body>
 
 </html>

@@ -2,78 +2,76 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.3
+ *   Version: 1.0.4
  * 
  */
-// import { test } from './js/func.js';
-// console.log(test);
 
 'use strict';
 let socket = io.connect(`/chat`),
     notf;
-const middleDiv = document.querySelector(".panel--middle");
+const middleDiv = $(".panel--middle");
 
 
 window.addEventListener("DOMContentLoaded", function() {
-    const el = document.querySelector(".panel--middle");
+    const el = $(".panel--middle");
     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-    const calc = wh - document.querySelector(".panel--top").offsetHeight - document.querySelector(".panel--bottom").offsetHeight;
+    const calc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
     el.style["max-height"] = calc + "px";
 
     window.addEventListener("resize", function() {
-        const el = document.querySelector(".panel--middle");
+        const el = $(".panel--middle");
         const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        const calc = wh - document.querySelector(".panel--top").offsetHeight - document.querySelector(".panel--bottom").offsetHeight;
+        const calc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
         el.style["max-height"] = calc + "px";
     });
 
-    document.querySelector(".textField").focus();
+    $(".textField").focus();
 });
 
 /*
  *  Error handling
  */
 socket.on("connect_error", function() {
-    const errorEl = document.querySelectorAll(".error");
+    const errorEl = $$(".error");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
             errorEl.remove();
 
-    const HTML = `<div class="error">
+    const HTML = `<li class="error">
                     <div class="errorCont">
                         <i class="material-icons">error</i>Connection Error.
                     </div>
                     <div class="who noselect who--smaller">VV</div>
-                </div>`;
+                </li>`;
     appendDOM(HTML, ".panel--middle");
 });
 socket.on("connect_failed", function() {
-    const errorEl = document.querySelectorAll(".error");
+    const errorEl = $$(".error");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
             errorEl.remove();
 
-    const HTML = `<div class="error">
+    const HTML = `<li class="error">
                     <div class="errorCont">
                         <i class="material-icons">error</i>Connection Error.
                     </div>
                     <div class="who noselect who--smaller">VV</div>
-                </div>`;
+                </li>`;
     appendDOM(HTML, ".panel--middle");
 });
 
 socket.on("connect_timeout", function() {
-    const errorEl = document.querySelectorAll(".error");
+    const errorEl = $$(".error");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
             errorEl.remove();
 
-    const HTML = `<div class="error">
+    const HTML = `<li class="error">
                     <div class="errorCont">
                         <i class="material-icons">error</i>Connection timeout.
                     </div>
                     <div class="who noselect who--smaller">VV</div>
-                </div>`;
+                </li>`;
     appendDOM(HTML, ".panel--middle");
 });
 socket.on("invalidSession", function(status) {
@@ -92,11 +90,11 @@ socket.emit("userConnected", true);
 socket.on("userConnected", function(data) {
     if (!data.self) {
         const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-        const HTML = `<div class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></div>`;
+        const HTML = `<li class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></li>`;
         // If (Cookies.get("user") != data.username) 
         appendDOM(HTML, ".panel--middle");
     }
-    document.querySelector("#uc").innerHTML = data.users;
+    $("#uc").innerHTML = data.users;
 });
 
 
@@ -104,6 +102,83 @@ socket.on("userConnected", function(data) {
 /*
  *  Messages
  */
+
+function appendMessage() {
+    let val = $(".textField").value.trim();
+    const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+    if (val != "" && Cookies.get("user")) {
+        const mid = `ms-${randomString()}-${socket.id}`;
+        socket.emit("message", {
+            username: Cookies.get("user"),
+            message: val,
+            time: time,
+            mid: mid
+        });
+        val = escapeHtml(val);
+        const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+        const replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
+        const HTML = `<li class="ms from__me" data-mid="${mid}">
+                        <div class="time noselect">${time}</div>
+                        <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                        <div class="message">${replacedText}</div>
+                        <div class="who noselect" title="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                    </li>;`;
+        appendDOM(HTML, ".panel--middle", true);
+        const middleDiv = $(".panel--middle");
+        middleDiv.scrollTop = middleDiv.scrollHeight;
+        $(".textField").value = "";
+        $(".textField").focus();
+    }
+}
+
+function appendImage(files) {
+    for (let i = 0; i < 5; i++) {
+        const file = files[i];
+
+        if (file.type.indexOf("image") >= 0) {
+            const fileReader = new FileReader();
+            fileReader.onloadend = function(e) {
+
+                const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                const mid = `ms-${randomString()}-${socket.id}`;
+                socket.emit("image", {
+                    username: Cookies.get("user"),
+                    type: file.type,
+                    name: file.name,
+                    blob: arrayBuffer,
+                    mid: mid
+                });
+                const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+                const HTML = `<li class="ms from__me" data-mid="${mid}">
+                        <div class="time noselect">${time}</div>
+                        <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                        <div class="message message--image"><img src="data:${file.type};base64,${arrayBuffer}"></div>
+                        <div class="who noselect">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                    </li>`;
+                if ($$(".typing").length > 0) $(".typing").remove();
+
+                const panelMiddle = $(".panel--middle");
+                getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+                    appendDOM(HTML, ".panel--middle", false);
+                    panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+                    if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
+                            panelMiddle.scrollHeight,
+                            panelMiddle.offsetHeight,
+                            panelMiddle.clientHeight,
+                        ) - 250)
+                        panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
+                    else
+                        panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
+                });
+                $(".textField").focus();
+            }
+            fileReader.readAsDataURL(file);
+        }
+    }
+}
+
+
+
 let isUpTimeout;
 socket.on("message", function(data) {
     let message = data.message;
@@ -114,12 +189,12 @@ socket.on("message", function(data) {
 
     message = escapeHtml(message.trim());
     const replacedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
-    const HTML = `<div class="ms ${username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${escapeHtml(mid)}">
+    const HTML = `<li class="ms ${username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${escapeHtml(mid)}">
                 <div class="time noselect">${time}</div>
                 <div class="message">${replacedText}</div>
                 <div class="who noselect">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
-            </div>;`;
-    if (document.querySelectorAll(".typing").length > 0) document.querySelector(".typing").remove();
+            </li>;`;
+    if ($$(".typing").length > 0) $(".typing").remove();
     appendDOM(HTML, ".panel--middle");
     const isUp = `<div data-mid="${mid}" class="tost noselect">
                     <div class="who">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
@@ -130,40 +205,29 @@ socket.on("message", function(data) {
             middleDiv.offsetHeight,
             middleDiv.clientHeight,
         ) - 250) {
-        if (document.querySelectorAll(".tost").length > 0) {
-            document.querySelector(`.tost`).setAttribute("data-mid", mid);
-            document.querySelector(`.tost .who`).innerHTML = escapeHtml(username.substring(0, 1).toUpperCase());
-            document.querySelector(`.tost .text`).innerHTML = escapeHtml(message.length > 25 ? message.substring(0, 25) + "..." : message);
+        if ($$(".tost").length > 0) {
+            $(`.tost`).setAttribute("data-mid", mid);
+            $(`.tost .who`).innerHTML = escapeHtml(username.substring(0, 1).toUpperCase());
+            $(`.tost .text`).innerHTML = escapeHtml(message.length > 25 ? message.substring(0, 25) + "..." : message);
         } else {
             appendDOM(isUp, 'body', false);
-            document.querySelector(`.tost[data-mid="${mid}"]`).classList.add("tost-enter");
+            $(`.tost[data-mid="${mid}"]`).classList.add("tost-enter");
         }
         clearTimeout(isUpTimeout);
         isUpTimeout = setTimeout(function() {
-            document.querySelector(`.tost[data-mid="${mid}"]`).classList.add("tost-leave");
+            $(`.tost[data-mid="${mid}"]`).classList.add("tost-leave");
             setTimeout(function() {
-                document.querySelector(`.tost[data-mid="${mid}"]`).remove();
+                $(`.tost[data-mid="${mid}"]`).remove();
             }, 300);
         }, 3000);
     }
     newNotf(username);
 });
 
-window.addEvent(document.querySelector("body"), "click", function(e) {
-    let s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "tost");
-    }, this);
-    if (s) {
-        middleDiv.scrollTop = middleDiv.scrollHeight;
-        s.classList.add("tost-leave");
-        setTimeout(function() {
-            s.remove();
-        }, 300);
-    }
-});
 
-document.querySelector(".send").addEventListener("click", appendMessage);
-document.querySelector(".textField").addEventListener("keydown", function(e) {
+
+$(".send").addEventListener("click", appendMessage);
+$(".textField").addEventListener("keydown", function(e) {
     const codes = [
         17,
         18,
@@ -216,11 +280,11 @@ document.querySelector(".textField").addEventListener("keydown", function(e) {
  */
 socket.on("image", function(image) {
     const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-    const HTML = `<div class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
+    const HTML = `<li class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
                     <div class="time noselect">${time}</div>
                     <div class="message message--image"><img src="data:${image.type};base64,${image.img}"></div>
                     <div class="who noselect">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
-                </div>`;
+                </li>`;
     getImageDimensions(`data:${image.type};base64,${image.img}`).then(dims => {
         appendDOM(HTML, ".panel--middle", false);
         middleDiv.scrollTop += dims.h;
@@ -242,42 +306,42 @@ socket.on("image", function(image) {
             middleDiv.offsetHeight,
             middleDiv.clientHeight,
         ) - 250) {
-        if (document.querySelectorAll(".tost").length > 0) {
-            document.querySelector(`.tost`).setAttribute("data-mid", image.mid);
-            document.querySelector(`.tost .who`).innerHTML = escapeHtml(image.username.substring(0, 1).toUpperCase());
-            document.querySelector(`.tost .text`).innerHTML = 'Sent photo';
+        if ($$(".tost").length > 0) {
+            $(`.tost`).setAttribute("data-mid", image.mid);
+            $(`.tost .who`).innerHTML = escapeHtml(image.username.substring(0, 1).toUpperCase());
+            $(`.tost .text`).innerHTML = 'Sent photo';
         } else {
             appendDOM(isUp, 'body', false);
-            document.querySelector(`.tost[data-mid="${image.mid}"]`).classList.add("tost-enter");
+            $(`.tost[data-mid="${image.mid}"]`).classList.add("tost-enter");
         }
         isUpTimeout = setTimeout(function() {
-            document.querySelector(`.tost[data-mid="${image.mid}"]`).classList.add("tost-leave");
+            $(`.tost[data-mid="${image.mid}"]`).classList.add("tost-leave");
             setTimeout(function() {
-                document.querySelector(`.tost[data-mid="${image.mid}"]`).remove();
+                $(`.tost[data-mid="${image.mid}"]`).remove();
             }, 300);
         }, 4000);
     }
     newNotf(image.username, true);
 });
 
-document.querySelector("input[type='file']").addEventListener('input', function(e) {
+$("input[type='file']").addEventListener('input', function(e) {
     e.stopPropagation();
     e.preventDefault();
     let files = e.target.files;
     appendImage(files);
 }, false);
 
-document.querySelector(".photo").addEventListener("click", function(e) {
+$(".photo").addEventListener("click", function(e) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
-        document.querySelector("input[type='file']").click();
+        $("input[type='file']").click();
     } else {
         alert('The File APIs are not fully supported in this browser.');
     }
 });
 
-document.querySelector(".textField").addEventListener("paste", function(pasteEvent) {
+$(".textField").addEventListener("paste", function(pasteEvent) {
     let items = pasteEvent.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < 5; i++) {
         if (items[i].type.indexOf("image") == -1) continue;
         let blob = items[i].getAsFile();
         let fileReader = new FileReader();
@@ -294,12 +358,12 @@ document.querySelector(".textField").addEventListener("paste", function(pasteEve
                 mid: mid
             });
             const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-            const HTML = `<div class="ms from__me" data-mid="${mid}">
+            const HTML = `<li class="ms from__me" data-mid="${mid}">
                         <div class="time noselect">${time}</div>
                         <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
                         <div class="message message--image"><img src="data:${fileType};base64,${arrayBuffer}"></div>
                         <div class="who noselect">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
-                    </div>`;
+                    </li>`;
             getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
                 appendDOM(HTML, ".panel--middle", false);
                 middleDiv.scrollTop += dims.h;
@@ -317,37 +381,36 @@ document.querySelector(".textField").addEventListener("paste", function(pasteEve
     }
 }, false);
 
-window.addEvent(document.body, "click", function(e) {
-    let s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "message--image");
-    }, this);
-    if (s) {
-        const data = s.querySelector("img").getAttribute("src");
-        let w = window.open('about:blank');
-
-        setTimeout(function() {
-            w.document.body.appendChild(w.document.createElement('img'))
-                .src = data;
-            w.document.body.style.cssText = "height:100%;width:100%;border:0;background:#000;display:flex;justify-content:center;align-items:center;margin:0;";
-            getImageDimensions(data).then(dims => {
-                w.document.body.querySelector("img").style.cssText = `height:${dims.h}px;width:${dims.w}px;max-width:100%;`;
-            })
-
-        }, 0);
+$(".panel--middle").addEventListener('click', function(e) {
+    if (e.target && hasClass(e.target.parentNode, 'message--image')) {
+        const data = e.target.getAttribute("src");
+        const HTML = `<div class="modal__div anim--opacity">
+                        <div class="gallery__cont">
+                            <div class="modal__exit noselect"><i class="material-icons">close</i></div>
+                            <div class="img__div">
+                                <img class="gallery__img">
+                            </div>
+                        </div>
+                    </div>`;
+        appendDOM(HTML, 'body');
+        $(".modal__div").classList.add("anim--opacity");
+        $(".gallery__cont").classList.add("anim--opacity");
+        $(".img__div").classList.add("anim--scale");
+        $(".gallery__img").src = data;
     }
 });
 
 window.addEventListener("focus", function() {
-    document.querySelector(".textField").focus();
+    $(".textField").focus();
 });
 
 /*
  *  Clear your local chat history
  */
-document.querySelector(".clear_chat").addEventListener("click", function(e) {
-    const messages = document.querySelectorAll(".ms, .joined, .error");
+$(".clear_chat").addEventListener("click", function(e) {
+    const messages = $$(".ms, .joined, .error");
     for (let i = messages.length - 1; i >= 0; i--) {
-        const t = messages.length < 200 ? i * 15 : i * 2;
+        const t = messages.length < 200 ? i * 3 : i * 2;
         setTimeout(function() {
             messages[i].classList.add("transition-leave");
             setTimeout(function() {
@@ -360,27 +423,27 @@ document.querySelector(".clear_chat").addEventListener("click", function(e) {
 /*
  *  Send image by dropping file on dropImage element
  */
-const dropImage = document.querySelector('.panel--bottom');
+const dropImage = $('.panel--bottom');
 dropImage.addEventListener('dragover', function(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     evt.dataTransfer.dropEffect = 'copy';
-    document.querySelector('.textField').setAttribute("placeholder", "Drop image here");
-    document.querySelector('.panel--bottom').style.background = "#454d6f";
+    $('.textField').setAttribute("placeholder", "Drop image here");
+    $('.panel--bottom').style.background = "#454d6f";
 }, false);
 dropImage.addEventListener('dragleave', function(evt) {
     evt.stopPropagation();
     evt.preventDefault();
-    document.querySelector('.panel--bottom').removeAttribute("style");
-    document.querySelector('.textField').setAttribute("placeholder", "Type message here");
+    $('.panel--bottom').removeAttribute("style");
+    $('.textField').setAttribute("placeholder", "Type message here");
 
 }, false);
 dropImage.addEventListener('drop', function(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     let files = evt.dataTransfer.files;
-    document.querySelector('.panel--bottom').removeAttribute("style");
-    document.querySelector('.textField').setAttribute("placeholder", "Type message here");
+    $('.panel--bottom').removeAttribute("style");
+    $('.textField').setAttribute("placeholder", "Type message here");
     appendImage(files);
 }, false);
 
@@ -388,17 +451,16 @@ dropImage.addEventListener('drop', function(evt) {
 /*
  *  Revert message that you sent
  */
-window.addEvent(document.querySelector(".panel--middle"), "click", function(e) {
-    let s = window.findParent(e.srcElement || e.target, function(elm) {
-        return window.hasClass(elm, "reverse");
-    }, this);
-    if (s) {
-        const mid = s.parentNode.getAttribute("data-mid");
+
+$(".panel--middle").addEventListener('click', function(e) {
+    if (e.target && hasClass(e.target, 'reverse') || hasClass(e.target.parentNode, 'reverse')) {
+        const mid = hasClass(e.target.parentNode, 'reverse') ? e.target.parentNode.parentNode.getAttribute("data-mid") : e.target.parentNode.getAttribute("data-mid");
         socket.emit("reverseMessage", mid);
     }
 });
+
 socket.on("reverseMessage", function(mid) {
-    const ms = document.querySelector(`.ms[data-mid="${mid}"]`);
+    const ms = $(`.ms[data-mid="${mid}"]`);
     if (typeof ms !== undefined && ms != null) {
         ms.classList.add("transition-leave");
         setTimeout(function() {
@@ -418,8 +480,8 @@ socket.on("typing", function(mid) {
             if (midPos == -1) {
                 userTyping.push(mid.user);
             }
-            if (document.querySelectorAll(".typing").length > 0) document.querySelector(".typing").remove();
-            const HTML = `<div class="typing">
+            if ($$(".typing").length > 0) $(".typing").remove();
+            const HTML = `<li class="typing">
                      <div class="usersTyping">
                         ${
                             (function() {
@@ -432,15 +494,36 @@ socket.on("typing", function(mid) {
                         } 
                     <span>typing</span>
                 </div>
-            </div>`;
+            </li>`;
     appendDOM(HTML, ".panel--middle", false);
     clearTimeout(timeout);
     timeout = setTimeout(function() {
-        const el = document.querySelectorAll(".who-typer");
+        const el = $$(".who-typer");
         for (let i = 0; i < el.length; i++) {
             const user = el[i].getAttribute("data-user");
             userTyping.splice(userTyping.indexOf(user), 1);
         }
-        if (document.querySelectorAll(".typing").length > 0) document.querySelector(".typing").remove();
+        if ($$(".typing").length > 0) $(".typing").remove();
     }, 1500);
+});
+
+
+document.addEventListener('click', function(e) {
+    if (e.target && hasClass(e.target, 'tost') || hasClass(e.target.parentNode, 'tost')) {
+        middleDiv.scrollTop = middleDiv.scrollHeight;
+        if (hasClass(e.target, 'tost')) e.target.classList.add("tost-leave");
+        else e.target.parentNode.classList.add("tost-leave");
+        setTimeout(function() {
+            if (hasClass(e.target, 'tost')) e.target.remove();
+            else e.target.parentNode.remove();
+        }, 300);
+    }
+    else if (e.target && hasClass(e.target, 'modal__exit') || hasClass(e.target.parentNode, 'modal__exit')) {
+        $(".gallery__cont").classList.remove("anim--opacity");
+        $(".img__div").classList.remove("anim--scale");
+        $(".modal__div").classList.remove("anim--opacity");
+        setTimeout(function() {
+            $(".modal__div").remove();
+        }, 300);
+    }
 });

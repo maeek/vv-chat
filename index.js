@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.3
+ *   Version: 1.0.4
  * 
  */
 
@@ -12,7 +12,7 @@ const config = {
     name: "VV-Chat",
     port: 3000,
     https: true,
-    sessionSecret: 'chattyPatty',
+    sessionSecret: 'secretPhrase',
     usersFile: "src/users.json",
     certificateFiles: {
         cert: 'path_to_cert.pem',
@@ -159,38 +159,41 @@ app.route('/login')
             password = req.body.password.trim();
         const usersFile = JSON.parse(fs.readFileSync(config.usersFile));
 
-        if (usersFile.users.length == 0) {
-            res.redirect("/login");
-        } else {
-            for (let i = 0; i < usersFile.users.length; i++) {
-                if (username == usersFile.users[i].username) {
-                    bcrypt.compare(password, usersFile.users[i].password, function(err, result) {
-                        if (err) { res.redirect("/login") }
-                        if (result === true) {
-                            const userData = usersFile.users[i].username;
-                            req.session.user = userData;
-                            req.session.valid = true;
-                            res.cookie('user', userData);
-                            if (userData == "root") {
-                                req.session.auth = "root";
-                                res.redirect("/manage");
-                            } else {
-                                req.session.auth = "user";
-                                if (usersFile.users[i].first) {
-                                    req.session.setup = true;
-                                    res.redirect("/setup");
-                                } else {
-                                    res.redirect("/chat");
-                                }
-                            }
-                        } else {
-                            res.redirect("/login");
-                            req.session.valid = false;
-                        }
+        usersFile.users = usersFile.users.filter(user => {
+            return user.username == username;
+        });
+
+        if (usersFile.users.length == 1) {
+            bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
+                if (err) { res.redirect(`/login#error`) }
+                if (result === true) {
+                    const userData = usersFile.users[0].username;
+                    req.session.user = userData;
+                    req.session.valid = true;
+                    res.cookie('user', userData, {
+                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
                     });
+                    if (userData == "root") {
+                        req.session.auth = "root";
+                        res.redirect("/manage");
+                    } else {
+                        req.session.auth = "user";
+                        if (usersFile.users[0].first) {
+                            req.session.setup = true;
+                            res.redirect("/setup");
+                        } else {
+                            res.redirect("/chat");
+                        }
+                    }
+                } else {
+                    res.redirect("/login#wrong");
+                    req.session.valid = false;
                 }
-            }
+            });
+        } else {
+            res.redirect("/login#wrong");
         }
+
 
     });
 
@@ -415,7 +418,7 @@ io.of("/chat").use(sharedsession(session, { autoSave: true }));
 io.of('/chat').on('connection', function(socket) {
     if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
         socket.join("room");
-    };
+    }
 
     socket.on("userConnected", function() {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
@@ -489,14 +492,16 @@ io.of('/chat').on('connection', function(socket) {
     });
 
     socket.on("disconnect", function() {
-        io.of('/chat').in("room").clients((error, clients) => {
-            socket.nsp.to("room").emit("userConnected", {
-                status: false,
-                self: false,
-                username: socket.handshake.session.user,
-                time: new Date().toJSON().substring(10, 19).replace('T', ' '),
-                users: clients.length
+        if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
+            io.of('/chat').in("room").clients((error, clients) => {
+                socket.nsp.to("room").emit("userConnected", {
+                    status: false,
+                    self: false,
+                    username: socket.handshake.session.user,
+                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    users: clients.length
+                });
             });
-        });
+        }
     });
 });
