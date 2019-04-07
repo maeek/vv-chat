@@ -116,7 +116,11 @@ function appendMessage() {
         });
         val = escapeHtml(val);
         const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-        const replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
+        let replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
+        const code = /((?<=`{3}(\n)?)[^]+(?=`{3}))/gim;
+        replacedText = replacedText.replace(code, '<span class="code">$1</span>');
+        replacedText = replacedText.replace(/(\`{3}(\n)?)/gim, '');
+
         const HTML = `<li class="ms from__me" data-mid="${mid}">
                         <div class="time noselect">${time}</div>
                         <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
@@ -188,7 +192,10 @@ socket.on("message", function(data) {
         reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
 
     message = escapeHtml(message.trim());
-    const replacedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
+    let replacedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
+    const code = /((?<=`{3}(\n)?)[^]+(?=`{3}))/gim;
+    replacedText = replacedText.replace(code, '<span class="code">$1</span>');
+    replacedText = replacedText.replace(/(\`{3}(\n)?)/gim, '').trim();
     const HTML = `<li class="ms ${username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${escapeHtml(mid)}">
                 <div class="time noselect">${time}</div>
                 <div class="message">${replacedText}</div>
@@ -200,7 +207,7 @@ socket.on("message", function(data) {
                     <div class="who">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                     <div class="text">${escapeHtml(message.length > 25?message.substring(0,25)+"...":message)}</div>
                 </div>`;
-    if (middleDiv.scrollTop + middleDiv.clientHeight < Math.max(
+    if (middleDiv.scrollTop + middleDiv.clientHeight + $(`.ms[data-mid='${mid}']`).offsetHeight < Math.max(
             middleDiv.scrollHeight,
             middleDiv.offsetHeight,
             middleDiv.clientHeight,
@@ -220,6 +227,8 @@ socket.on("message", function(data) {
                 $(`.tost[data-mid="${mid}"]`).remove();
             }, 300);
         }, 3000);
+    } else {
+        middleDiv.scrollTop = middleDiv.scrollHeight;
     }
     newNotf(username);
 });

@@ -448,7 +448,7 @@ input[type="file"] {
     margin: .1rem 0;
     flex: 0 0 auto;
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
     align-items: center;
     color: #000;
     padding: .2rem;
@@ -475,7 +475,7 @@ input[type="file"] {
     border-radius: 20px;
     color: #FFF;
     word-wrap: break-word;
-    max-width: 650px;
+    max-width: 750px;
     white-space: pre-wrap;
     cursor: default;
 }
@@ -598,6 +598,19 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     display: none;
+}
+
+.code {
+    font-family: monospace;
+    font-size: 1.2rem;
+}
+
+.to__me .code {
+    background: #1d202b;
+}
+
+.from__me .code {
+    background: #02436d;
 }
 
 .reverse {
