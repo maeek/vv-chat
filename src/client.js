@@ -122,7 +122,7 @@ function appendMessage() {
                         <div class="time noselect">${time}</div>
                         <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
                         <div class="message">${replacedText}</div>
-                        <div class="who noselect" title="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                        <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                     </li>;`;
         appendDOM(HTML, ".panel--middle", true);
         const middleDiv = $(".panel--middle");
@@ -153,8 +153,8 @@ function appendImage(files) {
                 const HTML = `<li class="ms from__me" data-mid="${mid}">
                         <div class="time noselect">${time}</div>
                         <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                        <div class="message message--image"><img src="data:${file.type};base64,${arrayBuffer}"></div>
-                        <div class="who noselect">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                        <div class="message message--image"><img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}"></div>
+                        <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                     </li>`;
                 if ($$(".typing").length > 0) $(".typing").remove();
 
@@ -197,12 +197,12 @@ socket.on("message", function(data) {
                 <div class="time noselect">${time}</div>
                 ${username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
                 <div class="message">${replacedText}</div>
-                <div class="who noselect">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
+                <div class="who noselect" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
             </li>;`;
     if ($$(".typing").length > 0) $(".typing").remove();
     appendDOM(HTML, ".panel--middle");
     const isUp = `<div data-mid="${mid}" class="tost noselect">
-                    <div class="who">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
+                    <div class="who" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                     <div class="text">${escapeHtml(message.length > 25?message.substring(0,25)+"...":message)}</div>
                 </div>`;
     if (middleDiv.scrollTop + middleDiv.clientHeight + $(`.ms[data-mid='${mid}']`).offsetHeight < Math.max(
@@ -290,8 +290,8 @@ socket.on("image", function(image) {
     const HTML = `<li class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
                     <div class="time noselect">${time}</div>
                     ${image.username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
-                    <div class="message message--image"><img src="data:${image.type};base64,${image.img}"></div>
-                    <div class="who noselect">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
+                    <div class="message message--image"><img data-type="${image.type}" data-name="${image.name}" src="data:${image.type};base64,${image.img}"></div>
+                    <div class="who noselect" data-user="${escapeHtml(image.username)}">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
                 </li>`;
     getImageDimensions(`data:${image.type};base64,${image.img}`).then(dims => {
         appendDOM(HTML, ".panel--middle", false);
@@ -372,8 +372,8 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
             const HTML = `<li class="ms from__me" data-mid="${mid}">
                         <div class="time noselect">${time}</div>
                         <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                        <div class="message message--image"><img src="data:${fileType};base64,${arrayBuffer}"></div>
-                        <div class="who noselect">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
+                        <div class="message message--image"><img data-type="${fileType}" data-name="${name}" src="data:${fileType};base64,${arrayBuffer}"></div>
+                        <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
                     </li>`;
             getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
                 appendDOM(HTML, ".panel--middle", false);
@@ -395,9 +395,14 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
 $(".panel--middle").addEventListener('click', function(e) {
     if (e.target && hasClass(e.target.parentNode, 'message--image')) {
         const data = e.target.getAttribute("src");
+        const type = e.target.getAttribute("data-type");
+        const name = e.target.getAttribute("data-name");
+        const user = e.target.parentNode.parentNode.querySelector(".who").getAttribute("data-user");
         const HTML = `<div class="modal__div">
                         <div class="gallery__cont">
                             <div class="modal__exit noselect"><i class="material-icons">close</i></div>
+                            <div class="gallery__download noselect" data-type="${type}" data-name="${name}"><i class="material-icons">save</i></div>
+                            <div class="who noselect modal__who">${user.substring(0,1).toLowerCase()}</div>
                             <div class="img__div">
                                 <img class="gallery__img">
                             </div>
@@ -536,5 +541,22 @@ document.addEventListener('click', function(e) {
         setTimeout(function() {
             $(".modal__div").remove();
         }, 300);
+    }
+    else if (e.target && hasClass(e.target, 'gallery__download') || hasClass(e.target.parentNode, 'gallery__download')) {
+        const btn = hasClass(e.target, 'gallery__download')?e.target:e.target.parentNode;
+        const type = btn.getAttribute("data-type");
+        const name = btn.getAttribute("data-name");
+        const image = btn.parentNode.querySelector(".gallery__img").src;
+        fetch(image)
+        .then(res => res.blob())
+        .then(blob => {
+            const anchor = document.createElement('a');
+            anchor.download = name;
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.dataset.downloadurl = [type+';charset=utf8', anchor.download, anchor.href].join(':');
+            anchor.click();
+        })
+        // const blob = new Blob([image], { type: type }),
+       
     }
 });

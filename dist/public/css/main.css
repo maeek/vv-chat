@@ -1278,25 +1278,62 @@ input[type="file"] {
     position: absolute;
     top: .5rem;
     right: .5rem;
-    padding: .5rem .6rem;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
     background: #282d42;
     cursor: pointer;
-    font-size: 1rem;
     transition: background .3s;
-    border-radius: 30px;
     z-index: 100;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    margin: 0 .3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3rem;
+    flex: 0 0 2rem;
 }
 
-.settings__exit i {
-    font-size: 1.2rem;
+.gallery__download {
+    position: absolute;
+    top: .5rem;
+    right: 3rem;
+    background: #282d42;
+    cursor: pointer;
+    transition: background .3s;
+    z-index: 100;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    margin: 0 .3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.3rem;
+    flex: 0 0 2rem;
+}
+
+.modal__who {
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+    z-index: 100;
+    font-size: 1.5rem;
+    font-family: 'Major Mono Display', monospace;
+}
+
+.settings__exit i,
+.modal__exit i,
+.gallery__download i {
+    font-size: 1.5rem;
 }
 
 .settings__exit:hover,
 .modal__exit:hover {
     background: #FF6E6E;
+}
+
+.gallery__download:hover {
+    background: #0068a9;
 }
 
 input[type="checkbox"] {
