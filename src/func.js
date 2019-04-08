@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.4
+ *   Version: 1.0.5
  * 
  */
 
@@ -143,7 +143,7 @@ window.addEventListener("DOMContentLoaded", function() {
                                     <div class="status__div"></div>
                                 </div>
                                 <div class="footer">
-                                    <div class="branding noselect">1.0.3</div>
+                                    <div class="branding noselect">1.0.5</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
@@ -222,3 +222,12 @@ window.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function(r) {
+        console.log("SW scope:", r.scope);
+        console.log('ServiceWorker zarejestrowany.')
+    }).catch(function(e) {
+        console.log('Ups! Błąd przy rejestracji ServiceWorkera! ' + e)
+    });
+}

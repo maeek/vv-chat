@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.4
+ *   Version: 1.0.5
  * 
  */
 
@@ -12,7 +12,7 @@ const config = {
     name: "VV-Chat",
     port: 3000,
     https: true,
-    sessionSecret: 'secretPhrase',
+    sessionSecret: 'secret',
     usersFile: "src/users.json",
     certificateFiles: {
         cert: 'path_to_cert.pem',
@@ -90,6 +90,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(function(req, res, next) {
     res.removeHeader("X-Powered-By");
+    res.header('Content-Security-Policy', "worker-src 'self'");
     next();
 });
 

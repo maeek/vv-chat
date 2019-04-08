@@ -2,7 +2,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.4
+ *   Version: 1.0.5
  * 
  */
 
@@ -76,10 +76,7 @@ socket.on("connect_timeout", function() {
 });
 socket.on("invalidSession", function(status) {
     if (status) {
-        error("Invalid session, you will be redirected in 5s", 5000);
-        setTimeout(() => {
-            location.href = "/login";
-        }, 5000);
+        location.href = "/login";
     }
 });
 
@@ -106,7 +103,7 @@ socket.on("userConnected", function(data) {
 function appendMessage() {
     let val = $(".textField").value.trim();
     const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-    if (val != "" && Cookies.get("user")) {
+    if (val != "" && Cookies.get("user") && val != "```" && val != "``````") {
         const mid = `ms-${randomString()}-${socket.id}`;
         socket.emit("message", {
             username: Cookies.get("user"),

@@ -5,15 +5,15 @@
         "src": "/static/vv.png",
         "type": "image/png",
         "sizes": "200x200"
-    },{
+    }, {
         "src": "/static/vv192.png",
         "type": "image/png",
         "sizes": "192x192"
-    },{
+    }, {
         "src": "/static/vv256.png",
         "type": "image/png",
         "sizes": "256x256"
-    },{
+    }, {
         "src": "/static/vv512.png",
         "type": "image/png",
         "sizes": "512x512"
