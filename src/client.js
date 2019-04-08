@@ -104,7 +104,7 @@ function appendMessage() {
     let val = $(".textField").value.trim();
     const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
     if (val != "" && Cookies.get("user") && val != "```" && val != "``````") {
-        const mid = `ms-${randomString()}-${socket.id}`;
+        const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
         socket.emit("message", {
             username: Cookies.get("user"),
             message: val,
@@ -141,7 +141,7 @@ function appendImage(files) {
             fileReader.onloadend = function(e) {
 
                 const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                const mid = `ms-${randomString()}-${socket.id}`;
+                const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
                 socket.emit("image", {
                     username: Cookies.get("user"),
                     type: file.type,
@@ -195,6 +195,7 @@ socket.on("message", function(data) {
     replacedText = replacedText.replace(/(\`{3}(\n)?)/gim, '').trim();
     const HTML = `<li class="ms ${username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${escapeHtml(mid)}">
                 <div class="time noselect">${time}</div>
+                ${username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
                 <div class="message">${replacedText}</div>
                 <div class="who noselect">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
             </li>;`;
@@ -288,6 +289,7 @@ socket.on("image", function(image) {
     const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
     const HTML = `<li class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
                     <div class="time noselect">${time}</div>
+                    ${image.username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
                     <div class="message message--image"><img src="data:${image.type};base64,${image.img}"></div>
                     <div class="who noselect">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
                 </li>`;
@@ -356,7 +358,7 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
         let fileReader = new FileReader();
         var fileType = items[i].type;
         var name = items[i].name
-        var mid = `ms-${randomString()}-${socket.id}`;
+        var mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
         fileReader.onloadend = function(e) {
             let arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
             socket.emit("image", {

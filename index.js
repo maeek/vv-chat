@@ -39,7 +39,8 @@ if (!fs.existsSync(config.usersFile)) {
         users: [{
             username: "root",
             password: hash,
-            first: false
+            first: false,
+            clientId: randomString(22)
         }]
     }));
     console.log(`Created file:  ${config.usersFile}`);
@@ -137,7 +138,7 @@ server.listen(config.port, () => {
 });
 
 function randomString(length = 15) {
-    const chars = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
+    const chars = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789$_!?";
     let string = "";
     for (let i = 0; i < length; i++) {
         string += chars[Math.floor(Math.random() * chars.length)];
@@ -168,10 +169,15 @@ app.route('/login')
             bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
                 if (err) { res.redirect(`/login#error`) }
                 if (result === true) {
-                    const userData = usersFile.users[0].username;
+                    const userData = usersFile.users[0].username,
+                        clientId = usersFile.users[0].clientId;
                     req.session.user = userData;
                     req.session.valid = true;
+                    req.session.clientId = clientId;
                     res.cookie('user', userData, {
+                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                    });
+                    res.cookie('clientId', clientId, {
                         expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
                     });
                     if (userData == "root") {
@@ -250,7 +256,8 @@ app.route('/manage')
                                 const newUser = {
                                     username: user,
                                     password: hash,
-                                    first: true
+                                    first: true,
+                                    clientId: randomString(22)
                                 };
                                 const checkUsers = userObj.users.filter(el => {
                                     return el.username == user;
@@ -399,9 +406,10 @@ app.get('/logout', (req, res) => {
         delete req.session.user;
         delete req.session.valid;
         delete req.session.auth;
-
+        delete req.session.clientID;
         res.clearCookie('user_sid');
         res.clearCookie("user");
+        res.clearCookie("clientId");
         res.redirect('/');
     } else {
         res.redirect('/login');
@@ -476,7 +484,7 @@ io.of('/chat').on('connection', function(socket) {
     });
     socket.on("reverseMessage", function(mid) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            if (mid.indexOf(socket.id) > 0) {
+            if (mid.indexOf(socket.handshake.session.clientId) > 0) {
                 socket.nsp.to("room").emit("reverseMessage", mid);
             }
         }
