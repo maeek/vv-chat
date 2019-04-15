@@ -375,7 +375,7 @@ input[type="file"] {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: .5rem .1rem;
+    padding: .5rem 0;
     background: url(/static/bg.png);
     background-size: 500px 500px;
     margin: 0;
@@ -445,7 +445,7 @@ input[type="file"] {
 }
 
 .ms {
-    margin: .1rem 0;
+    width: 100%;
     flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
@@ -516,7 +516,8 @@ input[type="file"] {
     font-size: 1.3rem;
     flex: 0 0 2rem;
     cursor: default;
-    text-shadow: 2px 2px 3px red;
+    text-shadow: 0px 2px 3px red;
+    align-self: flex-end;
 }
 
 .who--smaller {
@@ -833,7 +834,7 @@ input[type="file"] {
     border: 0;
     border-radius: 0;
     box-shadow: none;
-    background: transparent;
+    background: #22263a;
 }
 
 .endRecords {
@@ -969,6 +970,8 @@ input[type="file"] {
     background: linear-gradient(270deg, #003d65, #00558a);
     transition: background .3s;
     cursor: pointer;
+    color: #FFF;
+    padding: 1.3rem 2rem;
 }
 
 .user--add .user--name {

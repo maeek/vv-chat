@@ -6,13 +6,11 @@
  * 
  */
 
-
-'use strict'
 const config = {
     name: "VV-Chat",
     port: 3000,
     https: true,
-    sessionSecret: 'secret',
+    sessionSecret: 'chattyPatty',
     usersFile: "src/users.json",
     certificateFiles: {
         cert: 'path_to_cert.pem',
@@ -111,12 +109,19 @@ let session = expressSession({
 app.use(session);
 app.use((req, res, next) => {
     if (req.cookies.user_sid && !req.session.user) {
+        delete req.session.user;
+        delete req.session.valid;
+        delete req.session.auth;
+        delete req.session.clientID;
         res.clearCookie('user_sid');
+        res.clearCookie("user");
+        res.clearCookie("io");
+        res.clearCookie("clientId");
     }
     next();
 });
 const sessionChecker = (req, res, next) => {
-    if (req.session.user && req.cookies.user_sid) {
+    if (req.session.auth) {
         res.redirect('/chat');
     } else {
         next();
@@ -152,68 +157,17 @@ function randomString(length = 15) {
 app.get('/', sessionChecker, function(req, res) {
     res.redirect("/login");
 });
-app.route('/login')
-    .get(sessionChecker, (req, res) => {
-        res.sendFile(__dirname + '/public/login.html');
-    })
-    .post((req, res) => {
-        const username = req.body.username.trim().toLowerCase(),
-            password = req.body.password.trim();
-        const usersFile = JSON.parse(fs.readFileSync(config.usersFile));
-
-        usersFile.users = usersFile.users.filter(user => {
-            return user.username == username;
-        });
-
-        if (usersFile.users.length == 1) {
-            bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
-                if (err) { res.redirect(`/login#error`) }
-                if (result === true) {
-                    const userData = usersFile.users[0].username,
-                        clientId = usersFile.users[0].clientId;
-                    req.session.user = userData;
-                    req.session.valid = true;
-                    req.session.clientId = clientId;
-                    res.cookie('user', userData, {
-                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
-                    });
-                    res.cookie('clientId', clientId, {
-                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
-                    });
-                    if (userData == "root") {
-                        req.session.auth = "root";
-                        res.redirect("/manage");
-                    } else {
-                        req.session.auth = "user";
-                        if (usersFile.users[0].first) {
-                            req.session.setup = true;
-                            res.redirect("/setup");
-                        } else {
-                            res.redirect("/chat");
-                        }
-                    }
-                } else {
-                    res.redirect("/login#wrong");
-                    req.session.valid = false;
-                }
-            });
-        } else {
-            res.redirect("/login#wrong");
-        }
-
-
-    });
 
 app.route('/manage')
     .get((req, res) => {
-        if (req.session.user && req.cookies.user_sid && req.session.auth == "root") {
+        if (req.session.user && req.session.auth == "root") {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
             res.redirect('/chat');
         }
     })
     .post((req, res) => {
-        if (req.session.user && req.cookies.user_sid && req.session.auth == "root") {
+        if (req.session.user && req.session.auth == "root") {
             switch (req.body.action) {
                 case "getUsers":
                     (function() {
@@ -310,14 +264,14 @@ app.route('/manage')
 
 app.route('/setup')
     .get((req, res) => {
-        if (req.session.user && req.cookies.user_sid && req.session.setup) {
+        if (req.session.user && req.session.setup) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
             res.redirect('/chat');
         }
     })
     .post((req, res) => {
-        if (req.session.user && req.cookies.user_sid) {
+        if (req.session.user && req.cookies.auth) {
             if (req.session.setup) {
                 const password = req.body.password;
                 const repassword = req.body.repassword;
@@ -387,7 +341,7 @@ app.route('/setup')
 
 
 app.get('/chat', (req, res) => {
-    if (req.session.user && req.cookies.user_sid) {
+    if (req.session.user) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
                 res.redirect('/setup');
@@ -398,17 +352,73 @@ app.get('/chat', (req, res) => {
             res.redirect('/manage');
         }
     } else {
-        res.redirect('/login');
+        res.redirect('/chat#error');
     }
 });
+app.route('/login')
+    .get((req, res) => {
+        if (!req.session.valid)
+            res.sendFile(__dirname + '/public/login.html');
+        else
+            res.redirect(200, "/");
+    })
+    .post((req, res) => {
+        const username = req.body.username.trim().toLowerCase(),
+            password = req.body.password.trim();
+        const usersFile = JSON.parse(fs.readFileSync(config.usersFile));
+
+        usersFile.users = usersFile.users.filter(user => {
+            return user.username == username;
+        });
+
+        if (usersFile.users.length == 1) {
+            bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
+                if (err) { res.redirect(`/login#error=${err}`) }
+                if (result === true) {
+                    const userData = usersFile.users[0].username,
+                        clientId = usersFile.users[0].clientId;
+                    req.session.user = userData;
+                    req.session.valid = true;
+                    req.session.clientId = clientId;
+                    res.cookie('user', userData, {
+                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                    });
+                    res.cookie('clientId', clientId, {
+                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                    });
+                    if (userData == "root") {
+                        req.session.auth = "root";
+                        res.redirect("/manage");
+                    } else {
+                        req.session.auth = "user";
+                        if (usersFile.users[0].first) {
+                            req.session.setup = true;
+                            res.redirect("/setup");
+                        } else {
+                            res.redirect("/chat");
+                        }
+                    }
+                } else {
+                    res.redirect("/login#wrong");
+                    req.session.valid = false;
+                }
+            });
+        } else {
+            res.redirect("/login#wrong");
+        }
+
+
+    });
+
 app.get('/logout', (req, res) => {
-    if (req.session.user && req.cookies.user_sid) {
+    if (req.session.user) {
         delete req.session.user;
         delete req.session.valid;
         delete req.session.auth;
         delete req.session.clientID;
         res.clearCookie('user_sid');
         res.clearCookie("user");
+        res.clearCookie("io");
         res.clearCookie("clientId");
         res.redirect('/');
     } else {

@@ -103,7 +103,7 @@ socket.on("userConnected", function(data) {
 function appendMessage() {
     let val = $(".textField").value.trim();
     const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-    if (val != "" && Cookies.get("user") && val != "```" && val != "``````") {
+    if (val != "" && Cookies.get("user")) {
         const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
         socket.emit("message", {
             username: Cookies.get("user"),
@@ -114,10 +114,6 @@ function appendMessage() {
         val = escapeHtml(val);
         const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
         let replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
-        const code = /((?<=`{3}(\n)?)[^]+(?=`{3}))/gim;
-        replacedText = replacedText.replace(code, '<span class="code">$1</span>');
-        replacedText = replacedText.replace(/(\`{3}(\n)?)/gim, '');
-
         const HTML = `<li class="ms from__me" data-mid="${mid}">
                         <div class="time noselect">${time}</div>
                         <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
@@ -190,9 +186,6 @@ socket.on("message", function(data) {
 
     message = escapeHtml(message.trim());
     let replacedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
-    const code = /((?<=`{3}(\n)?)[^]+(?=`{3}))/gim;
-    replacedText = replacedText.replace(code, '<span class="code">$1</span>');
-    replacedText = replacedText.replace(/(\`{3}(\n)?)/gim, '').trim();
     const HTML = `<li class="ms ${username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${escapeHtml(mid)}">
                 <div class="time noselect">${time}</div>
                 ${username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
@@ -425,6 +418,7 @@ window.addEventListener("focus", function() {
  */
 $(".clear_chat").addEventListener("click", function(e) {
     const messages = $$(".ms, .joined, .error");
+    revSelectedIndex = -1;
     for (let i = messages.length - 1; i >= 0; i--) {
         const t = messages.length < 200 ? i * 3 : i * 2;
         setTimeout(function() {
@@ -467,11 +461,49 @@ dropImage.addEventListener('drop', function(evt) {
 /*
  *  Revert message that you sent
  */
-
+let revSelectedIndex = -1;
 $(".panel--middle").addEventListener('click', function(e) {
     if (e.target && hasClass(e.target, 'reverse') || hasClass(e.target.parentNode, 'reverse')) {
-        const mid = hasClass(e.target.parentNode, 'reverse') ? e.target.parentNode.parentNode.getAttribute("data-mid") : e.target.parentNode.getAttribute("data-mid");
-        socket.emit("reverseMessage", mid);
+        const messageDiv = hasClass(e.target.parentNode, 'reverse') ? e.target.parentNode.parentNode : e.target.parentNode;
+        const mid = messageDiv.getAttribute("data-mid");
+        if (e.ctrlKey) {
+            if (typeof messageDiv.getAttribute("data-selected") === undefined || messageDiv.getAttribute("data-selected") == null) {
+                messageDiv.style.background = "rgb(43, 52, 84)";
+                messageDiv.setAttribute("data-selected", mid);
+                const nodes = Array.prototype.slice.call($$(".from__me")),
+                    liRef = messageDiv;
+                revSelectedIndex = nodes.indexOf(liRef);
+            } else {
+                messageDiv.removeAttribute("style");
+                messageDiv.removeAttribute("data-selected");
+                if ($$(".from__me[data-selected]").length === 0) revSelectedIndex = -1;
+            }
+        } else if (e.shiftKey && revSelectedIndex != -1) {
+            messageDiv.setAttribute("data-selected", mid);
+            const nodes = Array.prototype.slice.call($$(".from__me")),
+                liRef = messageDiv;
+            const index = nodes.indexOf(liRef);
+            if (index > revSelectedIndex) {
+                for (let i = revSelectedIndex; i <= index; i++) {
+                    $$(".from__me")[i].style.background = "rgb(43, 52, 84)";
+                    $$(".from__me")[i].setAttribute("data-selected", $$(".from__me")[i].getAttribute("data-mid"));
+                }
+            } else {
+                for (let i = revSelectedIndex; i >= index; i--) {
+                    $$(".from__me")[i].style.background = "rgb(43, 52, 84)";
+                    $$(".from__me")[i].setAttribute("data-selected", $$(".from__me")[i].getAttribute("data-mid"));
+                }
+            }
+        } else {
+            if ($$(".from__me[data-selected]").length > 0) {
+                messageDiv.setAttribute("data-selected", mid);
+                for (let i = 0; i < $$(".from__me[data-selected]").length; i++)
+                    socket.emit("reverseMessage", $$(".from__me[data-selected]")[i].getAttribute("data-selected"));
+            } else {
+                socket.emit("reverseMessage", mid);
+            }
+            revSelectedIndex = -1;
+        }
     }
 });
 
@@ -556,7 +588,6 @@ document.addEventListener('click', function(e) {
             anchor.dataset.downloadurl = [type+';charset=utf8', anchor.download, anchor.href].join(':');
             anchor.click();
         })
-        // const blob = new Blob([image], { type: type }),
        
     }
 });

@@ -8,7 +8,7 @@
 
 console.log("WORKER: started");
 
-var version = 'v1.0.5::';
+var version = 'v1.0.7::';
 var CACHE = 'network-or-cache';
 var offlineFundamentals = [
     '/',
@@ -44,7 +44,7 @@ self.addEventListener("install", function(event) {
 
 self.addEventListener("fetch", function(event) {
     console.log('WORKER: fetch event in progress.');
-    if ((event.request.method !== 'GET') || (event.request.url.indexOf("/logout") !== -1) || (event.request.url.indexOf("/login") !== -1 && event.request.method !== 'GET')) {
+    if ((event.request.method !== 'GET') || (event.request.url.indexOf("/logout") !== -1) || (event.request.url.indexOf("/login") !== -1) || (event.request.url.indexOf("/socket.io") !== -1)) {
         console.log('WORKER: fetch event ignored.', event.request.method, event.request.url);
         return false;
     }

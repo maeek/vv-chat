@@ -8,12 +8,7 @@
 
 function getUsers() {
     $(".users__table").innerHTML = "";
-    appendDOM(`<li class="user--record user--add">
-                    <div class="user--name">Add user</div>
-                    <div class="actions noselect">
-                        <div><i class="material-icons">add</i></div>
-                    </div>
-                </li>
+    appendDOM(`<li class="user--record user--add">Add user <i class="material-icons">add</i></li>
                 <li class="loader__div">
                 <div class="lds-roller">
                         <div></div>
@@ -37,12 +32,7 @@ function getUsers() {
         method: "POST"
     }).then(data => data.json()).then(users => {
         $(".users__table").innerHTML = "";
-        appendDOM(`<li class="user--record user--add">
-                        <div class="user--name">Add user</div>
-                        <div class="actions noselect">
-                            <div><i class="material-icons">add</i></div>
-                        </div>
-                    </li>
+        appendDOM(`<li class="user--record user--add">Add user<i class="material-icons">add</i></li>
                     <li class="loader__div">
                     <div class="lds-roller">
                             <div></div>
