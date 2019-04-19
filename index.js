@@ -21,7 +21,7 @@ const config = {
 
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
 const express = require('express');
 const app = express();
 let server;
@@ -93,6 +93,7 @@ app.use(function(req, res, next) {
     next();
 });
 
+/* Initiate session */
 let session = expressSession({
     key: 'user_sid',
     name: 'user_sid',
@@ -105,8 +106,8 @@ let session = expressSession({
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
     }
 });
-
 app.use(session);
+
 app.use((req, res, next) => {
     if (req.cookies.user_sid && !req.session.user) {
         delete req.session.user;
@@ -120,8 +121,9 @@ app.use((req, res, next) => {
     }
     next();
 });
+
 const sessionChecker = (req, res, next) => {
-    if (req.session.auth) {
+    if (req.session.valid) {
         res.redirect('/chat');
     } else {
         next();
@@ -129,10 +131,10 @@ const sessionChecker = (req, res, next) => {
 };
 
 app.get('/js/manage.js', function(req, res) {
-    if (req.session.user && req.cookies.user_sid && req.session.auth == "root") {
+    if (req.session.valid && req.cookies.user_sid && req.session.auth == "root") {
         res.sendFile(__dirname + "/public/js/manage.js");
     } else {
-        res.status(404).sendFile(__dirname + "/public/error.html");
+        res.status(404).sendFile(__dirname + "/src/error.html");
     }
 });
 
@@ -168,95 +170,102 @@ app.route('/manage')
     })
     .post((req, res) => {
         if (req.session.user && req.session.auth == "root") {
-            switch (req.body.action) {
-                case "getUsers":
-                    (function() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        for (let i = 0; i < userObj.users.length; i++) {
-                            delete userObj.users[i].password;
-                            delete userObj.users[i].first;
-                        }
-                        userObj.users = userObj.users.filter(el => {
-                            return el.username != "root"
-                        })
-                        res.json(userObj.users);
-                    })();
-
-                    break;
-                case "deleteUser":
-                    (function() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const user = req.body.user.trim();
-                        if (user != "root") {
+            if (!fs.existsSync(config.usersFile)) {
+                console.log(`ERROR: file ${config.usersFile} doesn't exist`);
+                res.json({ status: false });
+            } else {
+                switch (req.body.action) {
+                    case "getUsers":
+                        (function() {
+                            let userObj = JSON.parse(fs.readFileSync(config.usersFile));
+                            for (let i = 0; i < userObj.users.length; i++) {
+                                delete userObj.users[i].password;
+                                delete userObj.users[i].first;
+                            }
                             userObj.users = userObj.users.filter(el => {
-                                return el.username != user;
-                            });
-                            fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                            res.json({ status: true });
-                        } else {
-                            res.json({ status: false });
-                        }
-                    })();
-                    break;
-                case "createUser":
-                    (function() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const user = req.body.user.toLowerCase().trim();
-                        const format = /[ !@#$%^&*()_+\-=[]{};':"\\|,.<>\/?]/;
-                        const salt = bcrypt.genSaltSync();
-                        const newPassword = randomString();
-                        bcrypt.hash(newPassword, salt, function(err, hash) {
-                            if (!err) {
-                                const newUser = {
-                                    username: user,
-                                    password: hash,
-                                    first: true,
-                                    clientId: randomString(22)
-                                };
-                                const checkUsers = userObj.users.filter(el => {
-                                    return el.username == user;
+                                return el.username != "root"
+                            })
+                            res.json(userObj.users);
+                        })();
+
+                        break;
+                    case "deleteUser":
+                        (function() {
+                            let userObj = JSON.parse(fs.readFileSync(config.usersFile));
+                            const user = req.body.user.trim();
+                            if (user != "root") {
+                                userObj.users = userObj.users.filter(el => {
+                                    return el.username != user;
                                 });
-                                if (checkUsers.length == 0 && format.test(user) === false) {
-                                    userObj.users.push(newUser);
-                                    fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                                    res.json({ status: true, user: user.toLowerCase().trim(), password: newPassword });
+                                fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
+                                res.json({ status: true });
+                            } else {
+                                res.json({ status: false });
+                            }
+                        })();
+                        break;
+                    case "createUser":
+                        (function() {
+                            let userObj = JSON.parse(fs.readFileSync(config.usersFile));
+                            const user = req.body.user.toLowerCase().trim();
+                            const format = /[ !@#$%^&*()_+\-=[]{};':"\\|,.<>\/?]/;
+                            const salt = bcrypt.genSaltSync();
+                            const newPassword = randomString();
+                            bcrypt.hash(newPassword, salt, null, function(err, hash) {
+                                if (!err) {
+                                    const newUser = {
+                                        username: user,
+                                        password: hash,
+                                        first: true,
+                                        clientId: randomString(22)
+                                    };
+                                    const checkUsers = userObj.users.filter(el => {
+                                        return el.username == user;
+                                    });
+                                    if (checkUsers.length == 0 && format.test(user) === false) {
+                                        userObj.users.push(newUser);
+                                        fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
+                                        res.json({ status: true, user: user.toLowerCase().trim(), password: newPassword });
+                                    } else {
+                                        res.json({ status: false });
+                                    }
+
                                 } else {
+                                    console.log(`ERROR: failed to hash password at "/manage" (createUser) for user: "${username}" error description:\n${err}`);
                                     res.json({ status: false });
                                 }
+                            })
+                        })();
+                        break;
+                    case "resetPassword":
+                        (function() {
+                            let userObj = JSON.parse(fs.readFileSync(config.usersFile));
+                            const user = req.body.user.trim();
+                            const password = randomString();
+                            const salt = bcrypt.genSaltSync();
+                            bcrypt.hash(password, salt, null, function(err, hash) {
+                                if (!err) {
+                                    userObj.users = userObj.users.filter(el => {
+                                        if (el.username == user) {
+                                            el.password = hash;
+                                            el.first = true;
+                                        }
+                                        return el;
+                                    });
 
-                            } else {
-                                res.json({ status: false });
-                            }
-                        })
-                    })();
-                    break;
-                case "resetPassword":
-                    (function() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const user = req.body.user.trim();
-                        const password = randomString();
-                        const salt = bcrypt.genSaltSync();
-                        bcrypt.hash(password, salt, function(err, hash) {
-                            if (!err) {
-                                userObj.users = userObj.users.filter(el => {
-                                    if (el.username == user) {
-                                        el.password = hash;
-                                        el.first = true;
-                                    }
-                                    return el;
-                                });
-
-                                fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                                res.json({ status: true, password: password });
-                            } else {
-                                res.json({ status: false });
-                            }
-                        });
-                    })();
-                    break;
-                default:
-                    res.json({ status: false });
-                    break;
+                                    fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
+                                    res.json({ status: true, password: password });
+                                } else {
+                                    console.log(`ERROR: failed to hash password at "/manage" (resetPassword) for user: "${username}" error description:\n${err}`);
+                                    res.json({ status: false });
+                                }
+                            });
+                        })();
+                        break;
+                    default:
+                        res.json({ status: false });
+                        break;
+                }
             }
         }
     });
@@ -271,82 +280,90 @@ app.route('/setup')
         }
     })
     .post((req, res) => {
-        if (req.session.user && req.cookies.auth) {
-            if (req.session.setup) {
-                const password = req.body.password;
-                const repassword = req.body.repassword;
-                const name = req.session.user;
-                if (password != repassword && password.length < 5) {
-                    res.redirect("/setup");
-                } else {
-                    const salt = bcrypt.genSaltSync();
-                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                    bcrypt.hash(password, salt, function(err, hash) {
-                        if (!err) {
-                            usersObj.users = usersObj.users.filter(el => {
-                                if (el.username == name) {
-                                    el.password = hash;
-                                    el.first = false;
-                                }
-                                return el;
-                            });
-                            fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                            req.session.setup = false;
-                            res.redirect("/chat");
-                        }
-
-                    });
-                }
+        if (req.session.user && req.session.valid) {
+            if (!fs.existsSync(config.usersFile)) {
+                console.log(`ERROR: file ${config.usersFile} doesn't exist`);
+                res.redirect("/setup");
             } else {
-                const oldPassword = req.body.oldPassword;
-                const password = req.body.password;
-                if (password.length > 4) {
+                if (req.session.setup) {
+                    const password = req.body.password;
+                    const repassword = req.body.repassword;
                     const name = req.session.user;
-                    const salt = bcrypt.genSaltSync();
-                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                    const userHash = usersObj.users.filter(user => {
-                        return user.username == req.session.user;
-                    });
-                    if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
-                        bcrypt.hash(password, salt, function(err, hash) {
+                    if (password != repassword && password.length < 5) {
+                        res.redirect("/setup");
+                    } else {
+                        const salt = bcrypt.genSaltSync();
+                        let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                        bcrypt.hash(password, salt, null, function(err, hash) {
                             if (!err) {
                                 usersObj.users = usersObj.users.filter(el => {
-                                    if (el.username == name)
+                                    if (el.username == name) {
                                         el.password = hash;
+                                        el.first = false;
+                                    }
                                     return el;
                                 });
                                 fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                                res.json({
-                                    status: true
-                                });
+                                req.session.setup = false;
+                                res.redirect("/chat");
                             } else {
-                                res.json({
-                                    status: false
-                                });
+                                console.log(`ERROR: failed to hash password at "/setup" for user: "${name}" error description:\n${err}`);
                             }
                         });
+                    }
+                } else {
+                    const oldPassword = req.body.oldPassword;
+                    const password = req.body.password;
+                    if (password.length > 4) {
+                        const name = req.session.user;
+                        const salt = bcrypt.genSaltSync();
+                        let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                        const userHash = usersObj.users.filter(user => {
+                            return user.username == req.session.user;
+                        });
+                        if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
+                            bcrypt.hash(password, salt, null, function(err, hash) {
+                                if (!err) {
+                                    usersObj.users = usersObj.users.filter(el => {
+                                        if (el.username == name)
+                                            el.password = hash;
+                                        return el;
+                                    });
+                                    fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
+                                    res.json({
+                                        status: true
+                                    });
+                                } else {
+                                    console.log(`ERROR: failed to hash password at "/setup" for user: "${name}" error description:\n${err}`);
+                                    res.json({
+                                        status: false
+                                    });
+                                }
+                            });
+                        } else {
+                            res.json({
+                                status: false
+                            });
+                        }
                     } else {
                         res.json({
                             status: false
                         });
                     }
-                } else {
-                    res.json({
-                        status: false
-                    });
                 }
             }
+
         }
     });
 
 
 app.get('/chat', (req, res) => {
-    if (req.session.user) {
+    if (req.session.valid) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
                 res.redirect('/setup');
             } else {
-                res.sendFile(__dirname + '/public/chat.html');
+                res.status(200).sendFile(__dirname + '/src/chat.html');
             }
         } else {
             res.redirect('/manage');
@@ -358,56 +375,62 @@ app.get('/chat', (req, res) => {
 app.route('/login')
     .get((req, res) => {
         if (!req.session.valid)
-            res.sendFile(__dirname + '/public/login.html');
+            res.sendFile(__dirname + '/src/login.html');
         else
-            res.redirect(200, "/");
+            res.redirect("/chat");
     })
     .post((req, res) => {
-        const username = req.body.username.trim().toLowerCase(),
-            password = req.body.password.trim();
-        const usersFile = JSON.parse(fs.readFileSync(config.usersFile));
-
-        usersFile.users = usersFile.users.filter(user => {
-            return user.username == username;
-        });
-
-        if (usersFile.users.length == 1) {
-            bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
-                if (err) { res.redirect(`/login#error=${err}`) }
-                if (result === true) {
-                    const userData = usersFile.users[0].username,
-                        clientId = usersFile.users[0].clientId;
-                    req.session.user = userData;
-                    req.session.valid = true;
-                    req.session.clientId = clientId;
-                    res.cookie('user', userData, {
-                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
-                    });
-                    res.cookie('clientId', clientId, {
-                        expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
-                    });
-                    if (userData == "root") {
-                        req.session.auth = "root";
-                        res.redirect("/manage");
-                    } else {
-                        req.session.auth = "user";
-                        if (usersFile.users[0].first) {
-                            req.session.setup = true;
-                            res.redirect("/setup");
-                        } else {
-                            res.redirect("/chat");
-                        }
-                    }
-                } else {
-                    res.redirect("/login#wrong");
-                    req.session.valid = false;
-                }
-            });
+        if (!fs.existsSync(config.usersFile)) {
+            console.log(`ERROR: file ${config.usersFile} doesn't exist`);
+            res.redirect("/login#error");
         } else {
-            res.redirect("/login#wrong");
+            const username = req.body.username.trim().toLowerCase(),
+                password = req.body.password.trim();
+            const usersFile = JSON.parse(fs.readFileSync(config.usersFile));
+
+            usersFile.users = usersFile.users.filter(user => {
+                return user.username == username;
+            });
+
+            if (usersFile.users.length == 1) {
+                bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
+                    if (err) {
+                        console.log(`ERROR: failed to hash password at "/login" for user: "${username}" error description:\n${err}`);
+                        res.redirect(`/login#error`);
+                    }
+                    if (result === true) {
+                        const userData = usersFile.users[0].username,
+                            clientId = usersFile.users[0].clientId;
+                        req.session.user = userData;
+                        req.session.valid = true;
+                        req.session.clientId = clientId;
+                        res.cookie('user', userData, {
+                            expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                        });
+                        res.cookie('clientId', clientId, {
+                            expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                        });
+                        if (userData == "root") {
+                            req.session.auth = "root";
+                            res.redirect("/manage");
+                        } else {
+                            req.session.auth = "user";
+                            if (usersFile.users[0].first) {
+                                req.session.setup = true;
+                                res.redirect("/setup");
+                            } else {
+                                res.redirect("/chat");
+                            }
+                        }
+                    } else {
+                        res.redirect("/login#wrong");
+                        req.session.valid = false;
+                    }
+                });
+            } else {
+                res.redirect("/login#wrong");
+            }
         }
-
-
     });
 
 app.get('/logout', (req, res) => {
@@ -427,10 +450,9 @@ app.get('/logout', (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, '/public')));
-app.use(function(req, res) {
-    res.status(404).sendFile(__dirname + "/public/error.html");
+app.use(function(req, res, next) {
+    return res.status(404).sendFile(__dirname + "/src/error.html");
 });
-
 
 
 io.of("/chat").use(sharedsession(session, { autoSave: true }));
@@ -494,19 +516,23 @@ io.of('/chat').on('connection', function(socket) {
     });
     socket.on("reverseMessage", function(mid) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            if (mid.indexOf(socket.handshake.session.clientId) > 0) {
+            if (typeof user === String && mid.indexOf(socket.handshake.session.clientId) > 0) {
                 socket.nsp.to("room").emit("reverseMessage", mid);
             }
+        } else {
+            socket.leave("room");
         }
     });
     socket.on("typing", function(user) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            socket.to("room").emit("typing", user);
+            if (typeof user === String) socket.to("room").emit("typing", user);
         }
     });
     socket.on("read", function(user) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
             socket.to("room").emit("read", user);
+        } else {
+            socket.leave("room");
         }
     });
 

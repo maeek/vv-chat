@@ -783,6 +783,7 @@ input[type="file"] {
 
 .user--record .who {
     margin: 0 .5rem;
+    align-self: center;
     background: linear-gradient(to bottom, #2b3654, #1d1f25);
 }
 

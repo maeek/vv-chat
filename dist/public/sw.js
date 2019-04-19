@@ -12,10 +12,6 @@ var version = 'v1.0.7::';
 var CACHE = 'network-or-cache';
 var offlineFundamentals = [
     '/',
-    '/login.html',
-    '/chat.html',
-    '/error.html',
-    '/css/main.css',
     '/js/func.js',
     '/js/client.js',
     '/js/socket.io.js',
