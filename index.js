@@ -439,6 +439,9 @@ app.get('/logout', (req, res) => {
         delete req.session.valid;
         delete req.session.auth;
         delete req.session.clientID;
+        req.session.destroy(function(err){
+            console.log(`ERROR: cannot access session, error description:\n${err}`)
+        });
         res.clearCookie('user_sid');
         res.clearCookie("user");
         res.clearCookie("io");
