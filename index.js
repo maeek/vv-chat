@@ -82,7 +82,7 @@ const FileStore = require('session-file-store')(expressSession);
 
 
 
-
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -94,15 +94,17 @@ app.use(function(req, res, next) {
 });
 
 /* Initiate session */
+const Store = new FileStore({ path: "dist/sessions" });
 let session = expressSession({
     key: 'user_sid',
     name: 'user_sid',
     secret: config.sessionSecret,
-    store: new FileStore({ path: "dist/sessions" }),
+    store: Store,
     resave: true,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
+        secure: config.https,
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
     }
 });
@@ -110,10 +112,12 @@ app.use(session);
 
 app.use((req, res, next) => {
     if (req.cookies.user_sid && !req.session.user) {
-        delete req.session.user;
-        delete req.session.valid;
-        delete req.session.auth;
-        delete req.session.clientID;
+        Store.destroy(req.session.id, (err) => {
+            if (err != null) console.log(err);
+        });
+        req.session.destroy((err) => {
+            if (err != null) console.log(err);
+        });
         res.clearCookie('user_sid');
         res.clearCookie("user");
         res.clearCookie("io");
@@ -369,7 +373,7 @@ app.get('/chat', (req, res) => {
             res.redirect('/manage');
         }
     } else {
-        res.redirect('/chat#error');
+        res.redirect('/logout');
     }
 });
 app.route('/login')
@@ -435,12 +439,11 @@ app.route('/login')
 
 app.get('/logout', (req, res) => {
     if (req.session.user) {
-        delete req.session.user;
-        delete req.session.valid;
-        delete req.session.auth;
-        delete req.session.clientID;
-        req.session.destroy(function(err) {
-            console.log(`ERROR: cannot access session, error description:\n${err}`)
+        Store.destroy(req.session.id, (err) => {
+            if (err != null) console.log(err);
+        });
+        req.session.destroy((err) => {
+            if (err != null) console.log(err);
         });
         res.clearCookie('user_sid');
         res.clearCookie("user");
