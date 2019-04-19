@@ -468,7 +468,7 @@ $(".panel--middle").addEventListener('click', function(e) {
         const mid = messageDiv.getAttribute("data-mid");
         if (e.ctrlKey) {
             if (typeof messageDiv.getAttribute("data-selected") === undefined || messageDiv.getAttribute("data-selected") == null) {
-                messageDiv.style.background = "rgb(43, 52, 84)";
+                messageDiv.style.background = "rgba(43, 52, 84, 0.5)";
                 messageDiv.setAttribute("data-selected", mid);
                 const nodes = Array.prototype.slice.call($$(".from__me")),
                     liRef = messageDiv;
@@ -485,12 +485,12 @@ $(".panel--middle").addEventListener('click', function(e) {
             const index = nodes.indexOf(liRef);
             if (index > revSelectedIndex) {
                 for (let i = revSelectedIndex; i <= index; i++) {
-                    $$(".from__me")[i].style.background = "rgb(43, 52, 84)";
+                    $$(".from__me")[i].style.background = "rgba(43, 52, 84, 0.5)";
                     $$(".from__me")[i].setAttribute("data-selected", $$(".from__me")[i].getAttribute("data-mid"));
                 }
             } else {
                 for (let i = revSelectedIndex; i >= index; i--) {
-                    $$(".from__me")[i].style.background = "rgb(43, 52, 84)";
+                    $$(".from__me")[i].style.background = "rgba(43, 52, 84, 0.5)";
                     $$(".from__me")[i].setAttribute("data-selected", $$(".from__me")[i].getAttribute("data-mid"));
                 }
             }
