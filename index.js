@@ -519,7 +519,7 @@ io.of('/chat').on('connection', function(socket) {
     });
     socket.on("reverseMessage", function(mid) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            if (typeof user === String && mid.indexOf(socket.handshake.session.clientId) > 0) {
+            if (mid.indexOf(socket.handshake.session.clientId) > 0) {
                 socket.nsp.to("room").emit("reverseMessage", mid);
             }
         } else {
@@ -528,7 +528,7 @@ io.of('/chat').on('connection', function(socket) {
     });
     socket.on("typing", function(user) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            if (typeof user === String) socket.to("room").emit("typing", user);
+            socket.to("room").emit("typing", user);
         }
     });
     socket.on("read", function(user) {
