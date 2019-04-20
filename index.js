@@ -535,7 +535,7 @@ io.of('/chat').on('connection', function(socket) {
     });
     socket.on("typing", function(user) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            socket.to("room").emit("typing", socket.handshake.session.user);
+            socket.to("room").emit("typing", user);
         }
     });
     socket.on("read", function(user) {
