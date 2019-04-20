@@ -106,20 +106,7 @@ socket.on("reconnect_failed", function() {
         appendDOM(HTML, ".panel--middle");
     }
 });
-socket.on("reconnect_error", function() {
-    const errorEl = $$(".reconnect");
-    const HTML = `<li class="error reconnect">
-            <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
-            <div class="errorCont">Reconnection failed, try refreshing the page</div>
-        </li>`;
-    if (errorEl.length > 0) {
-        $(".recAttemps").innerHTML = "";
-        appendDOM(`<i class="material-icons">error</i>`, ".recAttemps");
-        $(".reconnect .errorCont").innerHTML = "Reconnecting failed, try refreshing the page";
-    } else {
-        appendDOM(HTML, ".panel--middle");
-    }
-});
+
 socket.on("reconnect", function() {
     const errorEl = $$(".error, .reconnect");
     if (errorEl.length > 0)
