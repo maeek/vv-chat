@@ -7,7 +7,12 @@
  */
 
 'use strict';
-let socket = io.connect(`/chat`),
+let socket = io.connect(`/chat`, {
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 10
+    }),
     notf;
 const middleDiv = $(".panel--middle");
 
@@ -32,51 +37,99 @@ window.addEventListener("DOMContentLoaded", function() {
  *  Error handling
  */
 socket.on("connect_error", function() {
-    const errorEl = $$(".error");
+    const errorEl = $$(".error:not(.reconnect)");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
-            errorEl.remove();
+            errorEl[i].remove();
 
     const HTML = `<li class="error">
-                    <div class="errorCont">
-                        <i class="material-icons">error</i>Connection Error.
-                    </div>
-                    <div class="who noselect who--smaller">VV</div>
+                    <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
+                    <div class="errorCont">Connection Error</div>
                 </li>`;
     appendDOM(HTML, ".panel--middle");
+    $("#uc").innerHTML = 0;
 });
 socket.on("connect_failed", function() {
-    const errorEl = $$(".error");
+    const errorEl = $$(".error:not(.reconnect)");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
-            errorEl.remove();
+            errorEl[i].remove();
 
     const HTML = `<li class="error">
-                    <div class="errorCont">
-                        <i class="material-icons">error</i>Connection Error.
-                    </div>
-                    <div class="who noselect who--smaller">VV</div>
+                    <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
+                    <div class="errorCont">Connection Error</div>
                 </li>`;
     appendDOM(HTML, ".panel--middle");
+    $("#uc").innerHTML = 0;
 });
 
 socket.on("connect_timeout", function() {
-    const errorEl = $$(".error");
+    const errorEl = $$(".error:not(.reconnect)");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
-            errorEl.remove();
+            errorEl[i].remove();
 
     const HTML = `<li class="error">
-                    <div class="errorCont">
-                        <i class="material-icons">error</i>Connection timeout.
-                    </div>
-                    <div class="who noselect who--smaller">VV</div>
+                    <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
+                    <div class="errorCont">Connection timeout</div>
                 </li>`;
     appendDOM(HTML, ".panel--middle");
+    $("#uc").innerHTML = 0;
+});
+socket.on("reconnecting", function(at) {
+    const errorEl = $$(".reconnect");
+    // if (errorEl.length > 0)
+    //     for (let i = 0; i < errorEl.length; i++)
+    //         errorEl[i].remove();
+
+    const HTML = `<li class="error reconnect">
+                    <div class="who noselect recAttemps">${at}/10</div>
+                    <div class="errorCont">Reconnection attempt...</div>
+                </li>`;
+    if (errorEl.length > 0)
+        $(".recAttemps").innerHTML = at + "/10";
+    else
+        appendDOM(HTML, ".panel--middle");
+    $("#uc").innerHTML = 0;
+});
+socket.on("reconnect_failed", function() {
+    const errorEl = $$(".reconnect");
+    const HTML = `<li class="error reconnect">
+            <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
+            <div class="errorCont">Reconnection failed, try refreshing the page</div>
+        </li>`;
+    if (errorEl.length > 0) {
+        $(".recAttemps").innerHTML = "";
+        appendDOM(`<i class="material-icons">error</i>`, ".recAttemps");
+        $(".reconnect .errorCont").innerHTML = "Reconnecting failed, try refreshing the page";
+    } else {
+        appendDOM(HTML, ".panel--middle");
+    }
+});
+socket.on("reconnect_error", function() {
+    const errorEl = $$(".reconnect");
+    const HTML = `<li class="error reconnect">
+            <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
+            <div class="errorCont">Reconnection failed, try refreshing the page</div>
+        </li>`;
+    if (errorEl.length > 0) {
+        $(".recAttemps").innerHTML = "";
+        appendDOM(`<i class="material-icons">error</i>`, ".recAttemps");
+        $(".reconnect .errorCont").innerHTML = "Reconnecting failed, try refreshing the page";
+    } else {
+        appendDOM(HTML, ".panel--middle");
+    }
+});
+socket.on("reconnect", function() {
+    const errorEl = $$(".error, .reconnect");
+    if (errorEl.length > 0)
+        for (let i = 0; i < errorEl.length; i++)
+            errorEl[i].remove();
+    socket.emit("userConnected", true);
 });
 socket.on("invalidSession", function(status) {
     if (status) {
-        location.href = "/login";
+        location.href = "/logout";
     }
 });
 
@@ -88,11 +141,11 @@ socket.on("userConnected", function(data) {
     if (!data.self) {
         const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
         const HTML = `<li class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></li>`;
-        // If (Cookies.get("user") != data.username) 
         appendDOM(HTML, ".panel--middle");
     }
     $("#uc").innerHTML = data.users;
 });
+
 
 
 
@@ -125,52 +178,60 @@ function appendMessage() {
         middleDiv.scrollTop = middleDiv.scrollHeight;
         $(".textField").value = "";
         $(".textField").focus();
+    } else if (typeof Cookies.get("user") === "undefined") {
+        socket.close();
+        location.href = "/logout";
     }
 }
 
 function appendImage(files) {
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+    if (Cookies.get("user")) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
 
-        if (file.type.indexOf("image") >= 0) {
-            const fileReader = new FileReader();
-            fileReader.onloadend = function(e) {
+            if (file.type.indexOf("image") >= 0) {
+                const fileReader = new FileReader();
+                fileReader.onloadend = function(e) {
 
-                const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
-                socket.emit("image", {
-                    username: Cookies.get("user"),
-                    type: file.type,
-                    name: file.name,
-                    blob: arrayBuffer,
-                    mid: mid
-                });
-                const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-                const HTML = `<li class="ms from__me" data-mid="${mid}">
-                        <div class="time noselect">${time}</div>
-                        <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                        <div class="message message--image"><img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}"></div>
-                        <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
-                    </li>`;
-                if ($$(".typing").length > 0) $(".typing").remove();
+                    const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                    const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
+                    socket.emit("image", {
+                        username: Cookies.get("user"),
+                        type: file.type,
+                        name: file.name,
+                        blob: arrayBuffer,
+                        mid: mid
+                    });
+                    const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+                    const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message message--image"><img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}"></div>
+                            <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                        </li>`;
+                    if ($$(".typing").length > 0) $(".typing").remove();
 
-                const panelMiddle = $(".panel--middle");
-                getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
-                    appendDOM(HTML, ".panel--middle", false);
-                    panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
-                    if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
-                            panelMiddle.scrollHeight,
-                            panelMiddle.offsetHeight,
-                            panelMiddle.clientHeight,
-                        ) - 250)
-                        panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
-                    else
-                        panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
-                });
-                $(".textField").focus();
+                    const panelMiddle = $(".panel--middle");
+                    getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+                        appendDOM(HTML, ".panel--middle", false);
+                        panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+                        if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
+                                panelMiddle.scrollHeight,
+                                panelMiddle.offsetHeight,
+                                panelMiddle.clientHeight,
+                            ) - 250)
+                            panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
+                        else
+                            panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
+                    });
+                    $(".textField").focus();
+                }
+                fileReader.readAsDataURL(file);
             }
-            fileReader.readAsDataURL(file);
         }
+    } else {
+        socket.close();
+        location.href = "/logout";
     }
 }
 
@@ -344,44 +405,48 @@ $(".photo").addEventListener("click", function(e) {
 });
 
 $(".textField").addEventListener("paste", function(pasteEvent) {
-    let items = pasteEvent.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf("image") == -1) continue;
-        let blob = items[i].getAsFile();
-        let fileReader = new FileReader();
-        var fileType = items[i].type;
-        var name = items[i].name
-        var mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
-        fileReader.onloadend = function(e) {
-            let arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-            socket.emit("image", {
-                username: Cookies.get("user"),
-                type: fileType,
-                name: name,
-                blob: arrayBuffer,
-                mid: mid
-            });
-            const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
-            const HTML = `<li class="ms from__me" data-mid="${mid}">
-                        <div class="time noselect">${time}</div>
-                        <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                        <div class="message message--image"><img data-type="${fileType}" data-name="${name}" src="data:${fileType};base64,${arrayBuffer}"></div>
-                        <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
-                    </li>`;
-            getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
-                appendDOM(HTML, ".panel--middle", false);
-                middleDiv.scrollTop += dims.h;
-                if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
-                        middleDiv.scrollHeight,
-                        middleDiv.offsetHeight,
-                        middleDiv.clientHeight,
-                    ) - 250)
-                    middleDiv.scrollTop = middleDiv.scrollHeight + dims.h;
-                else
-                    middleDiv.scrollTop -= dims.h;
-            });
+    if (Cookies.get("user")) {
+        let items = pasteEvent.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf("image") == -1) continue;
+            let blob = items[i].getAsFile();
+            let fileReader = new FileReader();
+            var fileType = items[i].type;
+            var name = items[i].name
+            var mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
+            fileReader.onloadend = function(e) {
+                let arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                socket.emit("image", {
+                    username: Cookies.get("user"),
+                    type: fileType,
+                    name: name,
+                    blob: arrayBuffer,
+                    mid: mid
+                });
+                const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+                const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message message--image"><img data-type="${fileType}" data-name="${name}" src="data:${fileType};base64,${arrayBuffer}"></div>
+                            <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
+                        </li>`;
+                getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
+                    appendDOM(HTML, ".panel--middle", false);
+                    middleDiv.scrollTop += dims.h;
+                    if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
+                            middleDiv.scrollHeight,
+                            middleDiv.offsetHeight,
+                            middleDiv.clientHeight,
+                        ) - 250)
+                        middleDiv.scrollTop = middleDiv.scrollHeight + dims.h;
+                    else
+                        middleDiv.scrollTop -= dims.h;
+                });
+            }
+            fileReader.readAsDataURL(blob);
         }
-        fileReader.readAsDataURL(blob);
+    } else {
+        location.href = "/logout";
     }
 }, false);
 

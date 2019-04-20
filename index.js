@@ -486,6 +486,7 @@ io.of('/chat').on('connection', function(socket) {
                 })
             });
         } else {
+            socket.leave("room");
             socket.emit("invalidSession", true);
         }
     });
@@ -501,6 +502,7 @@ io.of('/chat').on('connection', function(socket) {
                 });
         } else {
             socket.leave("room");
+            socket.emit("invalidSession", true);
         }
     });
 
@@ -518,6 +520,7 @@ io.of('/chat').on('connection', function(socket) {
             }
         } else {
             socket.leave("room");
+            socket.emit("invalidSession", true);
         }
     });
     socket.on("reverseMessage", function(mid) {
@@ -527,11 +530,12 @@ io.of('/chat').on('connection', function(socket) {
             }
         } else {
             socket.leave("room");
+            socket.emit("invalidSession", true);
         }
     });
     socket.on("typing", function(user) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
-            socket.to("room").emit("typing", user);
+            socket.to("room").emit("typing", socket.handshake.session.user);
         }
     });
     socket.on("read", function(user) {
@@ -539,6 +543,7 @@ io.of('/chat').on('connection', function(socket) {
             socket.to("room").emit("read", user);
         } else {
             socket.leave("room");
+            socket.emit("invalidSession", true);
         }
     });
 

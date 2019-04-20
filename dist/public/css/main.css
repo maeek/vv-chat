@@ -565,21 +565,36 @@ input[type="file"] {
 
 .error {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
+    flex-direction: column;
     align-self: flex-end;
     font-family: 'KoHo', sans-serif;
-    margin: .2rem;
+    padding: .5rem 1rem;
+    width: 100%;
     flex: 0 0 auto;
+    background-color: #1c223591;
+}
+
+.error .who {
+    font-size: 1rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    flex: 0 0 2.2rem;
+    align-self: center;
+    margin: 0;
+}
+
+.error .who i {
+    font-size: 1rem;
+    margin: 0;
 }
 
 .errorCont {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: .25rem .7rem;
-    border-radius: 20px;
-    background-color: #055a90;
+    padding: .3rem .7rem;
     display: flex;
     justify-content: flex-start;
     color: #a7aab5;
