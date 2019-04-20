@@ -1297,7 +1297,7 @@ input[type="file"] {
     position: absolute;
     top: .5rem;
     right: .5rem;
-    background: #282d42;
+    background: #373f5a;
     cursor: pointer;
     transition: background .3s;
     z-index: 100;
@@ -1312,11 +1312,15 @@ input[type="file"] {
     flex: 0 0 2rem;
 }
 
+.settings__exit {
+    background: #282d42;
+}
+
 .gallery__download {
     position: absolute;
     top: .5rem;
     right: 3rem;
-    background: #282d42;
+    background: #373f5a;
     cursor: pointer;
     transition: background .3s;
     z-index: 100;
@@ -1338,6 +1342,18 @@ input[type="file"] {
     z-index: 100;
     font-size: 1.5rem;
     font-family: 'Major Mono Display', monospace;
+}
+
+.modal__fileinfo {
+    position: absolute;
+    top: .5rem;
+    right: 6rem;
+    z-index: 100;
+    font-size: .81rem;
+    border-radius: 20px;
+    padding: .5rem 1rem;
+    font-family: 'KoHo', sans-serif;
+    background: #373f5a;
 }
 
 .settings__exit i,

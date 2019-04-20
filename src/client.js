@@ -443,10 +443,13 @@ $(".panel--middle").addEventListener('click', function(e) {
         const type = e.target.getAttribute("data-type");
         const name = e.target.getAttribute("data-name");
         const user = e.target.parentNode.parentNode.querySelector(".who").getAttribute("data-user");
-        const HTML = `<div class="modal__div">
+        const mid = e.target.parentNode.parentNode.getAttribute("data-mid");
+        const fileSize = (data.length * (3 / 4)) - (data[data.length - 3] + data[data.length - 2] == "==" ? 2 : data[data.length - 2] == "=" ? 1 : 0);
+        const HTML = `<div class="modal__div" data-mid="${mid}">
                         <div class="gallery__cont">
                             <div class="modal__exit noselect"><i class="material-icons">close</i></div>
                             <div class="gallery__download noselect" data-type="${type}" data-name="${name}"><i class="material-icons">save</i></div>
+                            <div class="modal__fileinfo">${formatSizeUnits(fileSize)}</div>
                             <div class="who noselect modal__who">${user.substring(0,1).toLowerCase()}</div>
                             <div class="img__div">
                                 <img class="gallery__img">
@@ -560,13 +563,22 @@ $(".panel--middle").addEventListener('click', function(e) {
 });
 
 socket.on("reverseMessage", function(mid) {
-    const ms = $(`.ms[data-mid="${mid}"]`);
-    if (typeof ms !== undefined && ms != null) {
-        ms.classList.add("transition-leave");
-        setTimeout(function() {
-            ms.remove();
-        }, 200)
+    const ms = $$(`[data-mid="${mid}"]`);
+    for (let i = 0; i < ms.length; i++) {
+        if (typeof ms[i] !== undefined && ms[i] != null) {
+            if (!hasClass(ms[i], 'modal__div')) {
+                ms[i].classList.add("transition-leave");
+            } else {
+                $(".gallery__cont").classList.remove("anim--opacity");
+                $(".img__div").classList.remove("anim--scale");
+                $(".modal__div").classList.remove("anim--opacity");
+            }
+            setTimeout(function() {
+                ms[i].remove();
+            }, 200)
+        }
     }
+
 });
 
 

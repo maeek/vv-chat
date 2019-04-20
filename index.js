@@ -14,7 +14,7 @@ const config = {
     usersFile: "src/users.json",
     certificateFiles: {
         cert: 'path_to_cert.pem',
-        ca: 'path_to_chain.pem',
+        ca: 'path_to_chain.pem', // not always necessary
         priv: 'path_to_privkey.pem'
     }
 }
@@ -373,6 +373,9 @@ app.get('/chat', (req, res) => {
             res.redirect('/manage');
         }
     } else {
+        req.session.destroy(function(err) {
+            if (err) console.log(`ERROR: Couldn't destroy session, description:\n${err}`);
+        });
         res.redirect('/logout');
     }
 });
@@ -401,34 +404,35 @@ app.route('/login')
                     if (err) {
                         console.log(`ERROR: failed to hash password at "/login" for user: "${username}" error description:\n${err}`);
                         res.redirect(`/login#error`);
-                    }
-                    if (result === true) {
-                        const userData = usersFile.users[0].username,
-                            clientId = usersFile.users[0].clientId;
-                        req.session.user = userData;
-                        req.session.valid = true;
-                        req.session.clientId = clientId;
-                        res.cookie('user', userData, {
-                            expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
-                        });
-                        res.cookie('clientId', clientId, {
-                            expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
-                        });
-                        if (userData == "root") {
-                            req.session.auth = "root";
-                            res.redirect("/manage");
-                        } else {
-                            req.session.auth = "user";
-                            if (usersFile.users[0].first) {
-                                req.session.setup = true;
-                                res.redirect("/setup");
-                            } else {
-                                res.redirect("/chat");
-                            }
-                        }
                     } else {
-                        res.redirect("/login#wrong");
-                        req.session.valid = false;
+                        if (result === true) {
+                            const userData = usersFile.users[0].username,
+                                clientId = usersFile.users[0].clientId;
+                            req.session.user = userData;
+                            req.session.valid = true;
+                            req.session.clientId = clientId;
+                            res.cookie('user', userData, {
+                                expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                            });
+                            res.cookie('clientId', clientId, {
+                                expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
+                            });
+                            if (userData == "root") {
+                                req.session.auth = "root";
+                                res.redirect("/manage");
+                            } else {
+                                req.session.auth = "user";
+                                if (usersFile.users[0].first) {
+                                    req.session.setup = true;
+                                    res.redirect("/setup");
+                                } else {
+                                    res.redirect("/chat");
+                                }
+                            }
+                        } else {
+                            res.redirect("/login#wrong");
+                            req.session.valid = false;
+                        }
                     }
                 });
             } else {
@@ -438,7 +442,7 @@ app.route('/login')
     });
 
 app.get('/logout', (req, res) => {
-    if (req.session.user) {
+    if (req.session.valid) {
         Store.destroy(req.session.id, (err) => {
             if (err != null) console.log(err);
         });

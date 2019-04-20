@@ -8,10 +8,9 @@
 
 console.log("WORKER: started");
 
-var version = 'v1.0.7::';
+var version = 'v1.0.8::';
 var CACHE = 'network-or-cache';
 var offlineFundamentals = [
-    '/',
     '/js/func.js',
     '/js/client.js',
     '/js/socket.io.js',
