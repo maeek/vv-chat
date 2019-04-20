@@ -127,7 +127,7 @@ app.use((req, res, next) => {
 });
 
 const sessionChecker = (req, res, next) => {
-    if (req.session.valid) {
+    if (req.session.valid && typeof req.session !== undefined) {
         res.redirect('/chat');
     } else {
         next();
