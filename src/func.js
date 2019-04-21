@@ -23,11 +23,13 @@ const getImageDimensions = file => new Promise(function(resolved) {
     };
     i.src = file
 });
+const getTime = () => new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toJSON().substring(10, 19).replace('T', ' ');
 
 function formatSizeUnits(bytes) {
     if (bytes >= 1073741824) { bytes = (bytes / 1073741824).toFixed(2) + " GB"; } else if (bytes >= 1048576) { bytes = (bytes / 1048576).toFixed(2) + " MB"; } else if (bytes >= 1024) { bytes = (bytes / 1024).toFixed(2) + " KB"; } else if (bytes > 1) { bytes = bytes + " bytes"; } else if (bytes == 1) { bytes = bytes + " byte"; } else { bytes = "0 bytes"; }
     return bytes;
 }
+
 
 function appendDOM(HTML, element = String, scroll = true) {
     const childNodes = domFromText(HTML);

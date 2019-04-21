@@ -78,10 +78,6 @@ socket.on("connect_timeout", function() {
 });
 socket.on("reconnecting", function(at) {
     const errorEl = $$(".reconnect");
-    // if (errorEl.length > 0)
-    //     for (let i = 0; i < errorEl.length; i++)
-    //         errorEl[i].remove();
-
     const HTML = `<li class="error reconnect">
                     <div class="who noselect recAttemps">${at}/10</div>
                     <div class="errorCont">Reconnection attempt...</div>
@@ -126,7 +122,7 @@ socket.on("invalidSession", function(status) {
 socket.emit("userConnected", true);
 socket.on("userConnected", function(data) {
     if (!data.self) {
-        const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+        const time = getTime();
         const HTML = `<li class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></li>`;
         appendDOM(HTML, ".panel--middle");
     }
@@ -142,7 +138,7 @@ socket.on("userConnected", function(data) {
 
 function appendMessage() {
     let val = $(".textField").value.trim();
-    const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+    const time = getTime();
     if (val != "" && Cookies.get("user")) {
         const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
         socket.emit("message", {
@@ -189,7 +185,7 @@ function appendImage(files) {
                         blob: arrayBuffer,
                         mid: mid
                     });
-                    const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+                    const time = getTime();
                     const HTML = `<li class="ms from__me" data-mid="${mid}">
                             <div class="time noselect">${time}</div>
                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
@@ -327,7 +323,7 @@ $(".textField").addEventListener("keydown", function(e) {
  *  Images
  */
 socket.on("image", function(image) {
-    const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+    const time = getTime();
     const HTML = `<li class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
                     <div class="time noselect">${time}</div>
                     ${image.username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
@@ -410,7 +406,7 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
                     blob: arrayBuffer,
                     mid: mid
                 });
-                const time = new Date().toJSON().substring(10, 19).replace('T', ' ');
+                const time = getTime();
                 const HTML = `<li class="ms from__me" data-mid="${mid}">
                             <div class="time noselect">${time}</div>
                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
@@ -466,6 +462,18 @@ $(".panel--middle").addEventListener('click', function(e) {
 
 window.addEventListener("focus", function() {
     $(".textField").focus();
+    socket.io.reconnection(true);
+    socket.io._reconnectionAttempts = 10;
+    socket.io.open(function() {
+        const errorEl = $$(".error, .reconnect");
+        if (errorEl.length > 0)
+            for (let i = 0; i < errorEl.length; i++)
+                errorEl[i].remove();
+        socket.emit("userConnected", true);
+    });
+});
+window.addEventListener("blur", function() {
+    socket.io._reconnectionAttempts = 0;
 });
 
 /*

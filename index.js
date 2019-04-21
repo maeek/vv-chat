@@ -78,6 +78,7 @@ const cors = require('cors');
 const expressSession = require('express-session');
 const sharedsession = require('express-socket.io-session');
 const FileStore = require('session-file-store')(expressSession);
+const getTime = () => new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toJSON().substring(10, 19).replace('T', ' ');
 
 
 
@@ -459,7 +460,7 @@ app.get('/logout', (req, res) => {
     }
 });
 
-app.use(express.static(path.join(__dirname, '/public')));
+app.use(express.static(path.join(__dirname, '/public'), { redirect: false }));
 app.use(function(req, res, next) {
     return res.status(404).sendFile(__dirname + "/src/error.html");
 });
@@ -478,14 +479,14 @@ io.of('/chat').on('connection', function(socket) {
                     status: true,
                     self: false,
                     username: socket.handshake.session.user,
-                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    time: getTime(),
                     users: clients.length
                 });
                 socket.emit("userConnected", {
                     status: true,
                     self: true,
                     username: socket.handshake.session.user,
-                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    time: getTime(),
                     users: clients.length
                 })
             });
@@ -501,7 +502,7 @@ io.of('/chat').on('connection', function(socket) {
                 socket.to("room").emit("message", {
                     username: socket.handshake.session.user,
                     message: data.message,
-                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    time: getTime(),
                     mid: data.mid
                 });
         } else {
@@ -517,7 +518,7 @@ io.of('/chat').on('connection', function(socket) {
                     username: socket.handshake.session.user,
                     name: image.name,
                     type: image.type,
-                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    time: getTime(),
                     img: image.blob,
                     mid: image.mid
                 });
@@ -558,7 +559,7 @@ io.of('/chat').on('connection', function(socket) {
                     status: false,
                     self: false,
                     username: socket.handshake.session.user,
-                    time: new Date().toJSON().substring(10, 19).replace('T', ' '),
+                    time: getTime(),
                     users: clients.length
                 });
             });
