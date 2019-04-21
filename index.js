@@ -112,7 +112,7 @@ let session = expressSession({
 app.use(session);
 
 app.use((req, res, next) => {
-    if (req.cookies.user_sid && !req.session.user) {
+    if (req.cookies.user_sid && !req.session.user && typeof req.session !== undefined) {
         Store.destroy(req.session.id, (err) => {
             if (err != null) console.log(err);
         });
@@ -136,7 +136,7 @@ const sessionChecker = (req, res, next) => {
 };
 
 app.get('/js/manage.js', function(req, res) {
-    if (req.session.valid && req.cookies.user_sid && req.session.auth == "root") {
+    if (req.session.valid && req.cookies.user_sid && req.session.auth == "root" && typeof req.session !== undefined) {
         res.sendFile(__dirname + "/public/js/manage.js");
     } else {
         res.status(404).sendFile(__dirname + "/src/error.html");
@@ -167,14 +167,14 @@ app.get('/', sessionChecker, function(req, res) {
 
 app.route('/manage')
     .get((req, res) => {
-        if (req.session.user && req.session.auth == "root") {
+        if (req.session.user && req.session.auth == "root" && typeof req.session !== undefined) {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
             res.redirect('/chat');
         }
     })
     .post((req, res) => {
-        if (req.session.user && req.session.auth == "root") {
+        if (req.session.user && req.session.auth == "root" && typeof req.session !== undefined) {
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
                 res.json({ status: false });
@@ -278,14 +278,14 @@ app.route('/manage')
 
 app.route('/setup')
     .get((req, res) => {
-        if (req.session.user && req.session.setup) {
+        if (req.session.user && req.session.setup && typeof req.session !== undefined) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
             res.redirect('/chat');
         }
     })
     .post((req, res) => {
-        if (req.session.user && req.session.valid) {
+        if (req.session.user && req.session.valid && typeof req.session !== undefined) {
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
                 res.redirect("/setup");
@@ -363,7 +363,7 @@ app.route('/setup')
 
 
 app.get('/chat', (req, res) => {
-    if (req.session.valid) {
+    if (req.session.valid && typeof req.session !== undefined) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
                 res.redirect('/setup');
@@ -382,7 +382,7 @@ app.get('/chat', (req, res) => {
 });
 app.route('/login')
     .get((req, res) => {
-        if (!req.session.valid)
+        if (!req.session.valid || typeof req.session === undefined)
             res.sendFile(__dirname + '/src/login.html');
         else
             res.redirect("/chat");
@@ -443,7 +443,7 @@ app.route('/login')
     });
 
 app.get('/logout', (req, res) => {
-    if (req.session.valid) {
+    if (req.session.valid && typeof req.session !== undefined) {
         Store.destroy(req.session.id, (err) => {
             if (err != null) console.log(err);
         });
