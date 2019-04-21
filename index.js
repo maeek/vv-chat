@@ -382,7 +382,7 @@ app.get('/chat', (req, res) => {
 });
 app.route('/login')
     .get((req, res) => {
-        if (!req.session.valid && typeof req.session !== undefined)
+        if (!req.session.valid && typeof req.session !== undefined || typeof req.session === undefined)
             res.sendFile(__dirname + '/src/login.html');
         else
             res.redirect("/chat");
