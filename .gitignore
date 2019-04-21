@@ -61,7 +61,7 @@ typings/
 .next
 
 # User sessions
-dist/sessions
+dist/sessions/*
 
 # Users file
 src/users.json
