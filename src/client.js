@@ -140,27 +140,32 @@ function appendMessage() {
     let val = $(".textField").value.trim();
     const time = getTime();
     if (val != "" && Cookies.get("user")) {
-        const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
-        socket.emit("message", {
-            username: Cookies.get("user"),
-            message: val,
-            time: time,
-            mid: mid
-        });
-        val = escapeHtml(val);
-        const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
-        let replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
-        const HTML = `<li class="ms from__me" data-mid="${mid}">
-                        <div class="time noselect">${time}</div>
-                        <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                        <div class="message">${replacedText}</div>
-                        <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
-                    </li>;`;
-        appendDOM(HTML, ".panel--middle", true);
-        const middleDiv = $(".panel--middle");
-        middleDiv.scrollTop = middleDiv.scrollHeight;
-        $(".textField").value = "";
-        $(".textField").focus();
+        if (socket.io.readyState == "open") {
+            const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
+            socket.emit("message", {
+                username: Cookies.get("user"),
+                message: val,
+                time: time,
+                mid: mid
+            });
+            val = escapeHtml(val);
+            const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+            let replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
+            const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message">${replacedText}</div>
+                            <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                        </li>;`;
+            appendDOM(HTML, ".panel--middle", true);
+            const middleDiv = $(".panel--middle");
+            middleDiv.scrollTop = middleDiv.scrollHeight;
+            $(".textField").value = "";
+            $(".textField").focus();
+        } else {
+            error("Failed sending message");
+            $(".textField").focus();
+        }
     } else if (typeof Cookies.get("user") === "undefined") {
         socket.close();
         location.href = "/logout";
@@ -169,48 +174,53 @@ function appendMessage() {
 
 function appendImage(files) {
     if (Cookies.get("user")) {
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
+        if (socket.io.readyState == "open") {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
 
-            if (file.type.indexOf("image") >= 0) {
-                const fileReader = new FileReader();
-                fileReader.onloadend = function(e) {
+                if (file.type.indexOf("image") >= 0) {
+                    const fileReader = new FileReader();
+                    fileReader.onloadend = function(e) {
 
-                    const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                    const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
-                    socket.emit("image", {
-                        username: Cookies.get("user"),
-                        type: file.type,
-                        name: file.name,
-                        blob: arrayBuffer,
-                        mid: mid
-                    });
-                    const time = getTime();
-                    const HTML = `<li class="ms from__me" data-mid="${mid}">
+                        const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                        const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
+                        socket.emit("image", {
+                            username: Cookies.get("user"),
+                            type: file.type,
+                            name: file.name,
+                            blob: arrayBuffer,
+                            mid: mid
+                        });
+                        const time = getTime();
+                        const HTML = `<li class="ms from__me" data-mid="${mid}">
                             <div class="time noselect">${time}</div>
                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
                             <div class="message message--image"><img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}"></div>
                             <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                         </li>`;
-                    if ($$(".typing").length > 0) $(".typing").remove();
+                        if ($$(".typing").length > 0) $(".typing").remove();
 
-                    const panelMiddle = $(".panel--middle");
-                    getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
-                        appendDOM(HTML, ".panel--middle", false);
-                        panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
-                        if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
-                                panelMiddle.scrollHeight,
-                                panelMiddle.offsetHeight,
-                                panelMiddle.clientHeight,
-                            ) - 250)
-                            panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
-                        else
-                            panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
-                    });
-                    $(".textField").focus();
+                        const panelMiddle = $(".panel--middle");
+                        getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+                            appendDOM(HTML, ".panel--middle", false);
+                            panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+                            if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
+                                    panelMiddle.scrollHeight,
+                                    panelMiddle.offsetHeight,
+                                    panelMiddle.clientHeight,
+                                ) - 250)
+                                panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
+                            else
+                                panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
+                        });
+                        $(".textField").focus();
+                    }
+                    fileReader.readAsDataURL(file);
                 }
-                fileReader.readAsDataURL(file);
             }
+        } else {
+            error("Failed sending message");
+            $(".textField").focus();
         }
     } else {
         socket.close();
@@ -465,11 +475,15 @@ window.addEventListener("focus", function() {
     socket.io.reconnection(true);
     socket.io._reconnectionAttempts = 10;
     socket.io.open(function() {
-        const errorEl = $$(".error, .reconnect");
-        if (errorEl.length > 0)
-            for (let i = 0; i < errorEl.length; i++)
-                errorEl[i].remove();
-        socket.emit("userConnected", true);
+        if (socket.io.readyState == "open") {
+            console.log(status);
+            const errorEl = $$(".error, .reconnect");
+            if (errorEl.length > 0) {
+                for (let i = 0; i < errorEl.length; i++)
+                    errorEl[i].remove();
+                socket.emit("userConnected", true);
+            }
+        }
     });
 });
 window.addEventListener("blur", function() {

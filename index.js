@@ -496,7 +496,7 @@ io.of('/chat').on('connection', function(socket) {
         }
     });
 
-    socket.on("message", function(data) {
+    socket.on("message", function(data, fn) {
         if (socket.handshake.session.valid && typeof socket.handshake.session !== undefined) {
             if (data.message != "" && data.message.length > 0)
                 socket.to("room").emit("message", {

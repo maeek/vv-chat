@@ -958,8 +958,6 @@ input[type="file"] {
 }
 
 .tost--error {
-    top: 4rem;
-    bottom: initial;
     color: #ff6e6e;
     padding: .5rem 1rem;
 }
