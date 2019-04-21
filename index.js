@@ -95,10 +95,10 @@ app.use(function(req, res, next) {
 });
 
 /* Initiate session */
-const Store = new FileStore({ path: "dist/sessions" });
+const Store = new FileStore({ path: __dirname + "/sessions/" });
+if (!fs.existsSync(__dirname + "/sessions/")) fs.mkdirSync(__dirname + "/sessions/", 744);
 let session = expressSession({
-    key: 'user_sid',
-    name: 'user_sid',
+    name: 'user.sid',
     secret: config.sessionSecret,
     store: Store,
     resave: true,
@@ -120,7 +120,7 @@ const sessionChecker = (req, res, next) => {
 };
 
 app.get('/js/manage.js', function(req, res) {
-    if (typeof req.session !== undefined && req.session.valid && req.cookies.user_sid && req.session.auth == "root") {
+    if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
         res.sendFile(__dirname + "/public/js/manage.js");
     } else {
         res.status(404).sendFile(__dirname + "/src/error.html");
@@ -432,11 +432,11 @@ app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
     });
-    res.clearCookie('user_sid');
+    res.clearCookie("user.sid");
     res.clearCookie("user");
     res.clearCookie("io");
     res.clearCookie("clientId");
-    res.redirect('/login');
+    res.redirect("/login");
 });
 
 app.use(express.static(path.join(__dirname, '/public'), { redirect: false }));
