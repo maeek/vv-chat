@@ -151,14 +151,14 @@ app.get('/', sessionChecker, function(req, res) {
 
 app.route('/manage')
     .get((req, res) => {
-        if (typeof req.session !== undefined && req.session.user && req.session.auth == "root") {
+        if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
             res.redirect('/chat');
         }
     })
     .post((req, res) => {
-        if (typeof req.session !== undefined && req.session.user && req.session.auth == "root") {
+        if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
                 res.json({ status: false });
@@ -262,14 +262,14 @@ app.route('/manage')
 
 app.route('/setup')
     .get((req, res) => {
-        if (typeof req.session !== undefined && req.session.user && req.session.setup) {
+        if (typeof req.session !== undefined && req.session.valid && req.session.setup) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
             res.redirect('/chat');
         }
     })
     .post((req, res) => {
-        if (typeof req.session !== undefined && req.session.user && req.session.valid) {
+        if (typeof req.session !== undefined && req.session.valid) {
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
                 res.redirect("/setup");
@@ -358,9 +358,6 @@ app.get('/chat', (req, res) => {
             res.redirect('/manage');
         }
     } else {
-        req.session.destroy(function(err) {
-            if (err) console.log(`ERROR: Couldn't destroy session, description:\n${err}`);
-        });
         res.redirect('/logout');
     }
 });
