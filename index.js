@@ -111,22 +111,6 @@ let session = expressSession({
 });
 app.use(session);
 
-app.use((req, res, next) => {
-    if (typeof req.session !== undefined && req.cookies.user_sid && !req.session.user) {
-        Store.destroy(req.session.id, (err) => {
-            if (err != null) console.log(err);
-        });
-        req.session.destroy((err) => {
-            if (err != null) console.log(err);
-        });
-        res.clearCookie('user_sid');
-        res.clearCookie("user");
-        res.clearCookie("io");
-        res.clearCookie("clientId");
-    }
-    next();
-});
-
 const sessionChecker = (req, res, next) => {
     if (typeof req.session !== undefined && req.session.valid) {
         res.redirect('/chat');
@@ -445,19 +429,17 @@ app.route('/login')
 app.get('/logout', (req, res) => {
     if (typeof req.session !== undefined && req.session.valid) {
         Store.destroy(req.session.id, (err) => {
-            if (err != null) console.log(err);
+            if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
         });
-        req.session.destroy((err) => {
-            if (err != null) console.log(err);
-        });
-        res.clearCookie('user_sid');
-        res.clearCookie("user");
-        res.clearCookie("io");
-        res.clearCookie("clientId");
-        res.redirect('/');
-    } else {
-        res.redirect('/login');
     }
+    req.session.destroy((err) => {
+        if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
+    });
+    res.clearCookie('user_sid');
+    res.clearCookie("user");
+    res.clearCookie("io");
+    res.clearCookie("clientId");
+    res.redirect('/login');
 });
 
 app.use(express.static(path.join(__dirname, '/public'), { redirect: false }));
