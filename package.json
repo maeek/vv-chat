@@ -1,47 +1,48 @@
 {
-    "name": "vv-chat",
-    "version": "1.0.5",
-    "description": "Simple websocket chat",
-    "private": true,
-    "main": "index.js",
-    "scripts": {
-        "build": "./node_modules/.bin/babel src/client.js src/func.js -d dist && mv dist/src/client.js dist/src/func.js dist/public/js/ && cp index.js dist/index.js",
-        "start": "npm run build && node dist/index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/maeek/vv-chat.git"
-    },
-    "keywords": [
-        "vv-chat",
-        "websocket",
-        "chat",
-        "nodejs"
-    ],
-    "author": "maeek",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/maeek/vv-chat/issues"
-    },
-    "homepage": "https://github.com/maeek/vv-chat#readme",
-    "devDependencies": {
-        "@babel/core": "^7.4.3",
-        "@babel/preset-env": "^7.4.3",
-        "babel-cli": "^6.26.0",
-        "babel-core": "^6.26.3",
-        "babel-preset-env": "^1.7.0"
-    },
-    "dependencies": {
-        "bcrypt-nodejs": "0.0.3",
-        "body-parser": "^1.18.3",
-        "cookie": "^0.3.1",
-        "cookie-parser": "^1.4.4",
-        "cors": "^2.8.5",
-        "express": "^4.16.4",
-        "express-session": "^1.15.6",
-        "express-socket.io-session": "^1.3.5",
-        "session-file-store": "^1.2.0",
-        "socket.io": "^2.2.0"
-    }
+  "name": "vv-chat",
+  "version": "1.0.5",
+  "description": "Simple websocket chat",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/babel src/client.js src/func.js -d dist && mv dist/src/client.js dist/src/func.js dist/public/js/ && cp index.js dist/index.js",
+    "start": "npm run build && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maeek/vv-chat.git"
+  },
+  "keywords": [
+    "vv-chat",
+    "websocket",
+    "chat",
+    "nodejs"
+  ],
+  "author": "maeek",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maeek/vv-chat/issues"
+  },
+  "homepage": "https://github.com/maeek/vv-chat#readme",
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0"
+  },
+  "dependencies": {
+    "bcrypt-nodejs": "0.0.3",
+    "body-parser": "^1.18.3",
+    "cookie": "^0.3.1",
+    "cookie-parser": "^1.4.4",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "express-session": "^1.15.6",
+    "express-socket.io-session": "^1.3.5",
+    "mobile-detect": "^1.4.3",
+    "session-file-store": "^1.2.0",
+    "socket.io": "^2.2.0"
+  }
 }
