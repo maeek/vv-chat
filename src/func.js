@@ -148,6 +148,10 @@ window.addEventListener("DOMContentLoaded", function() {
                                     </div>
                                     <div class="status__div"></div>
                                 </div>
+                                <div class="subtitle noselect">Your active sessions</div>
+                                <div class="input__div">
+                                    <ul class="activeSessions"></ul>
+                                </div>
                                 <div class="footer">
                                     <div class="branding noselect">1.0.5</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
@@ -162,6 +166,7 @@ window.addEventListener("DOMContentLoaded", function() {
             $(".modal__div").classList.add("anim--opacity");
             $(".settings__cont").classList.add("anim--opacity", "anim--scale");
         });
+
         document.addEventListener('click', function(e) {
             if (e.target && hasClass(e.target, 'settings__exit') || hasClass(e.target.parentNode, 'settings__exit')) {
 
@@ -227,6 +232,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
         });
     }
+
 });
 
 if ('serviceWorker' in navigator) {

@@ -112,6 +112,7 @@ socket.on("reconnect", function() {
 });
 socket.on("invalidSession", function(status) {
     if (status) {
+        socket.close();
         location.href = "/logout";
     }
 });
@@ -642,6 +643,49 @@ socket.on("typing", function(mid) {
 });
 
 
+/* Sessions */
+
+socket.on("activeSessions", (data) => {
+    const sessions = $$("li[data-socketid]");
+    for (let i = 0; i < sessions.length; i++)
+        sessions[i].remove();
+    if ($$('.activeSessions').length > 0) {
+        for (let i = 0; i < data.length; i++) {
+            appendDOM(
+                `<li data-socketid="${data[i].socketId}">
+                        <span class="session--id">${(typeof socket !== undefined && data[i].socketId == socket.id)?"This device":data[i].os}</span>
+                        <span class="session--time">${data[i].lastAccess}</span>
+                        <span class="remove--session__span remove--session"><i class="material-icons">close</i></span>
+                    </li>`,
+                '.activeSessions'
+            );
+        }
+    }
+});
+if ($$(".settings--popup").length > 0) {
+    $(".settings--popup").addEventListener("click", function() {
+        socket.emit("activeSessions", true, function(data) {
+            const sessions = $$(".session__li");
+            for (let i = 0; i < sessions.length; i++)
+                sessions[i].remove();
+            appendDOM(`<li class="noselect">
+                            <span>Device</span>
+                            <span class="session--time">First seen</span>
+                            <span class="remove--session__span"><i class="material-icons">close</i></span>
+                        </li>`, '.activeSessions');
+            for (let i = 0; i < data.length; i++) {
+                appendDOM(
+                    `<li class="session__li" data-socketid="${data[i].socketId}">
+                        <span class="session--id">${(typeof socket !== undefined && data[i].socketId == socket.id)?"This device":data[i].os}</span>
+                        <span class="session--time">${data[i].lastAccess}</span>
+                        <span class="remove--session__span remove--session"><i class="material-icons">close</i></span>
+                    </li>`,
+                    '.activeSessions'
+                );
+            }
+        });
+    });
+}
 document.addEventListener('click', function(e) {
     if (e.target && hasClass(e.target, 'tost') || hasClass(e.target.parentNode, 'tost')) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
@@ -675,5 +719,24 @@ document.addEventListener('click', function(e) {
             anchor.click();
         })
        
+    } else if (e.target && hasClass(e.target, 'remove--session') || hasClass(e.target.parentNode, 'remove--session')) {
+        const btn = hasClass(e.target.parentNode, 'remove--session') ? e.target.parentNode : e.target;
+        const socketId = btn.parentNode.getAttribute("data-socketid");
+        socket.emit("removeSession", socketId, (data) => {
+            const sessions = $$(".session__li");
+            for (let i = 0; i < sessions.length; i++)
+                sessions[i].remove();
+            for (let i = 0; i < data.length; i++) {
+                appendDOM(
+                    `<li class="session__li" data-socketid="${data[i].socketId}">
+                            <span class="session--id">${(typeof socket !== undefined && data[i].socketId == socket.id)?"This device":data[i].os}</span>
+                            <span class="session--time">${data[i].lastAccess}</span>
+                            <span class="remove--session__span remove--session"><i class="material-icons">close</i></span>
+                        </li>`,
+                    '.activeSessions'
+                );
+            }
+        });
+
     }
 });

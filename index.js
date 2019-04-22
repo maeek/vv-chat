@@ -78,6 +78,7 @@ const cors = require('cors');
 const expressSession = require('express-session');
 const sharedsession = require('express-socket.io-session');
 const FileStore = require('session-file-store')(expressSession);
+const MobileDetect = require('mobile-detect');
 const getTime = () => new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toJSON().substring(10, 19).replace('T', ' ');
 
 
@@ -113,7 +114,7 @@ app.use(session);
 
 const sessionChecker = (req, res, next) => {
     if (typeof req.session !== undefined && req.session.valid) {
-        res.redirect('/chat');
+        res.redirect('/chat/');
     } else {
         next();
     }
@@ -146,15 +147,15 @@ function randomString(length = 15) {
 
 
 app.get('/', sessionChecker, function(req, res) {
-    res.redirect("/login");
+    res.redirect("/login/");
 });
 
-app.route('/manage')
+app.route('/manage/')
     .get((req, res) => {
         if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
-            res.redirect('/chat');
+            res.redirect('/chat/');
         }
     })
     .post((req, res) => {
@@ -260,26 +261,26 @@ app.route('/manage')
     });
 
 
-app.route('/setup')
+app.route('/setup/')
     .get((req, res) => {
         if (typeof req.session !== undefined && req.session.valid && req.session.setup) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
-            res.redirect('/chat');
+            res.redirect('/chat/');
         }
     })
     .post((req, res) => {
         if (typeof req.session !== undefined && req.session.valid) {
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
-                res.redirect("/setup");
+                res.redirect("/setup/");
             } else {
                 if (req.session.setup) {
                     const password = req.body.password;
                     const repassword = req.body.repassword;
                     const name = req.session.user;
                     if (password != repassword && password.length < 5) {
-                        res.redirect("/setup");
+                        res.redirect("/setup/");
                     } else {
                         const salt = bcrypt.genSaltSync();
                         let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
@@ -294,9 +295,9 @@ app.route('/setup')
                                 });
                                 fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
                                 req.session.setup = false;
-                                res.redirect("/chat");
+                                res.redirect("/chat/");
                             } else {
-                                console.log(`ERROR: failed to hash password at "/setup" for user: "${name}" error description:\n${err}`);
+                                console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
                             }
                         });
                     }
@@ -323,7 +324,7 @@ app.route('/setup')
                                         status: true
                                     });
                                 } else {
-                                    console.log(`ERROR: failed to hash password at "/setup" for user: "${name}" error description:\n${err}`);
+                                    console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
                                     res.json({
                                         status: false
                                     });
@@ -346,32 +347,32 @@ app.route('/setup')
     });
 
 
-app.get('/chat', (req, res) => {
-    if (typeof req.session !== undefined && req.session.valid) {
+app.get('/chat/', (req, res) => {
+    if (req.session.valid) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
-                res.redirect('/setup');
+                res.redirect('/setup/');
             } else {
                 res.status(200).sendFile(__dirname + '/src/chat.html');
             }
         } else {
-            res.redirect('/manage');
+            res.redirect('/manage/');
         }
     } else {
         res.redirect('/logout');
     }
 });
-app.route('/login')
+app.route('/login/')
     .get((req, res) => {
         if (typeof req.session !== undefined && !req.session.valid || typeof req.session === undefined)
             res.sendFile(__dirname + '/src/login.html');
         else
-            res.redirect("/chat");
+            res.redirect("/chat/");
     })
     .post((req, res) => {
         if (!fs.existsSync(config.usersFile)) {
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
-            res.redirect("/login#error");
+            res.redirect("/login/#error");
         } else {
             const username = req.body.username.trim().toLowerCase(),
                 password = req.body.password.trim();
@@ -384,12 +385,14 @@ app.route('/login')
             if (usersFile.users.length == 1) {
                 bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
                     if (err) {
-                        console.log(`ERROR: failed to hash password at "/login" for user: "${username}" error description:\n${err}`);
-                        res.redirect(`/login#error`);
+                        console.log(`ERROR: failed to hash password at "/login/" for user: "${username}" error description:\n${err}`);
+                        res.redirect(`/login/#error`);
                     } else {
                         if (result === true) {
                             const userData = usersFile.users[0].username,
                                 clientId = usersFile.users[0].clientId;
+                            const os = new MobileDetect(req.headers['user-agent']).os();
+                            req.session.os = os == null ? "PC" : os;
                             req.session.user = userData;
                             req.session.valid = true;
                             req.session.clientId = clientId;
@@ -401,24 +404,24 @@ app.route('/login')
                             });
                             if (userData == "root") {
                                 req.session.auth = "root";
-                                res.redirect("/manage");
+                                res.redirect("/manage/");
                             } else {
                                 req.session.auth = "user";
                                 if (usersFile.users[0].first) {
                                     req.session.setup = true;
-                                    res.redirect("/setup");
+                                    res.redirect("/setup/");
                                 } else {
-                                    res.redirect("/chat");
+                                    res.redirect("/chat/");
                                 }
                             }
                         } else {
-                            res.redirect("/login#wrong");
+                            res.redirect("/login/#wrong");
                             req.session.valid = false;
                         }
                     }
                 });
             } else {
-                res.redirect("/login#wrong");
+                res.redirect("/login/#wrong");
             }
         }
     });
@@ -436,18 +439,54 @@ app.get('/logout', (req, res) => {
     res.clearCookie("user");
     res.clearCookie("io");
     res.clearCookie("clientId");
-    res.redirect("/login");
+    res.redirect("/login/");
 });
 
-app.use(express.static(path.join(__dirname, '/public'), { redirect: false }));
+app.use(express.static(path.join(__dirname, '/public/'), { redirect: false }));
 app.use(function(req, res, next) {
     return res.status(404).sendFile(__dirname + "/src/error.html");
 });
 
-
+io.of("/settings").use(sharedsession(session, { autoSave: true }));
 io.of("/chat").use(sharedsession(session, { autoSave: true }));
+
+
+
+
 io.of('/chat').on('connection', function(socket) {
+
+
+    function activeSessions(clientId) {
+        return new Promise(function(resolve, reject) {
+            Store.list(function(el, list) {
+                list = list.map((el) => {
+                    let active = JSON.parse(fs.readFileSync(__dirname + "/sessions/" + el, 'utf-8'));
+                    if (active.clientId == clientId)
+                        return {
+                            clientId: active.clientId,
+                            socketId: active.socketId,
+                            os: active.os,
+                            user: active.user,
+                            lastAccess: new Date(active.__lastAccess).toJSON().substring(0, 19).replace('T', ' '),
+                            status: true
+                        };
+                    else
+                        return null;
+                });
+                list = list.filter((el) => {
+                    return typeof el !== undefined && el != null;
+                });
+                if (list.length > 0)
+                    resolve(list);
+                else
+                    reject(false);
+            });
+        });
+    }
+
     if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
+        socket.handshake.session.socketId = socket.id;
+        socket.handshake.session.save();
         socket.join("room");
     }
 
@@ -469,12 +508,59 @@ io.of('/chat').on('connection', function(socket) {
                     users: clients.length
                 })
             });
+            activeSessions(socket.handshake.session.clientId).then((list) => {
+                for (let i = 0; i < list.length; i++) {
+                    io.of('/chat').to(`${list[i].socketId}`).emit("activeSessions", list);
+                }
+            }).catch(() => {
+                console.log("No sessions");
+            });
+
         } else {
             socket.leave("room");
             socket.emit("invalidSession", true);
         }
     });
-
+    socket.on("activeSessions", function(user, fn) {
+        if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
+            activeSessions(socket.handshake.session.clientId).then((list) => {
+                fn(list);
+            }).catch(() => {
+                console.log("No sessions");
+            });
+        }
+    });
+    socket.on("removeSession", function(s, fn) {
+        if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
+            const clientId = socket.handshake.session.clientId;
+            Store.list(function(opt, list) {
+                list = list.map((el) => {
+                    let active = JSON.parse(fs.readFileSync(__dirname + "/sessions/" + el, 'utf-8'));
+                    if (active.clientId == clientId && active.socketId == s) {
+                        Store.destroy(el.substring(0, el.indexOf(".json")), (err) => {
+                            if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
+                            io.of("/chat").to(`${s}`).volatile.emit("invalidSession", true);
+                        });
+                    } else {
+                        if (active.clientId == clientId)
+                            return {
+                                clientId: active.clientId,
+                                socketId: active.socketId,
+                                os: active.os,
+                                user: active.user,
+                                lastAccess: new Date(active.__lastAccess).toJSON().substring(0, 19).replace('T', ' ')
+                            };
+                        else
+                            return null;
+                    }
+                });
+                list = list.filter((el) => {
+                    return typeof el !== undefined && el != null;
+                });
+                fn(list);
+            });
+        }
+    });
     socket.on("message", function(data) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (data.message != "" && data.message.length > 0)
@@ -530,7 +616,6 @@ io.of('/chat').on('connection', function(socket) {
             socket.emit("invalidSession", true);
         }
     });
-
     socket.on("disconnect", function() {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             io.of('/chat').in("room").clients((error, clients) => {
@@ -542,6 +627,14 @@ io.of('/chat').on('connection', function(socket) {
                     users: clients.length
                 });
             });
+            activeSessions(socket.handshake.session.clientId).then((list) => {
+                for (let i = 0; i < list.length; i++) {
+                    io.of('/chat').to(`${list[i].socketId}`).emit("activeSessions", list);
+                }
+            }).catch(() => {
+                console.log("No sessions");
+            });
+
         }
     });
 });

@@ -1247,7 +1247,7 @@ input[type="file"] {
     border-radius: 15px;
 }
 
-.settings__cont .input__div i:hover {
+.settings__cont .input__div .input__div--wrapper i:hover {
     background: #0069ab;
     color: #fefefe;
 }
@@ -1288,6 +1288,49 @@ input[type="file"] {
 
 .settings__cont .footer {
     width: 100%;
+}
+
+.settings__cont .activeSessions {
+    width: 100%;
+    padding-inline-start: 0;
+    margin: .2rem;
+    max-height: 10rem;
+    overflow: auto;
+}
+
+.settings__cont .activeSessions li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: .2rem .8rem;
+    cursor: default;
+}
+
+.settings__cont .activeSessions li span:not(.remove--session__span) {
+    flex: 1 1 auto;
+    margin: 0 .1rem;
+}
+
+.settings__cont .activeSessions li:first-child {
+    border-bottom: 1px solid #59607b;
+    color: #aab5de;
+}
+
+.remove--session__span {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.remove--session__span i:hover {
+    background: transparent;
+}
+
+.session--time {
+    text-align: right;
 }
 
 .settings__exit,
