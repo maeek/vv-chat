@@ -113,8 +113,8 @@ let session = expressSession({
 app.use(session);
 
 const sessionChecker = (req, res, next) => {
-    if (typeof req.session !== undefined && req.session.valid) {
-        res.redirect('/chat/');
+    if (!req.session.valid) {
+        res.redirect('/login/');
     } else {
         next();
     }
@@ -147,19 +147,19 @@ function randomString(length = 15) {
 
 
 app.get('/', sessionChecker, function(req, res) {
-    res.redirect("/login/");
+    res.redirect("/chat/");
 });
 
 app.route('/manage/')
-    .get((req, res) => {
-        if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
+    .get(sessionChecker, (req, res) => {
+        if (req.session.auth == "root") {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
             res.redirect('/chat/');
         }
     })
-    .post((req, res) => {
-        if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
+    .post(sessionChecker, (req, res) => {
+        if (req.session.auth == "root") {
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
                 res.json({ status: false });
@@ -262,104 +262,97 @@ app.route('/manage/')
 
 
 app.route('/setup/')
-    .get((req, res) => {
-        if (typeof req.session !== undefined && req.session.valid && req.session.setup) {
+    .get(sessionChecker, (req, res) => {
+        if (req.session.setup) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
             res.redirect('/chat/');
         }
     })
-    .post((req, res) => {
-        if (typeof req.session !== undefined && req.session.valid) {
-            if (!fs.existsSync(config.usersFile)) {
-                console.log(`ERROR: file ${config.usersFile} doesn't exist`);
-                res.redirect("/setup/");
+    .post(sessionChecker, (req, res) => {
+        if (!fs.existsSync(config.usersFile)) {
+            console.log(`ERROR: file ${config.usersFile} doesn't exist`);
+            res.redirect("/setup/");
+        } else {
+            if (req.session.setup) {
+                const password = req.body.password;
+                const repassword = req.body.repassword;
+                const name = req.session.user;
+                if (password != repassword && password.length < 5) {
+                    res.redirect("/setup/");
+                } else {
+                    const salt = bcrypt.genSaltSync();
+                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    bcrypt.hash(password, salt, null, function(err, hash) {
+                        if (!err) {
+                            usersObj.users = usersObj.users.filter(el => {
+                                if (el.username == name) {
+                                    el.password = hash;
+                                    el.first = false;
+                                }
+                                return el;
+                            });
+                            fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
+                            req.session.setup = false;
+                            res.redirect("/chat/");
+                        } else {
+                            console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
+                        }
+                    });
+                }
             } else {
-                if (req.session.setup) {
-                    const password = req.body.password;
-                    const repassword = req.body.repassword;
+                const oldPassword = req.body.oldPassword;
+                const password = req.body.password;
+                if (password.length > 4) {
                     const name = req.session.user;
-                    if (password != repassword && password.length < 5) {
-                        res.redirect("/setup/");
-                    } else {
-                        const salt = bcrypt.genSaltSync();
-                        let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    const salt = bcrypt.genSaltSync();
+                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
+                    const userHash = usersObj.users.filter(user => {
+                        return user.username == req.session.user;
+                    });
+                    if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
                         bcrypt.hash(password, salt, null, function(err, hash) {
                             if (!err) {
                                 usersObj.users = usersObj.users.filter(el => {
-                                    if (el.username == name) {
+                                    if (el.username == name)
                                         el.password = hash;
-                                        el.first = false;
-                                    }
                                     return el;
                                 });
                                 fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                                req.session.setup = false;
-                                res.redirect("/chat/");
+                                res.json({
+                                    status: true
+                                });
                             } else {
                                 console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
+                                res.json({
+                                    status: false
+                                });
                             }
                         });
-                    }
-                } else {
-                    const oldPassword = req.body.oldPassword;
-                    const password = req.body.password;
-                    if (password.length > 4) {
-                        const name = req.session.user;
-                        const salt = bcrypt.genSaltSync();
-                        let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const userHash = usersObj.users.filter(user => {
-                            return user.username == req.session.user;
-                        });
-                        if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
-                            bcrypt.hash(password, salt, null, function(err, hash) {
-                                if (!err) {
-                                    usersObj.users = usersObj.users.filter(el => {
-                                        if (el.username == name)
-                                            el.password = hash;
-                                        return el;
-                                    });
-                                    fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                                    res.json({
-                                        status: true
-                                    });
-                                } else {
-                                    console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
-                                    res.json({
-                                        status: false
-                                    });
-                                }
-                            });
-                        } else {
-                            res.json({
-                                status: false
-                            });
-                        }
                     } else {
                         res.json({
                             status: false
                         });
                     }
+                } else {
+                    res.json({
+                        status: false
+                    });
                 }
             }
-
         }
     });
 
 
-app.get('/chat/', (req, res) => {
-    if (req.session.valid) {
-        if (req.session.auth != "root") {
-            if (req.session.setup) {
-                res.redirect('/setup/');
-            } else {
-                res.status(200).sendFile(__dirname + '/src/chat.html');
-            }
+app.get('/chat/', sessionChecker, (req, res) => {
+    if (req.session.auth != "root") {
+        if (req.session.setup) {
+            res.redirect('/setup/');
         } else {
-            res.redirect('/manage/');
+            res.status(200).sendFile(__dirname + '/src/chat.html');
         }
     } else {
-        res.redirect('/logout');
+        res.redirect('/manage/');
     }
 });
 app.route('/login/')
@@ -467,7 +460,7 @@ io.of('/chat').on('connection', function(socket) {
                             socketId: active.socketId,
                             os: active.os,
                             user: active.user,
-                            lastAccess: new Date(active.__lastAccess).toJSON().substring(0, 19).replace('T', ' '),
+                            lastAccess: new Date(new Date(active.__lastAccess).getTime() - (new Date(active.__lastAccess).getTimezoneOffset() * 60000)).toJSON().substring(0, 19).replace('T', ' '),
                             status: true
                         };
                     else
@@ -548,7 +541,7 @@ io.of('/chat').on('connection', function(socket) {
                                 socketId: active.socketId,
                                 os: active.os,
                                 user: active.user,
-                                lastAccess: new Date(active.__lastAccess).toJSON().substring(0, 19).replace('T', ' ')
+                                lastAccess: new Date(new Date(active.__lastAccess).getTime() - (new Date(active.__lastAccess).getTimezoneOffset() * 60000)).toJSON().substring(0, 19).replace('T', ' ')
                             };
                         else
                             return null;
