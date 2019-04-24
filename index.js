@@ -19,6 +19,15 @@ const config = {
     }
 }
 
+
+/* Docker SSL cert settings */
+if (process.env.DOCKER) {
+    config.certificateFiles = {
+        cert: '',
+        priv: ''
+    }
+}
+
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt-nodejs');
@@ -112,6 +121,7 @@ let session = expressSession({
 });
 app.use(session);
 
+/* Express check session middleware */
 const sessionChecker = (req, res, next) => {
     if (!req.session.valid) {
         res.redirect('/login/');
@@ -119,16 +129,6 @@ const sessionChecker = (req, res, next) => {
         next();
     }
 };
-
-app.get('/js/manage.js', function(req, res) {
-    if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
-        res.sendFile(__dirname + "/public/js/manage.js");
-    } else {
-        res.status(404).sendFile(__dirname + "/src/error.html");
-    }
-});
-
-
 
 server.listen(config.port, () => {
     console.log(`### (${config.https?"HTTPS":"HTTP"}) ${config.name} listening on port ${config.port} ###`);
@@ -145,9 +145,17 @@ function randomString(length = 15) {
 
 
 
-
+app.use('/', express.static(path.join(__dirname, 'public'), { redirect: false }));
 app.get('/', sessionChecker, function(req, res) {
     res.redirect("/chat/");
+});
+
+app.get('/js/manage.js', function(req, res) {
+    if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
+        res.sendFile(__dirname + "/public/js/manage.js");
+    } else {
+        res.status(404).sendFile(__dirname + "/src/error.html");
+    }
 });
 
 app.route('/manage/')
@@ -435,19 +443,16 @@ app.get('/logout', (req, res) => {
     res.redirect("/login/");
 });
 
-app.use(express.static(path.join(__dirname, '/public/'), { redirect: false }));
 app.use(function(req, res, next) {
     return res.status(404).sendFile(__dirname + "/src/error.html");
 });
 
-io.of("/settings").use(sharedsession(session, { autoSave: true }));
 io.of("/chat").use(sharedsession(session, { autoSave: true }));
 
 
 
 
 io.of('/chat').on('connection', function(socket) {
-
 
     function activeSessions(clientId) {
         return new Promise(function(resolve, reject) {
