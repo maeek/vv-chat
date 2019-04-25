@@ -236,7 +236,7 @@ window.addEventListener("DOMContentLoaded", function() {
 });
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(function(r) {
+    navigator.serviceWorker.register('/sw.js', { scope: "/" }).then(function(r) {
         console.log("SW scope:", r.scope);
         console.log('ServiceWorker zarejestrowany.')
     }).catch(function(e) {
