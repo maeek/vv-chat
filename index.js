@@ -124,7 +124,7 @@ app.use(session);
 /* Express check session middleware */
 const sessionChecker = (req, res, next) => {
     if (!req.session.valid) {
-        res.redirect('/login/');
+        res.redirect(301, '/login/');
     } else {
         next();
     }
@@ -147,7 +147,7 @@ function randomString(length = 15) {
 
 app.use('/', express.static(path.join(__dirname, 'public'), { redirect: false }));
 app.get('/', sessionChecker, function(req, res) {
-    res.redirect("/chat/");
+    res.redirect(301, "/chat/");
 });
 
 app.get('/js/manage.js', function(req, res) {
@@ -163,7 +163,7 @@ app.route('/manage/')
         if (req.session.auth == "root") {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
-            res.redirect('/chat/');
+            res.redirect(301, '/chat/');
         }
     })
     .post(sessionChecker, (req, res) => {
@@ -274,20 +274,20 @@ app.route('/setup/')
         if (req.session.setup) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
-            res.redirect('/chat/');
+            res.redirect(301, '/chat/');
         }
     })
     .post(sessionChecker, (req, res) => {
         if (!fs.existsSync(config.usersFile)) {
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
-            res.redirect("/setup/");
+            res.redirect(301, "/setup/");
         } else {
             if (req.session.setup) {
                 const password = req.body.password;
                 const repassword = req.body.repassword;
                 const name = req.session.user;
                 if (password != repassword && password.length < 5) {
-                    res.redirect("/setup/");
+                    res.redirect(301, "/setup/");
                 } else {
                     const salt = bcrypt.genSaltSync();
                     let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
@@ -302,7 +302,7 @@ app.route('/setup/')
                             });
                             fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
                             req.session.setup = false;
-                            res.redirect("/chat/");
+                            res.redirect(301, "/chat/");
                         } else {
                             console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
                         }
@@ -355,12 +355,12 @@ app.route('/setup/')
 app.get('/chat/', sessionChecker, (req, res) => {
     if (req.session.auth != "root") {
         if (req.session.setup) {
-            res.redirect('/setup/');
+            res.redirect(301, '/setup/');
         } else {
             res.status(200).sendFile(__dirname + '/src/chat.html');
         }
     } else {
-        res.redirect('/manage/');
+        res.redirect(301, '/manage/');
     }
 });
 app.route('/login/')
@@ -368,12 +368,12 @@ app.route('/login/')
         if (typeof req.session !== undefined && !req.session.valid || typeof req.session === undefined)
             res.sendFile(__dirname + '/src/login.html');
         else
-            res.redirect("/chat/");
+            res.redirect(301, "/chat/");
     })
     .post((req, res) => {
         if (!fs.existsSync(config.usersFile)) {
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
-            res.redirect("/login/#error");
+            res.redirect(301, "/login/#error/misconfigured_server");
         } else {
             const username = req.body.username.trim().toLowerCase(),
                 password = req.body.password.trim();
@@ -387,7 +387,7 @@ app.route('/login/')
                 bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
                     if (err) {
                         console.log(`ERROR: failed to hash password at "/login/" for user: "${username}" error description:\n${err}`);
-                        res.redirect(`/login/#error`);
+                        res.redirect(301, `/login/#error`);
                     } else {
                         if (result === true) {
                             const userData = usersFile.users[0].username,
@@ -405,24 +405,24 @@ app.route('/login/')
                             });
                             if (userData == "root") {
                                 req.session.auth = "root";
-                                res.redirect("/manage/");
+                                res.redirect(301, "/manage/");
                             } else {
                                 req.session.auth = "user";
                                 if (usersFile.users[0].first) {
                                     req.session.setup = true;
-                                    res.redirect("/setup/");
+                                    res.redirect(301, "/setup/");
                                 } else {
-                                    res.redirect("/chat/");
+                                    res.redirect(301, "/chat/");
                                 }
                             }
                         } else {
-                            res.redirect("/login/#wrong");
+                            res.redirect(301, "/login/#wrong");
                             req.session.valid = false;
                         }
                     }
                 });
             } else {
-                res.redirect("/login/#wrong");
+                res.redirect(301, "/login/#wrong");
             }
         }
     });
@@ -440,11 +440,11 @@ app.get('/logout', (req, res) => {
     res.clearCookie("user");
     res.clearCookie("io");
     res.clearCookie("clientId");
-    res.redirect("/login/");
+    res.redirect(301, "/login/");
 });
 
-app.use(function(req, res, next) {
-    return res.status(404).sendFile(__dirname + "/src/error.html");
+app.get('*', function(req, res, next) {
+    res.status(404).sendFile(__dirname + "/src/error.html");
 });
 
 io.of("/chat").use(sharedsession(session, { autoSave: true }));
@@ -453,6 +453,7 @@ io.of("/chat").use(sharedsession(session, { autoSave: true }));
 
 
 io.of('/chat').on('connection', function(socket) {
+    let room = "main";
 
     function activeSessions(clientId) {
         return new Promise(function(resolve, reject) {
@@ -485,13 +486,13 @@ io.of('/chat').on('connection', function(socket) {
     if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
         socket.handshake.session.socketId = socket.id;
         socket.handshake.session.save();
-        socket.join("room");
+        socket.join(room);
     }
 
     socket.on("userConnected", function() {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
-            io.of('/chat').in("room").clients((error, clients) => {
-                socket.to("room").emit("userConnected", {
+            io.of('/chat').in(room).clients((error, clients) => {
+                socket.to(`${room}`).emit("userConnected", {
                     status: true,
                     self: false,
                     username: socket.handshake.session.user,
@@ -515,7 +516,7 @@ io.of('/chat').on('connection', function(socket) {
             });
 
         } else {
-            socket.leave("room");
+            socket.leave(room);
             socket.emit("invalidSession", true);
         }
     });
@@ -562,14 +563,14 @@ io.of('/chat').on('connection', function(socket) {
     socket.on("message", function(data) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (data.message != "" && data.message.length > 0)
-                socket.to("room").emit("message", {
+                socket.to(`${room}`).emit("message", {
                     username: socket.handshake.session.user,
                     message: data.message,
                     time: getTime(),
                     mid: data.mid
                 });
         } else {
-            socket.leave("room");
+            socket.leave(room);
             socket.emit("invalidSession", true);
         }
     });
@@ -577,7 +578,7 @@ io.of('/chat').on('connection', function(socket) {
     socket.on("image", function(image) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (image.type.indexOf("image") >= 0) {
-                socket.to("room").emit("image", {
+                socket.to(`${room}`).emit("image", {
                     username: socket.handshake.session.user,
                     name: image.name,
                     type: image.type,
@@ -587,37 +588,70 @@ io.of('/chat').on('connection', function(socket) {
                 });
             }
         } else {
-            socket.leave("room");
+            socket.leave(room);
             socket.emit("invalidSession", true);
         }
     });
     socket.on("reverseMessage", function(mid) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (mid.indexOf(socket.handshake.session.clientId) > 0) {
-                socket.nsp.to("room").emit("reverseMessage", mid);
+                socket.nsp.to(`${room}`).emit("reverseMessage", mid);
             }
         } else {
-            socket.leave("room");
+            socket.leave(room);
             socket.emit("invalidSession", true);
         }
     });
     socket.on("typing", function(user) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
-            socket.to("room").emit("typing", user);
+            socket.to(`${room}`).emit("typing", user);
         }
     });
     socket.on("read", function(user) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
-            socket.to("room").emit("read", user);
+            socket.to(`${room}`).emit("read", user);
         } else {
-            socket.leave("room");
+            socket.leave(room);
             socket.emit("invalidSession", true);
+        }
+    });
+    socket.on("changeRoom", function(newroom) {
+        if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
+            io.of('/chat').in(room).clients((error, clients) => {
+                socket.to(`${room}`).emit("userConnected", {
+                    status: false,
+                    self: false,
+                    username: socket.handshake.session.user,
+                    time: getTime(),
+                    users: clients.length - 1
+                });
+
+                socket.leave(room);
+                room = newroom;
+                socket.join(room);
+                io.of('/chat').in(room).clients((error, clients) => {
+                    socket.to(`${room}`).emit("userConnected", {
+                        status: true,
+                        self: false,
+                        username: socket.handshake.session.user,
+                        time: getTime(),
+                        users: clients.length
+                    });
+                    socket.emit("userConnected", {
+                        status: true,
+                        self: true,
+                        username: socket.handshake.session.user,
+                        time: getTime(),
+                        users: clients.length
+                    });
+                });
+            });
         }
     });
     socket.on("disconnect", function() {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
-            io.of('/chat').in("room").clients((error, clients) => {
-                socket.nsp.to("room").emit("userConnected", {
+            io.of('/chat').in(room).clients((error, clients) => {
+                socket.nsp.to(`${room}`).emit("userConnected", {
                     status: false,
                     self: false,
                     username: socket.handshake.session.user,
