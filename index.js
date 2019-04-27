@@ -66,7 +66,7 @@ if (!fs.existsSync(config.usersFile)) {
  */
 if (!fs.existsSync(config.roomsFile)) {
     console.log(`${config.roomsFile} not found, creating.`);
-    fs.writeFileSync(config.usersFile, JSON.stringify({
+    fs.writeFileSync(config.roomsFile, JSON.stringify({
         list: [{
             name: config.defaultRoomName,
             icon: "0x1f448"
