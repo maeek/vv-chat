@@ -18,16 +18,33 @@ const middleDiv = $(".panel--middle");
 
 
 window.addEventListener("DOMContentLoaded", function() {
-    const el = $(".panel--middle");
-    const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-    const calc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
-    el.style["max-height"] = calc + "px";
+    if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
+        $("aside").height = $("aside").height;
+        const el = $(".page__wrapper");
+        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        const calc = wh - $("aside").offsetHeight;
+        el.style["max-height"] = calc + "px";
+    }
+    const panel = $(".panel--middle");
+    const pwh = $(".page__wrapper").offsetHeight;
+    const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - 10;
+    panel.style["max-height"] = pcalc + "px";
 
     window.addEventListener("resize", function() {
-        const el = $(".panel--middle");
+        const el = $(".page__wrapper");
         const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        const calc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
+        let calc;
+        if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
+            calc = wh - $("aside").offsetHeight;
+        } else {
+            calc = wh;
+        }
         el.style["max-height"] = calc + "px";
+
+        const panel = $(".panel--middle");
+        const pwh = $(".page__wrapper").offsetHeight;
+        const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - 10;
+        panel.style["max-height"] = pcalc + "px"
     });
 
     $(".textField").focus();
@@ -191,12 +208,19 @@ function appendImage(files) {
                             name: file.name,
                             blob: arrayBuffer,
                             mid: mid
+                        }, (uploaded) => {
+                            if (uploaded) {
+                                $(`.from__me[data-mid="${mid}"] .loader`).remove()
+                            }
                         });
                         const time = getTime();
                         const HTML = `<li class="ms from__me" data-mid="${mid}">
                             <div class="time noselect">${time}</div>
                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                            <div class="message message--image"><img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}"></div>
+                            <div class="message message--image">
+                                <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+                                <div class="loader"></div>
+                            </div>
                             <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                         </li>`;
                         if ($$(".typing").length > 0) $(".typing").remove();
@@ -495,7 +519,7 @@ window.addEventListener("blur", function() {
  *  Clear your local chat history
  */
 $(".clear_chat").addEventListener("click", function(e) {
-    const messages = $$(".ms, .joined, .error");
+    const messages = $$(".ms, .joined, .error, .info--change");
     revSelectedIndex = -1;
     for (let i = messages.length - 1; i >= 0; i--) {
         const t = messages.length < 200 ? i * 3 : i * 2;
@@ -737,6 +761,116 @@ document.addEventListener('click', function(e) {
                 );
             }
         });
+    } else if (e.target && hasClass(e.target, 'room--change') || hasClass(e.target.parentNode, 'room--change')) {
+        const btn = hasClass(e.target.parentNode, 'room--change') ? e.target.parentNode : e.target;
+        const name = btn.getAttribute("data-name");
+        location.hash = `${encodeURIComponent(name)}`;
+    } else if (e.target && hasClass(e.target, 'room--show') || hasClass(e.target.parentNode, 'room--show')) {
+        const btn = hasClass(e.target.parentNode, 'room--show') ? e.target.parentNode : e.target;
+        const HTML = `<div class="modal__div">
+                            <div class="settings__cont rooms__cont">
+                                <div class="settings__exit noselect"><i class="material-icons">close</i></div>
+                                <div class="title noselect">Rooms</div>
+                                <p class="description noselect">Change chat room.</p>
+                                <div class="subtitle noselect">Available rooms</div>
+                                <ul class="rooms noselect">
+                                    <li class="room--change" data-icon="🐫" data-name="Main"><i>🐫</i> Main</li>
+                                    <li class="room--change" data-icon="🙊" data-name="tajne/poufne"><i>🙊</i> tajne/poufne</li>
+                                    <li class="room--change" data-icon="🐘" data-name="granie"><i>🐘</i> granie</li>
+                                    <li class="room--change" data-icon="🐑" data-name="Bardzo długie zdanie jakie wymyślam na bieżąco, nie rób nic nikomu, nigdy, choćby nie wiem co"><i>🐑</i> Bardzo długie zdanie jakie wymyślam na bieżąco, nie rób nic nikomu, nigdy, choćby nie wiem co</li>
+                                    <li class="room--change" data-icon="🦁" data-name="ło panie"><i>🦁</i> ło panie</li>
+                                    <li class="room--change" data-icon="🐗" data-name="boar"><i>🐗</i> boar</li>
+                                    <li class="room--change" data-icon="🍄" data-name="yEE"><i>🍄</i> yEE</li>
+                                    <li class="room--change" data-icon="🌴" data-name="bob"><i>🌴</i> bob</li>
+                                    <li class="room--change" data-icon="🐙" data-name="pomidor"><i>🐙</i> pomidor</li>
+                                    <li class="room--change" data-icon="🐸" data-name="żabson ziomal"><i>🐸</i> żabson ziomal</li>
+                                    <li class="room--change" data-icon="🐤" data-name="pip"><i>🐤</i> pip</li>
+                                    <li class="room--change" data-icon="🐔" data-name="broilerek"><i>🐔</i> broilerek</li>
+                                    <li class="room--change" data-icon="🐼" data-name="pandoo"><i>🐼</i> pandoo</li>
+                                    <li class="room--change" data-icon="🐀" data-name="rastafarianie"><i>🐀</i> rastafarianie</li>
+                                    <li class="room--change" data-icon="🐷" data-name="kwiiii"><i>🐷</i> kwiiii</li>
+                                    <li class="room--change" data-icon="🐴" data-name="koniarze"><i>🐴</i> koniarze</li>
+                                </ul>
+                                <div class="footer">
+                                    <div class="branding noselect">1.0.5</div>
+                                    <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
+                                </div>
+                            </div>
+                        </div>`;
+            appendDOM(HTML, 'body', false);
+            let hash = location.hash;
+            let name = decodeURIComponent(hash.substring(1));
+            const selRooms = $$(`.room--change[data-name="${name}"]`);
+            for(let i = 0; i< selRooms.length; i++) {
+                selRooms[i].classList.add("room--active");
+            }    
+            $(".modal__div").classList.add("anim--opacity");
+            $(".settings__cont").classList.add("anim--opacity", "anim--scale");
 
+    } else if (e.target && hasClass(e.target, 'addRoom')) {
+        const HTML = `<div class="modal__div">
+                            <div class="settings__cont rooms__cont">
+                                <div class="settings__exit noselect"><i class="material-icons">close</i></div>
+                                <div class="title noselect">Add chat room</div>
+                                <p class="description noselect"></p>
+                                <div class="subtitle noselect">Name</div>
+                                <div class="input__div">
+                                    <div class="input__div--wrapper">
+                                        <input type="text" name="roomName" placeholder="Type new room name">
+                                    </div>    
+                                </div>
+                                <div class="subtitle noselect">Select icon</div>
+                                <div class="input__div">
+                                    <div class="room__icons">
+                                        <div class="lds-roller">
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                            <div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="subtitle noselect">Preview</div>
+                                <div class="input__div">
+                                    <div class="chat--prev"><i class="icon--prev">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i><span class="room--name--prev">name</span></div>
+                                </div>
+                                <div class="input__div">
+                                    <button class="create--room">Create<i class="material-icons">add</i></button>
+                                </div>
+                                <div class="footer">
+                                    <div class="branding noselect">1.0.5</div>
+                                    <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
+                                </div>
+                            </div>
+                        </div>`;
+            appendDOM(HTML, 'body', false);
+            fetch("/js/emoji.json", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }).then(res => res.json()).then(emojis => {
+                $(".room__icons").innerHTML="";
+                for(let i = 0; i< emojis.list.length;i++){
+                    let uni = emojis.list[i].indexOf("-") != -1?emojis.list[i].split("-"):[emojis.list[i]];
+                    let uniCode="";
+                    for(let j = 0; j< uni.length;j++){
+                        uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+                    }
+                    appendDOM(`<i class="select__icon" data-index="${i}">${uniCode}</i>`, '.room__icons');
+                }
+            }).catch(e => console.log(e));
+            $(".modal__div").classList.add("anim--opacity");
+            $(".settings__cont").classList.add("anim--opacity", "anim--scale");
+    }else if (e.target && hasClass(e.target, 'select__icon')) {
+        const icons = $$(".select__icon");
+        for(let i = 0; i< icons.length;i++)
+            icons[i].classList.remove("icon--active");
+        e.target.classList.add("icon--active");
+        $(".icon--prev").innerHTML = e.target.innerHTML;
     }
 });

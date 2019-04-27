@@ -668,7 +668,7 @@ io.of('/chat').on('connection', function(socket) {
     /* 
      * Sending/Receiving images
      */
-    socket.on("image", function(image) {
+    socket.on("image", function(image, fn) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (image.type.indexOf("image") >= 0) {
                 socket.to(`${room}`).emit("image", {
@@ -679,6 +679,7 @@ io.of('/chat').on('connection', function(socket) {
                     img: image.blob,
                     mid: image.mid
                 });
+                fn(true);
             }
         } else {
             socket.leave(room);
