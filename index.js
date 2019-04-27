@@ -12,10 +12,12 @@ const config = {
     https: true,
     sessionSecret: 'chattyPatty',
     usersFile: "src/users.json",
+    roomsFile: "src/rooms.json",
+    defaultRoomName: "Main",
     certificateFiles: {
-        cert: 'path_to_cert.pem',
-        ca: 'path_to_chain.pem', // not always necessary
-        priv: 'path_to_privkey.pem'
+        cert: 'server.crt',
+        ca: 'server.csr', // not always necessary
+        priv: 'server.key'
     }
 }
 
@@ -36,9 +38,11 @@ const app = express();
 let server;
 
 
-/* Checking if users file exists */
+/* 
+ * Checking if users file exists 
+ */
 if (!fs.existsSync(config.usersFile)) {
-    console.log(`${config.usersFile} not found!`);
+    console.log(`${config.usersFile} not found, creating`);
     const password = randomString();
     const salt = bcrypt.genSaltSync();
     const hash = bcrypt.hashSync(password, salt)
@@ -57,26 +61,46 @@ if (!fs.existsSync(config.usersFile)) {
     console.log(`\t${password}\n`);
 }
 
-/* Checking if certificate files exist */
+/* 
+ * Checking if rooms file exists 
+ */
+if (!fs.existsSync(config.roomsFile)) {
+    console.log(`${config.roomsFile} not found, creating.`);
+    fs.writeFileSync(config.usersFile, JSON.stringify({
+        list: [{
+            name: config.defaultRoomName,
+            icon: "0x1f448"
+        }]
+    }));
+}
+
+/* 
+ * Checking if certificate files exist 
+ */
 let certFlag = true;
 for (const file in config.certificateFiles)
     if (!fs.existsSync(config.certificateFiles[file]))
         certFlag = false;
 
 if (certFlag) {
-    /* Certificates exist, starting HTTPS */
+    /* 
+     * Certificates exist, starting HTTPS 
+     */
     const privateKey = fs.readFileSync(config.certificateFiles.priv, 'utf8');
     const certificate = fs.readFileSync(config.certificateFiles.cert, 'utf8');
     const ca = fs.readFileSync(config.certificateFiles.ca, 'utf8');
     const credentials = { key: privateKey, cert: certificate, ca: ca };
 
-    server = require('https').createServer(credentials, app);
+    server = require('spdy').createServer(credentials, app);
     config.https = true;
 } else {
-    /* No certificates, starting HTTP */
+    /* 
+     * No certificates, starting HTTP, NOT SECURE!
+     */
     console.log(`Couldn't find one or all of the certificates in:\n${Object.values(config.certificateFiles).join("\n")}`);
     server = require('http').createServer(app);
     config.https = false;
+    console.log(`###################################\n#     SERVER RUNNING PLAIN HTTP   #\n###################################`);
 }
 
 
@@ -104,7 +128,9 @@ app.use(function(req, res, next) {
     next();
 });
 
-/* Initiate session */
+/* 
+ * Initiate session 
+ */
 const Store = new FileStore({ path: __dirname + "/sessions/", logFn: function() {} });
 if (!fs.existsSync(__dirname + "/sessions/")) fs.mkdirSync(__dirname + "/sessions/", 744);
 let session = expressSession({
@@ -119,19 +145,18 @@ let session = expressSession({
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
     }
 });
-app.use(session);
 
-/* Express check session middleware */
-const sessionChecker = (req, res, next) => {
-    if (!req.session.valid) {
-        res.redirect(301, '/login/');
+/* 
+ * Starting express
+ */
+server.listen(config.port, (e) => {
+    if (e) {
+        console.log(e);
+        return process.exit(1);
     } else {
-        next();
+        console.log(`### (${config.https?"HTTPS":"HTTP"}) ${config.name} listening on port ${config.port} ###`);
     }
-};
 
-server.listen(config.port, () => {
-    console.log(`### (${config.https?"HTTPS":"HTTP"}) ${config.name} listening on port ${config.port} ###`);
 });
 
 function randomString(length = 15) {
@@ -145,29 +170,39 @@ function randomString(length = 15) {
 
 
 
-app.use('/', express.static(path.join(__dirname, 'public'), { redirect: false }));
-app.get('/', sessionChecker, function(req, res) {
-    res.redirect(301, "/chat/");
+
+app.get('/', session, function(req, res) {
+    res.redirect(301, "/login/");
 });
 
-app.get('/js/manage.js', function(req, res) {
-    if (typeof req.session !== undefined && req.session.valid && req.session.auth == "root") {
+/* 
+ * Allow access to dist/public/js/manage.js only for root
+ */
+app.get('/js/manage.js', session, function(req, res) {
+    if (req.session.valid && req.session.auth == "root") {
         res.sendFile(__dirname + "/public/js/manage.js");
     } else {
         res.status(404).sendFile(__dirname + "/src/error.html");
     }
 });
 
+/* 
+ * User management route
+ */
 app.route('/manage/')
-    .get(sessionChecker, (req, res) => {
+    .get(session, (req, res) => {
         if (req.session.auth == "root") {
             res.sendFile(__dirname + '/src/manage.html');
         } else {
             res.redirect(301, '/chat/');
         }
     })
-    .post(sessionChecker, (req, res) => {
+    .post(session, (req, res) => {
         if (req.session.auth == "root") {
+            /* 
+             * Check for usersFile 
+             * Prevent unnecessary errors if you accidentaly deleted the file or you don't have permissions
+             */
             if (!fs.existsSync(config.usersFile)) {
                 console.log(`ERROR: file ${config.usersFile} doesn't exist`);
                 res.json({ status: false });
@@ -268,16 +303,18 @@ app.route('/manage/')
         }
     });
 
-
+/* 
+ * Password change route
+ */
 app.route('/setup/')
-    .get(sessionChecker, (req, res) => {
+    .get(session, (req, res) => {
         if (req.session.setup) {
             res.sendFile(__dirname + '/src/changePass.html');
         } else {
             res.redirect(301, '/chat/');
         }
     })
-    .post(sessionChecker, (req, res) => {
+    .post(session, (req, res) => {
         if (!fs.existsSync(config.usersFile)) {
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
             res.redirect(301, "/setup/");
@@ -351,26 +388,40 @@ app.route('/setup/')
         }
     });
 
-
-app.get('/chat/', sessionChecker, (req, res) => {
-    if (req.session.auth != "root") {
-        if (req.session.setup) {
-            res.redirect(301, '/setup/');
+/* 
+ * Chat application route
+ */
+app.get('/chat/', session, (req, res) => {
+    if (req.session.valid) {
+        if (req.session.auth != "root") {
+            if (req.session.setup) {
+                res.redirect(301, '/setup/');
+            } else {
+                res.status(200).sendFile(__dirname + '/src/chat.html');
+            }
         } else {
-            res.status(200).sendFile(__dirname + '/src/chat.html');
+            res.redirect(301, '/manage/');
         }
     } else {
-        res.redirect(301, '/manage/');
+        res.redirect(301, '/logout');
     }
 });
+
+/* 
+ * Login route
+ */
 app.route('/login/')
-    .get((req, res) => {
-        if (typeof req.session !== undefined && !req.session.valid || typeof req.session === undefined)
+    .get(session, (req, res) => {
+        if (!req.session.valid)
             res.sendFile(__dirname + '/src/login.html');
         else
             res.redirect(301, "/chat/");
     })
-    .post((req, res) => {
+    .post(session, (req, res) => {
+        /* 
+         * Check for usersFile 
+         * Prevent unnecessary errors if you accidentaly deleted the file or you don't have permissions
+         */
         if (!fs.existsSync(config.usersFile)) {
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
             res.redirect(301, "/login/#error/misconfigured_server");
@@ -427,34 +478,54 @@ app.route('/login/')
         }
     });
 
-app.get('/logout', (req, res) => {
-    if (typeof req.session !== undefined && req.session.valid) {
+
+/* 
+ * Deleting session
+ */
+app.get('/logout', session, (req, res) => {
+    if (req.session.valid) {
         Store.destroy(req.session.id, (err) => {
             if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
         });
+        req.session.destroy((err) => {
+            if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
+        });
+        res.clearCookie("user.sid");
+        res.clearCookie("user");
+        res.clearCookie("io");
+        res.clearCookie("clientId");
     }
-    req.session.destroy((err) => {
-        if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
-    });
-    res.clearCookie("user.sid");
-    res.clearCookie("user");
-    res.clearCookie("io");
-    res.clearCookie("clientId");
+    res.set("Cache-Control", "no-cache");
     res.redirect(301, "/login/");
 });
 
+/* 
+ * Static dist/public/
+ */
+app.use('/', express.static(path.join(__dirname, 'public'), { redirect: false }));
+
+
+/* 
+ * 404 handler
+ */
 app.get('*', function(req, res, next) {
     res.status(404).sendFile(__dirname + "/src/error.html");
 });
 
+/* 
+ * Allow socket.io use session
+ */
 io.of("/chat").use(sharedsession(session, { autoSave: true }));
 
-
-
-
+/* 
+ * Socket.io 
+ */
 io.of('/chat').on('connection', function(socket) {
-    let room = "main";
+    let room = config.defaultRoomName;
 
+    /* 
+     * Get active sessions matching clientId
+     */
     function activeSessions(clientId) {
         return new Promise(function(resolve, reject) {
             Store.list(function(el, list) {
@@ -483,12 +554,18 @@ io.of('/chat').on('connection', function(socket) {
         });
     }
 
+    /* 
+     * Updating session and joining default room
+     */
     if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
         socket.handshake.session.socketId = socket.id;
         socket.handshake.session.save();
         socket.join(room);
     }
 
+    /* 
+     * Notify users when client connects/disconnects
+     */
     socket.on("userConnected", function() {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             io.of('/chat').in(room).clients((error, clients) => {
@@ -507,6 +584,9 @@ io.of('/chat').on('connection', function(socket) {
                     users: clients.length
                 })
             });
+            /* 
+             * Update active sessions for clientId
+             */
             activeSessions(socket.handshake.session.clientId).then((list) => {
                 for (let i = 0; i < list.length; i++) {
                     io.of('/chat').to(`${list[i].socketId}`).emit("activeSessions", list);
@@ -514,12 +594,15 @@ io.of('/chat').on('connection', function(socket) {
             }).catch(() => {
                 console.log("No sessions");
             });
-
         } else {
             socket.leave(room);
             socket.emit("invalidSession", true);
         }
     });
+
+    /* 
+     * Load active sessions for clientId
+     */
     socket.on("activeSessions", function(user, fn) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             activeSessions(socket.handshake.session.clientId).then((list) => {
@@ -529,6 +612,9 @@ io.of('/chat').on('connection', function(socket) {
             });
         }
     });
+    /* 
+     * User can log out devices on which he's logged in
+     */
     socket.on("removeSession", function(s, fn) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             const clientId = socket.handshake.session.clientId;
@@ -560,6 +646,10 @@ io.of('/chat').on('connection', function(socket) {
             });
         }
     });
+
+    /* 
+     * Sending/Receiving text messages
+     */
     socket.on("message", function(data) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (data.message != "" && data.message.length > 0)
@@ -575,12 +665,15 @@ io.of('/chat').on('connection', function(socket) {
         }
     });
 
+    /* 
+     * Sending/Receiving images
+     */
     socket.on("image", function(image) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (image.type.indexOf("image") >= 0) {
                 socket.to(`${room}`).emit("image", {
                     username: socket.handshake.session.user,
-                    name: image.name,
+                    name: image.name ? image.name : randomString(8),
                     type: image.type,
                     time: getTime(),
                     img: image.blob,
@@ -592,6 +685,10 @@ io.of('/chat').on('connection', function(socket) {
             socket.emit("invalidSession", true);
         }
     });
+
+    /* 
+     * Deleting sent messages
+     */
     socket.on("reverseMessage", function(mid) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             if (mid.indexOf(socket.handshake.session.clientId) > 0) {
@@ -602,11 +699,19 @@ io.of('/chat').on('connection', function(socket) {
             socket.emit("invalidSession", true);
         }
     });
+
+    /* 
+     * Notify users when someones typing
+     */
     socket.on("typing", function(user) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             socket.to(`${room}`).emit("typing", user);
         }
     });
+
+    /* 
+     * Not yet implemented
+     */
     socket.on("read", function(user) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             socket.to(`${room}`).emit("read", user);
@@ -615,8 +720,29 @@ io.of('/chat').on('connection', function(socket) {
             socket.emit("invalidSession", true);
         }
     });
+
+    /* 
+     * Listing avialable chat rooms
+     */
+    socket.on("listRooms", function() {
+        if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
+            const roomList = fs.readFileSync(config.roomsFile, "utf-8");
+            if (roomList) {
+                roomList = JSON.parse(roomList).list;
+                socket.emit("listRooms", roomList);
+            }
+        } else {
+            socket.leave(room);
+            socket.emit("invalidSession", true);
+        }
+    });
+
+    /* 
+     * Changing active room
+     */
     socket.on("changeRoom", function(newroom) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
+
             io.of('/chat').in(room).clients((error, clients) => {
                 socket.to(`${room}`).emit("userConnected", {
                     status: false,
@@ -648,6 +774,10 @@ io.of('/chat').on('connection', function(socket) {
             });
         }
     });
+
+    /* 
+     * Socket disconnect event, notifying users when user left
+     */
     socket.on("disconnect", function() {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             io.of('/chat').in(room).clients((error, clients) => {
