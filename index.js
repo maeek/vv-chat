@@ -390,28 +390,6 @@ app.route('/setup/')
     });
 
 /* 
- * Chat application route
- */
-app.get('/chat/', (req, res) => {
-    console.log(`URL /chat/: valid: ${req.session.valid}`);
-    if (req.session.valid) {
-        if (req.session.auth != "root") {
-            if (req.session.setup) {
-                res.redirect(301, '/setup/');
-            } else {
-                console.log(`URL /chat/: sending html}`);
-                res.status(200).sendFile(__dirname + '/src/chat.html');
-            }
-        } else {
-            res.redirect(301, '/manage/');
-        }
-    } else {
-        console.log(`URL /chat/: redirecting to /logout/`);
-        res.redirect(301, '/logout');
-    }
-});
-
-/* 
  * Login route
  */
 app.route('/login/')
@@ -485,6 +463,28 @@ app.route('/login/')
             }
         }
     });
+
+/* 
+ * Chat application route
+ */
+app.get('/chat/', (req, res) => {
+    console.log(`URL /chat/: valid: ${req.session.valid}`);
+    if (req.session.valid) {
+        if (req.session.auth != "root") {
+            if (req.session.setup) {
+                res.redirect(301, '/setup/');
+            } else {
+                console.log(`URL /chat/: sending html}`);
+                res.status(200).sendFile(__dirname + '/src/chat.html');
+            }
+        } else {
+            res.redirect(301, '/manage/');
+        }
+    } else {
+        console.log(`URL /chat/: redirecting to /logout/`);
+        res.redirect(301, '/logout');
+    }
+});
 
 
 /* 
