@@ -135,6 +135,7 @@ const Store = new FileStore({ path: __dirname + "/sessions/", logFn: function() 
 if (!fs.existsSync(__dirname + "/sessions/")) fs.mkdirSync(__dirname + "/sessions/", 744);
 let session = expressSession({
     name: 'user.sid',
+    path: '/',
     secret: config.sessionSecret,
     store: Store,
     resave: true,
