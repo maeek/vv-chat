@@ -440,14 +440,21 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
                     name: name,
                     blob: arrayBuffer,
                     mid: mid
+                }, (uploaded) => {
+                    if (uploaded) {
+                        $(`.from__me[data-mid="${mid}"] .loader`).remove()
+                    }
                 });
                 const time = getTime();
                 const HTML = `<li class="ms from__me" data-mid="${mid}">
-                            <div class="time noselect">${time}</div>
-                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                            <div class="message message--image"><img data-type="${fileType}" data-name="${name}" src="data:${fileType};base64,${arrayBuffer}"></div>
-                            <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
-                        </li>`;
+                    <div class="time noselect">${time}</div>
+                    <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                    <div class="message message--image">
+                        <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+                        <div class="loader"></div>
+                    </div>
+                    <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                </li>`;
                 getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
                     appendDOM(HTML, ".panel--middle", false);
                     middleDiv.scrollTop += dims.h;
