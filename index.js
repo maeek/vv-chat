@@ -437,19 +437,28 @@ app.route('/login/')
                             res.cookie('clientId', clientId, {
                                 expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
                             });
+                            console.log(`URL /login/: valid: ${req.session.valid}`);
                             if (userData == "root") {
                                 req.session.auth = "root";
-
-                                res.redirect(301, "/manage/");
+                                req.session.save((err) => {
+                                    if (!err) {
+                                        console.log(`URL /login/: before redirect - valid: ${req.session.valid}`);
+                                        res.redirect(301, "/manage/");
+                                    }
+                                });
                             } else {
                                 req.session.auth = "user";
                                 if (usersFile.users[0].first) {
                                     req.session.setup = true;
-
                                     res.redirect(301, "/setup/");
                                 } else {
+                                    req.session.save((err) => {
+                                        if (!err) {
+                                            console.log(`URL /login/: before redirect - valid: ${req.session.valid}`);
+                                            res.redirect(301, "/chat/");
+                                        }
+                                    });
 
-                                    res.redirect(301, "/chat/");
                                 }
                             }
                         } else {
@@ -475,7 +484,7 @@ app.get('/chat/', (req, res) => {
             if (req.session.setup) {
                 res.redirect(301, '/setup/');
             } else {
-                console.log(`URL /chat/: sending html}`);
+                console.log(`URL /chat/: sending html`);
                 res.status(200).sendFile(__dirname + '/src/chat.html');
             }
         } else {
