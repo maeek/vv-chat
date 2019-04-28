@@ -392,7 +392,7 @@ app.route('/setup/')
 /* 
  * Chat application route
  */
-app.get('/chat/', session, (req, res) => {
+app.get('/chat/', (req, res) => {
     console.log(`URL /chat/: valid: ${req.session.valid}`);
     if (req.session.valid) {
         if (req.session.auth != "root") {
