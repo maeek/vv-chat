@@ -18,28 +18,28 @@ const middleDiv = $(".panel--middle");
 
 
 window.addEventListener("DOMContentLoaded", function() {
-    if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
-        $("aside").height = $("aside").height;
-        const el = $(".page__wrapper");
-        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        const calc = wh - $("aside").offsetHeight;
-        el.style["max-height"] = calc + "px";
-    }
+    // if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
+    //     $("aside").height = $("aside").height;
+    //     const el = $(".page__wrapper");
+    //     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+    //     const calc = wh - $("aside").offsetHeight;
+    //     el.style["max-height"] = calc + "px";
+    // }
     const panel = $(".panel--middle");
     const pwh = $(".page__wrapper").offsetHeight;
     const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - 10;
     panel.style["max-height"] = pcalc + "px";
 
     window.addEventListener("resize", function() {
-        const el = $(".page__wrapper");
-        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        let calc;
-        if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
-            calc = wh - $("aside").offsetHeight;
-        } else {
-            calc = wh;
-        }
-        el.style["max-height"] = calc + "px";
+        // const el = $(".page__wrapper");
+        // const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        // let calc;
+        // if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
+        //     calc = wh - $("aside").offsetHeight;
+        // } else {
+        //     calc = wh;
+        // }
+        // el.style["max-height"] = calc + "px";
 
         const panel = $(".panel--middle");
         const pwh = $(".page__wrapper").offsetHeight;
@@ -800,10 +800,12 @@ document.addEventListener('click', function(e) {
             appendDOM(HTML, 'body', false);
             let hash = location.hash;
             let name = decodeURIComponent(hash.substring(1));
-            const selRooms = $$(`.room--change[data-name="${name}"]`);
-            for(let i = 0; i< selRooms.length; i++) {
-                selRooms[i].classList.add("room--active");
-            }    
+            socket.emit("listRooms", true, (list)=> {
+                const selRooms = $$(`.room--change[data-name="${name}"]`);
+                for(let i = 0; i< selRooms.length; i++) {
+                    selRooms[i].classList.add("room--active");
+                }
+            });
             $(".modal__div").classList.add("anim--opacity");
             $(".settings__cont").classList.add("anim--opacity", "anim--scale");
 
@@ -874,3 +876,49 @@ document.addEventListener('click', function(e) {
         $(".icon--prev").innerHTML = e.target.innerHTML;
     }
 });
+if(location.hash){
+    let hash = location.hash;
+    let name = decodeURIComponent(hash.substring(1));
+    const rooms = $$(".room--change");
+    for(let i = 0; i< rooms.length; i++) {
+        rooms[i].classList.remove("room--active");
+    }
+    const selRooms = $$(`.room--change[data-name="${name}"]`);
+    for(let i = 0; i< selRooms.length; i++) {
+        selRooms[i].classList.add("room--active");
+    }        
+    $(".rooms--title").innerHTML = "";        
+    socket.emit("changeRoom", name, function(roomInfo) {
+        appendDOM(`<i>${roomInfo.icon}</i> <span>${roomInfo.name}</span>`, '.rooms--title');
+        appendDOM(
+            `<li class="info--change">
+                <div class="noselect info--room"><i>${roomInfo.icon}</i></div>
+                <div class="info--changeCont">Joined "${roomInfo.name}"</div>
+            </li>`, 
+            '.panel--middle'
+        );
+    });
+}
+window.addEventListener("hashchange",function(){
+    let hash = location.hash;
+    let name = decodeURIComponent(hash.substring(1));
+    const rooms = $$(".room--change");
+    for(let i = 0; i< rooms.length; i++) {
+        rooms[i].classList.remove("room--active");
+    }
+    const selRooms = $$(`.room--change[data-name="${name}"]`);
+    for(let i = 0; i< selRooms.length; i++) {
+        selRooms[i].classList.add("room--active");
+    }        
+    $(".rooms--title").innerHTML = "";        
+    socket.emit("changeRoom", name, function(roomInfo) {
+        appendDOM(`<i>${icon}</i> <span>${name}</span>`, '.rooms--title');
+        appendDOM(
+            `<li class="info--change">
+                <div class="noselect info--room"><i>${icon}</i></div>
+                <div class="info--changeCont">Joined "${name}"</div>
+            </li>`, 
+            '.panel--middle'
+        );
+    });
+},false);
