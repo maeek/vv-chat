@@ -137,7 +137,7 @@ let session = expressSession({
     name: 'user.sid',
     secret: config.sessionSecret,
     store: Store,
-    resave: false,
+    resave: true,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
