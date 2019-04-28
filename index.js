@@ -139,7 +139,7 @@ let session = expressSession({
     secret: config.sessionSecret,
     store: Store,
     resave: true,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
         httpOnly: true,
         secure: config.https,
