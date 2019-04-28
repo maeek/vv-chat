@@ -450,7 +450,7 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
                     <div class="time noselect">${time}</div>
                     <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
                     <div class="message message--image">
-                        <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+                        <img data-type="${fileType}" data-name="${name}" src="data:${fileType};base64,${arrayBuffer}">
                         <div class="loader"></div>
                     </div>
                     <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
