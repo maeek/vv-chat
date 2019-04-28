@@ -340,8 +340,13 @@ app.route('/setup/')
                             });
                             fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
                             req.session.setup = false;
-
-                            res.redirect(301, "/chat/");
+                            req.session.save((err) => {
+                                if (!err) {
+                                    res.redirect(301, "/chat/");
+                                } else {
+                                    console.log(err);
+                                }
+                            });
                         } else {
                             console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
                         }
@@ -442,8 +447,9 @@ app.route('/login/')
                                 req.session.auth = "root";
                                 req.session.save((err) => {
                                     if (!err) {
-                                        console.log(`URL /login/: before redirect - valid: ${req.session.valid}`);
                                         res.redirect(301, "/manage/");
+                                    } else {
+                                        console.log(err);
                                     }
                                 });
                             } else {
@@ -454,8 +460,9 @@ app.route('/login/')
                                 } else {
                                     req.session.save((err) => {
                                         if (!err) {
-                                            console.log(`URL /login/: before redirect - valid: ${req.session.valid}`);
                                             res.redirect(301, "/chat/");
+                                        } else {
+                                            console.log(err);
                                         }
                                     });
 
@@ -463,8 +470,6 @@ app.route('/login/')
                             }
                         } else {
                             res.redirect(301, "/login/#wrong");
-                            req.session.valid = false;
-
                         }
                     }
                 });
