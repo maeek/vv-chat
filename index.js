@@ -145,7 +145,7 @@ let session = expressSession({
         expires: new Date(Date.now() + 60 * 60 * 1000 * 24)
     }
 });
-
+app.use(session);
 /* 
  * Starting express
  */
@@ -394,7 +394,7 @@ app.route('/setup/')
  */
 app.get('/chat/', session, (req, res) => {
     console.log(`URL /chat/: valid: ${req.session.valid}`);
-    if (req.session.valid) {
+    if (req.session.cookie.valid) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
                 res.redirect(301, '/setup/');
