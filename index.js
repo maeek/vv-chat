@@ -339,7 +339,7 @@ app.route('/setup/')
                             });
                             fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
                             req.session.setup = false;
-                            req.session.save();
+
                             res.redirect(301, "/chat/");
                         } else {
                             console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
@@ -394,7 +394,7 @@ app.route('/setup/')
  */
 app.get('/chat/', session, (req, res) => {
     console.log(`URL /chat/: valid: ${req.session.valid}`);
-    if (req.session.cookie.valid) {
+    if (req.session.valid) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
                 res.redirect(301, '/setup/');
@@ -460,23 +460,23 @@ app.route('/login/')
                             });
                             if (userData == "root") {
                                 req.session.auth = "root";
-                                req.session.save();
+
                                 res.redirect(301, "/manage/");
                             } else {
                                 req.session.auth = "user";
                                 if (usersFile.users[0].first) {
                                     req.session.setup = true;
-                                    req.session.save();
+
                                     res.redirect(301, "/setup/");
                                 } else {
-                                    req.session.save();
+
                                     res.redirect(301, "/chat/");
                                 }
                             }
                         } else {
                             res.redirect(301, "/login/#wrong");
                             req.session.valid = false;
-                            req.session.save();
+
                         }
                     }
                 });
