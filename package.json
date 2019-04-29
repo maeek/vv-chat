@@ -8,7 +8,7 @@
     "build": "./node_modules/.bin/babel src/client.js src/func.js -d dist && mv dist/src/client.js dist/src/func.js dist/public/js/ && cp index.js dist/index.js",
     "start": "npm run build && node dist/index.js",
     "dev": "npm run build && DEBUG=express:* node dist/index.js",
-    "docker": "npm run build && DOCKER=aaaaaaaaaaaaaaaaaaa node dist/index.js",
+    "docker": "npm run build && DOCKER=true node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "config": {
