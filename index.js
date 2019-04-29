@@ -24,10 +24,13 @@ const config = {
 
 /* Docker SSL cert settings */
 if (process.env.DOCKER) {
+    config.usersFile = '/app/input/users.json';
+    config.roomsFile = '/app/input/rooms.json';
     config.certificateFiles = {
-        cert: '',
-        priv: ''
-    }
+        cert: '/app/input/cert.pem',
+        priv: '/app/input/privkey.pem',
+        ca: '/app/input/chain.pem'
+    };
 }
 
 const fs = require('fs');
