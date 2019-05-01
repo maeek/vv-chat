@@ -260,7 +260,7 @@ socket.on("message", function(data) {
 
 
 
-$(".send").addEventListener("click", appendMessage);
+$(".send").addEventListener("click", function() { appendMessage(socket) });
 $(".textField").addEventListener("keydown", function(e) {
     const codes = [
         17,
