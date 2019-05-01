@@ -227,7 +227,7 @@ document.addEventListener('click', function(e) {
         }
     } else if (e.target && hasClass(e.target, 'user--confirm') || hasClass(e.target.parentNode, 'user--confirm')) {
         const name = $('input[name="newUser"]').value.toLowerCase().trim();
-        const format = /^[a-zA-Z0-9@!\.\-]+$/;
+        const format = /^[AaĄąĆćĘęŁłŃńÓóSsŚśŹźŻża-zA-Z0-9@!\.\-]+$/;
         if (name.length > 2 && name != "" && name.length <= 30 && format.test(name)) {
             fetch("/manage", {
                     body: JSON.stringify({
@@ -392,7 +392,7 @@ document.addEventListener('click', function(e) {
 });
 document.addEventListener('input', function(e) {
     if (e.target.getAttribute("name") == "roomName") {
-        const format = /^[a-zA-Z0-9@!\.\-\s]+$/;
+        const format = /^[AaĄąĆćĘęŁłŃńÓóSsŚśŹźŻża-zA-Z0-9@!\.\-\s]+$/;
         const val = e.target.value;
         if (format.test(val)) {
             $(".room--name--prev").innerHTML = val;

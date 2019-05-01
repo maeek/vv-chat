@@ -503,7 +503,7 @@ io.of('/chat').on('connection', function(socket) {
             if (socket.handshake.session.auth == "root" || socket.handshake.session.auth == "mod") {
                 cRoom = newRoom;
                 let roomList = JSON.parse(fs.readFileSync(config.roomsFile, "utf-8"));
-                const format = /^[a-zA-Z0-9@!\.\-\s]+$/;
+                const format = /^[a-zA-Z0-9@!\.\-\sAaĄąĆćĘęŁłŃńÓóSsŚśŹźŻż]+$/;
                 if (roomList) {
                     if (format.test(cRoom.name) && cRoom.name.length <= 30) {
                         cRoom.icon = cRoom.icon ? cRoom.icon : JSON.parse(fs.readFileSync(__dirname + "/dist/public/js/emoji.json", "utf-8")).list[Math.floor(Math.random() * 813)];
