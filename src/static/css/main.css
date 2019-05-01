@@ -2221,7 +2221,7 @@ aside .side--actions>a {
         justify-content: center;
     }
     .page-chat .panel--top .title {
-        padding: 1rem 1.2rem;
+        padding: .1rem 1.2rem;
     }
     .addRoom--mobile {
         display: flex;
