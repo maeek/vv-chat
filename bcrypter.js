@@ -8,7 +8,7 @@
  *   Usage: node bcrypter.js password
  * 
  */
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt-nodejs');
 const args = process.argv.slice(2);
 var salt = bcrypt.genSaltSync();
 for (let i = 0; i < args.length; i++) {

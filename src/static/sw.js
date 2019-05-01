@@ -2,28 +2,37 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.5
+ *   Version: 1.1.0
  * 
  */
 
 console.log("WORKER: started");
 
-var version = 'v1.0.8::';
+var version = 'v1.1.0::';
 var CACHE = 'network-or-cache';
+var OFFLINE_PAGE = '/static/offline.html';
 var offlineFundamentals = [
+    '/login/',
+    '/css/main.min.css',
+    '/static/offline.html',
     '/js/func.js',
     '/js/client.js',
     '/js/socket.io.js',
     '/js/js.cookie.main.js',
     '/static/pull-out.ogg',
     '/static/bg.png',
-    '/static/err.jpg'
+    '/static/err.jpg',
+    '/css/fonts/KoHo.woff2',
+    '/css/fonts/KoHo-ext.woff2',
+    '/css/fonts/Major.woff2',
+    '/css/fonts/Major-ext.woff2',
+    '/css/fonts/material-icons.woff2'
 ];
 
 self.addEventListener("install", function(event) {
     console.log("WORKER: install in progress");
     event.waitUntil(caches
-        .open(version + 'fundamentals')
+        .open(version + 'pages')
         .then(function(cache) {
             return cache.addAll(offlineFundamentals);
         })
@@ -39,7 +48,7 @@ self.addEventListener("install", function(event) {
 
 self.addEventListener("fetch", function(event) {
     console.log('WORKER: fetch event in progress.');
-    if ((event.request.method !== 'GET') || (event.request.url.indexOf("/logout") !== -1) || (event.request.url.indexOf("/login") !== -1) || (event.request.url.indexOf("/socket.io") !== -1)) {
+    if ((event.request.method !== 'GET') || (event.request.url.indexOf("/logout") !== -1) || (event.request.url.indexOf("/login/") !== -1) || (event.request.url.indexOf("/socket.io/") !== -1)) {
         console.log('WORKER: fetch event ignored.', event.request.method, event.request.url);
         return false;
     }
@@ -75,16 +84,9 @@ self.addEventListener("fetch", function(event) {
 
             function unableToResolve() {
                 console.log('WORKER: fetch request failed in both cache and network.');
-                return new Response(`<h1>Service Unavailable</h1>`, {
-                    status: 503,
-                    statusText: 'Service Unavailable',
-                    headers: new Headers({
-                        'Content-Type': 'text/html'
-                    })
-                });
+                return cache.match(OFFLINE_PAGE);
             }
-        })
-    );
+        }));
 });
 
 self.addEventListener("activate", function(event) {

@@ -2,11 +2,19 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.5
+ *   Version: 1.1.0
  * 
  */
 
 'use strict';
+
+
+/*****************************************************************
+ * 
+ * Initiating socket.io connection
+ * 
+ *****************************************************************/
+
 let socket = io.connect(`/chat`, {
         reconnection: true,
         reconnectionDelay: 1000,
@@ -16,42 +24,57 @@ let socket = io.connect(`/chat`, {
     notf;
 const middleDiv = $(".panel--middle");
 
+/*****************************************************************
+ * 
+ * Resize elements
+ * 
+ *****************************************************************/
 
 window.addEventListener("DOMContentLoaded", function() {
-    // if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
-    //     $("aside").height = $("aside").height;
-    //     const el = $(".page__wrapper");
-    //     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-    //     const calc = wh - $("aside").offsetHeight;
-    //     el.style["max-height"] = calc + "px";
-    // }
+    const el = $("aside .info");
+    const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
     const panel = $(".panel--middle");
-    const pwh = $(".page__wrapper").offsetHeight;
-    const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - 10;
-    panel.style["max-height"] = pcalc + "px";
+
+    if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
+        const calc = wh - $("aside .logo__div").offsetHeight - $("aside .side--actions").offsetHeight;
+        el.style["max-height"] = calc + "px";
+
+        const pcalc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
+        panel.style["max-height"] = pcalc + "px";
+    } else {
+        const pcalc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - $("aside").offsetHeight;
+        panel.style["max-height"] = pcalc + "px";
+    }
+
 
     window.addEventListener("resize", function() {
-        // const el = $(".page__wrapper");
-        // const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        // let calc;
-        // if (document.width !== undefined ? document.width : document.body.offsetWidth <= 900) {
-        //     calc = wh - $("aside").offsetHeight;
-        // } else {
-        //     calc = wh;
-        // }
-        // el.style["max-height"] = calc + "px";
+        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
+            const calc = wh - $("aside .logo__div").offsetHeight - $("aside .side--actions").offsetHeight;
+            el.style["max-height"] = calc + "px";
 
-        const panel = $(".panel--middle");
-        const pwh = $(".page__wrapper").offsetHeight;
-        const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - 10;
-        panel.style["max-height"] = pcalc + "px"
+            const pcalc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
+            panel.style["max-height"] = pcalc + "px";
+        } else {
+            const pcalc = wh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight - $("aside").offsetHeight;
+            panel.style["max-height"] = pcalc + "px";
+        }
+        $("aside").removeAttribute("style");
+        $("aside").removeAttribute("data-hidden");
     });
 
     $(".textField").focus();
 });
 
-/*
- *  Error handling
+/*****************************************************************
+ * 
+ * Socket error Handeling
+ * 
+ *****************************************************************/
+
+
+/* 
+ * Connection errors
  */
 socket.on("connect_error", function() {
     const errorEl = $$(".error:not(.reconnect)");
@@ -93,6 +116,10 @@ socket.on("connect_timeout", function() {
     appendDOM(HTML, ".panel--middle");
     $("#uc").innerHTML = 0;
 });
+
+/* 
+ * Reconnection errors
+ */
 socket.on("reconnecting", function(at) {
     const errorEl = $$(".reconnect");
     const HTML = `<li class="error reconnect">
@@ -125,8 +152,12 @@ socket.on("reconnect", function() {
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
             errorEl[i].remove();
-    socket.emit("userConnected", true);
+    socket.emit("userConnected", location.hash ? decodeURIComponent(location.hash.substring(2)) : null);
 });
+
+/* 
+ * Invalid session logout
+ */
 socket.on("invalidSession", function(status) {
     if (status) {
         socket.close();
@@ -134,27 +165,17 @@ socket.on("invalidSession", function(status) {
     }
 });
 
-/*
- *  User join/leave/read
- */
-socket.emit("userConnected", true);
-socket.on("userConnected", function(data) {
-    if (!data.self) {
-        const time = getTime();
-        const HTML = `<li class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></li>`;
-        appendDOM(HTML, ".panel--middle");
-    }
-    $("#uc").innerHTML = data.users;
-});
 
 
 
 
-/*
- *  Messages
- */
+/*****************************************************************
+ * 
+ * Send/receive messages
+ * 
+ *****************************************************************/
 
-function appendMessage() {
+function appendMessage(socket) {
     let val = $(".textField").value.trim();
     const time = getTime();
     if (val != "" && Cookies.get("user")) {
@@ -173,7 +194,6 @@ function appendMessage() {
                             <div class="time noselect">${time}</div>
                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
                             <div class="message">${replacedText}</div>
-                            <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                         </li>;`;
             appendDOM(HTML, ".panel--middle", true);
             const middleDiv = $(".panel--middle");
@@ -190,71 +210,6 @@ function appendMessage() {
     }
 }
 
-function appendImage(files) {
-    if (Cookies.get("user")) {
-        if (socket.io.readyState == "open") {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-
-                if (file.type.indexOf("image") >= 0) {
-                    const fileReader = new FileReader();
-                    fileReader.onloadend = function(e) {
-
-                        const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                        const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
-                        socket.emit("image", {
-                            username: Cookies.get("user"),
-                            type: file.type,
-                            name: file.name,
-                            blob: arrayBuffer,
-                            mid: mid
-                        }, (uploaded) => {
-                            if (uploaded) {
-                                $(`.from__me[data-mid="${mid}"] .loader`).remove()
-                            }
-                        });
-                        const time = getTime();
-                        const HTML = `<li class="ms from__me" data-mid="${mid}">
-                            <div class="time noselect">${time}</div>
-                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                            <div class="message message--image">
-                                <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
-                                <div class="loader"></div>
-                            </div>
-                            <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
-                        </li>`;
-                        if ($$(".typing").length > 0) $(".typing").remove();
-
-                        const panelMiddle = $(".panel--middle");
-                        getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
-                            appendDOM(HTML, ".panel--middle", false);
-                            panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
-                            if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
-                                    panelMiddle.scrollHeight,
-                                    panelMiddle.offsetHeight,
-                                    panelMiddle.clientHeight,
-                                ) - 250)
-                                panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
-                            else
-                                panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
-                        });
-                        $(".textField").focus();
-                    }
-                    fileReader.readAsDataURL(file);
-                }
-            }
-        } else {
-            error("Failed sending message");
-            $(".textField").focus();
-        }
-    } else {
-        socket.close();
-        location.href = "/logout";
-    }
-}
-
-
-
 let isUpTimeout;
 socket.on("message", function(data) {
     let message = data.message;
@@ -269,7 +224,7 @@ socket.on("message", function(data) {
                 <div class="time noselect">${time}</div>
                 ${username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
                 <div class="message">${replacedText}</div>
-                <div class="who noselect" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
+                ${username==Cookies.get("user")?'':'<div class="who noselect" data-user="'+escapeHtml(username)+'">'+escapeHtml(username.substring(0, 1).toUpperCase())+'</div>'}
             </li>;`;
     if ($$(".typing").length > 0) $(".typing").remove();
     appendDOM(HTML, ".panel--middle");
@@ -349,21 +304,87 @@ $(".textField").addEventListener("keydown", function(e) {
     }
     if (e.keyCode == 13 && !e.shiftKey) {
         e.preventDefault();
-        appendMessage();
+        appendMessage(socket);
     }
 });
 
 
-/*
- *  Images
- */
+/*****************************************************************
+ * 
+ * Send/receive Images
+ * 
+ *****************************************************************/
+
+function appendImage(socket, files) {
+    if (Cookies.get("user")) {
+        if (socket.io.readyState == "open") {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                if (file.type.indexOf("image") >= 0) {
+                    const fileReader = new FileReader();
+                    fileReader.onloadend = function(e) {
+
+                        const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                        const mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
+                        const time = getTime();
+                        const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message message--image">
+                                <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+                                <div class="loader"></div>
+                            </div>
+                            <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0, 1).toUpperCase())}</div>
+                        </li>`;
+                        if ($$(".typing").length > 0) $(".typing").remove();
+
+                        const panelMiddle = $(".panel--middle");
+                        getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+                            appendDOM(HTML, ".panel--middle", false);
+                            socket.emit("image", {
+                                username: Cookies.get("user"),
+                                type: file.type,
+                                name: file.name,
+                                blob: arrayBuffer,
+                                mid: mid
+                            }, (uploaded) => {
+                                if (uploaded) {
+                                    $(`.from__me[data-mid="${mid}"] .loader`).remove()
+                                }
+                            });
+                            panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+                            if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
+                                    panelMiddle.scrollHeight,
+                                    panelMiddle.offsetHeight,
+                                    panelMiddle.clientHeight,
+                                ) - 250)
+                                panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h;
+                            else
+                                panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h;
+                        });
+                        $(".textField").focus();
+                    }
+                    fileReader.readAsDataURL(file);
+                }
+            }
+        } else {
+            error("Failed sending message");
+            $(".textField").focus();
+        }
+    } else {
+        socket.close();
+        location.href = "/logout";
+    }
+}
+
 socket.on("image", function(image) {
     const time = getTime();
     const HTML = `<li class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
                     <div class="time noselect">${time}</div>
                     ${image.username==Cookies.get("user")?'<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>':''}
                     <div class="message message--image"><img data-type="${image.type}" data-name="${image.name}" src="data:${image.type};base64,${image.img}"></div>
-                    <div class="who noselect" data-user="${escapeHtml(image.username)}">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
+                    <div class="who noselect ${image.username==Cookies.get("user")?'nodisplay':''}" data-user="${escapeHtml(image.username)}">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
                 </li>`;
     getImageDimensions(`data:${image.type};base64,${image.img}`).then(dims => {
         appendDOM(HTML, ".panel--middle", false);
@@ -409,7 +430,7 @@ $("input[type='file']").addEventListener('input', function(e) {
     e.preventDefault();
     let files = e.target.files;
     if (files.length < 5)
-        appendImage(files);
+        appendImage(socket, files);
     else
         error('Selected too many photos, limit is 4')
 }, false);
@@ -434,17 +455,6 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
             var mid = `ms-${randomString()}-${Cookies.get("clientId")}`;
             fileReader.onloadend = function(e) {
                 let arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                socket.emit("image", {
-                    username: Cookies.get("user"),
-                    type: fileType,
-                    name: name,
-                    blob: arrayBuffer,
-                    mid: mid
-                }, (uploaded) => {
-                    if (uploaded) {
-                        $(`.from__me[data-mid="${mid}"] .loader`).remove()
-                    }
-                });
                 const time = getTime();
                 const HTML = `<li class="ms from__me" data-mid="${mid}">
                     <div class="time noselect">${time}</div>
@@ -453,10 +463,21 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
                         <img data-type="${fileType}" data-name="${name}" src="data:${fileType};base64,${arrayBuffer}">
                         <div class="loader"></div>
                     </div>
-                    <div class="who noselect" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
+                    <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get("user"))}">${escapeHtml(Cookies.get("user").substring(0,1).toUpperCase())}</div>
                 </li>`;
                 getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
                     appendDOM(HTML, ".panel--middle", false);
+                    socket.emit("image", {
+                        username: Cookies.get("user"),
+                        type: fileType,
+                        name: name,
+                        blob: arrayBuffer,
+                        mid: mid
+                    }, (uploaded) => {
+                        if (uploaded) {
+                            $(`.from__me[data-mid="${mid}"] .loader`).remove()
+                        }
+                    });
                     middleDiv.scrollTop += dims.h;
                     if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
                             middleDiv.scrollHeight,
@@ -474,6 +495,12 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
         location.href = "/logout";
     }
 }, false);
+
+/*****************************************************************
+ * 
+ * Show image popup
+ * 
+ *****************************************************************/
 
 $(".panel--middle").addEventListener('click', function(e) {
     if (e.target && hasClass(e.target.parentNode, 'message--image')) {
@@ -502,6 +529,12 @@ $(".panel--middle").addEventListener('click', function(e) {
     }
 });
 
+/*****************************************************************
+ * 
+ * Disable sending fake reconnect signals on blur
+ * 
+ *****************************************************************/
+
 window.addEventListener("focus", function() {
     $(".textField").focus();
     socket.io.reconnection(true);
@@ -513,7 +546,7 @@ window.addEventListener("focus", function() {
             if (errorEl.length > 0) {
                 for (let i = 0; i < errorEl.length; i++)
                     errorEl[i].remove();
-                socket.emit("userConnected", true);
+                socket.emit("userConnected", location.hash ? decodeURIComponent(location.hash.substring(2)) : null);
             }
         }
     });
@@ -522,26 +555,38 @@ window.addEventListener("blur", function() {
     socket.io._reconnectionAttempts = 0;
 });
 
-/*
- *  Clear your local chat history
- */
+
+/*****************************************************************
+ * 
+ * Clear your local chat history
+ * 
+ *****************************************************************/
+
 $(".clear_chat").addEventListener("click", function(e) {
-    const messages = $$(".ms, .joined, .error, .info--change");
+    const messages = $$(".panel--middle li");
     revSelectedIndex = -1;
-    for (let i = messages.length - 1; i >= 0; i--) {
+    for (let i = 0; i < messages.length; i++) {
         const t = messages.length < 200 ? i * 3 : i * 2;
+        let ms = messages[i];
+        console.log(ms);
         setTimeout(function() {
-            messages[i].classList.add("transition-leave");
+            console.log(ms)
+            ms.classList.add("transition-leave");
             setTimeout(function() {
-                messages[i].remove();
-            }, 200)
+                console.log(ms)
+                ms.remove();
+            }, 300);
         }, t);
     }
 });
 
-/*
- *  Send image by dropping file on dropImage element
- */
+
+/*****************************************************************
+ * 
+ * Send image by dropping file on dropImage element
+ * 
+ *****************************************************************/
+
 const dropImage = $('.panel--bottom');
 dropImage.addEventListener('dragover', function(evt) {
     evt.stopPropagation();
@@ -563,13 +608,15 @@ dropImage.addEventListener('drop', function(evt) {
     let files = evt.dataTransfer.files;
     $('.panel--bottom').removeAttribute("style");
     $('.textField').setAttribute("placeholder", "Type message here");
-    appendImage(files);
+    appendImage(socket, files);
 }, false);
 
 
-/*
- *  Revert message that you sent
- */
+/*****************************************************************
+ * 
+ *  Delete sent messages
+ * 
+ *****************************************************************/
 let revSelectedIndex = -1;
 $(".panel--middle").addEventListener('click', function(e) {
     if (e.target && hasClass(e.target, 'reverse') || hasClass(e.target.parentNode, 'reverse')) {
@@ -619,16 +666,17 @@ $(".panel--middle").addEventListener('click', function(e) {
 socket.on("reverseMessage", function(mid) {
     const ms = $$(`[data-mid="${mid}"]`);
     for (let i = 0; i < ms.length; i++) {
-        if (typeof ms[i] !== undefined && ms[i] != null) {
-            if (!hasClass(ms[i], 'modal__div')) {
-                ms[i].classList.add("transition-leave");
+        let mess = ms[i];
+        if (typeof mess !== undefined && mess != null) {
+            if (!hasClass(mess, 'modal__div')) {
+                mess.classList.add("transition-leave");
             } else {
                 $(".gallery__cont").classList.remove("anim--opacity");
                 $(".img__div").classList.remove("anim--scale");
                 $(".modal__div").classList.remove("anim--opacity");
             }
             setTimeout(function() {
-                ms[i].remove();
+                mess.remove();
             }, 200)
         }
     }
@@ -636,9 +684,11 @@ socket.on("reverseMessage", function(mid) {
 });
 
 
-/*
+/*****************************************************************
+ *  TODO
  *  User typing notification
- */
+ * 
+ *****************************************************************/
 let userTyping = [];
 let timeout;
 socket.on("typing", function(mid) {
@@ -674,7 +724,11 @@ socket.on("typing", function(mid) {
 });
 
 
-/* Sessions */
+/*****************************************************************
+ * 
+ *  Manage your sessions, popups
+ * 
+ *****************************************************************/
 
 socket.on("activeSessions", (data) => {
     const sessions = $$("li[data-socketid]");
@@ -770,8 +824,19 @@ document.addEventListener('click', function(e) {
         });
     } else if (e.target && hasClass(e.target, 'room--change') || hasClass(e.target.parentNode, 'room--change')) {
         const btn = hasClass(e.target.parentNode, 'room--change') ? e.target.parentNode : e.target;
-        const name = btn.getAttribute("data-name");
-        location.hash = `${encodeURIComponent(name)}`;
+        if(!hasClass(btn,"room--active")){
+            const rid = btn.getAttribute("data-rid");
+            location.hash = `/${encodeURIComponent(rid)}`;
+            if($$(".panel--middle li").length > 0 && hasClass($$(".panel--middle li")[$$(".panel--middle li").length-1], "info--change"))
+                $$(".panel--middle li")[$$(".panel--middle li").length-1].remove();
+            if($(".modal__div")){
+                $(".settings__cont").classList.remove("anim--opacity", "anim--scale");
+                $(".modal__div").classList.remove("anim--opacity");
+                setTimeout(function() {
+                    $(".modal__div").remove();
+                }, 300);
+            }
+        }
     } else if (e.target && hasClass(e.target, 'room--show') || hasClass(e.target.parentNode, 'room--show')) {
         const btn = hasClass(e.target.parentNode, 'room--show') ? e.target.parentNode : e.target;
         const HTML = `<div class="modal__div">
@@ -780,42 +845,17 @@ document.addEventListener('click', function(e) {
                                 <div class="title noselect">Rooms</div>
                                 <p class="description noselect">Change chat room.</p>
                                 <div class="subtitle noselect">Available rooms</div>
-                                <ul class="rooms noselect">
-                                    <li class="room--change" data-icon="🐫" data-name="Main"><i>🐫</i> Main</li>
-                                    <li class="room--change" data-icon="🙊" data-name="tajne/poufne"><i>🙊</i> tajne/poufne</li>
-                                    <li class="room--change" data-icon="🐘" data-name="granie"><i>🐘</i> granie</li>
-                                    <li class="room--change" data-icon="🐑" data-name="Bardzo długie zdanie jakie wymyślam na bieżąco, nie rób nic nikomu, nigdy, choćby nie wiem co"><i>🐑</i> Bardzo długie zdanie jakie wymyślam na bieżąco, nie rób nic nikomu, nigdy, choćby nie wiem co</li>
-                                    <li class="room--change" data-icon="🦁" data-name="ło panie"><i>🦁</i> ło panie</li>
-                                    <li class="room--change" data-icon="🐗" data-name="boar"><i>🐗</i> boar</li>
-                                    <li class="room--change" data-icon="🍄" data-name="yEE"><i>🍄</i> yEE</li>
-                                    <li class="room--change" data-icon="🌴" data-name="bob"><i>🌴</i> bob</li>
-                                    <li class="room--change" data-icon="🐙" data-name="pomidor"><i>🐙</i> pomidor</li>
-                                    <li class="room--change" data-icon="🐸" data-name="żabson ziomal"><i>🐸</i> żabson ziomal</li>
-                                    <li class="room--change" data-icon="🐤" data-name="pip"><i>🐤</i> pip</li>
-                                    <li class="room--change" data-icon="🐔" data-name="broilerek"><i>🐔</i> broilerek</li>
-                                    <li class="room--change" data-icon="🐼" data-name="pandoo"><i>🐼</i> pandoo</li>
-                                    <li class="room--change" data-icon="🐀" data-name="rastafarianie"><i>🐀</i> rastafarianie</li>
-                                    <li class="room--change" data-icon="🐷" data-name="kwiiii"><i>🐷</i> kwiiii</li>
-                                    <li class="room--change" data-icon="🐴" data-name="koniarze"><i>🐴</i> koniarze</li>
-                                </ul>
+                                <ul class="rooms noselect rooms--modal"></ul>
                                 <div class="footer">
-                                    <div class="branding noselect">1.0.5</div>
+                                    <div class="branding noselect">1.1.0</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
                         </div>`;
             appendDOM(HTML, 'body', false);
-            let hash = location.hash;
-            let name = decodeURIComponent(hash.substring(1));
-            socket.emit("listRooms", true, (list)=> {
-                const selRooms = $$(`.room--change[data-name="${name}"]`);
-                for(let i = 0; i< selRooms.length; i++) {
-                    selRooms[i].classList.add("room--active");
-                }
-            });
             $(".modal__div").classList.add("anim--opacity");
             $(".settings__cont").classList.add("anim--opacity", "anim--scale");
-
+            socket.emit("roomList", true);
     } else if (e.target && hasClass(e.target, 'addRoom')) {
         const HTML = `<div class="modal__div">
                             <div class="settings__cont rooms__cont">
@@ -851,7 +891,7 @@ document.addEventListener('click', function(e) {
                                     <button class="create--room">Create<i class="material-icons">add</i></button>
                                 </div>
                                 <div class="footer">
-                                    <div class="branding noselect">1.0.5</div>
+                                    <div class="branding noselect">1.1.0</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
@@ -870,9 +910,12 @@ document.addEventListener('click', function(e) {
                     for(let j = 0; j< uni.length;j++){
                         uniCode += String.fromCodePoint(parseInt(uni[j], 16));
                     }
-                    appendDOM(`<i class="select__icon" data-index="${i}">${uniCode}</i>`, '.room__icons');
+                    appendDOM(`<i class="select__icon" data-index="${emojis.list[i]}">${uniCode}</i>`, '.room__icons');
                 }
-            }).catch(e => console.log(e));
+            }).catch(() => {
+                $(".room__icons").innerHTML="";
+                appendDOM(`<i class="material-icons noselect failed-to-fetch">warning</i>`, ".room__icons");
+            });
             $(".modal__div").classList.add("anim--opacity");
             $(".settings__cont").classList.add("anim--opacity", "anim--scale");
     }else if (e.target && hasClass(e.target, 'select__icon')) {
@@ -883,49 +926,126 @@ document.addEventListener('click', function(e) {
         $(".icon--prev").innerHTML = e.target.innerHTML;
     }
 });
+
+
+
+/*****************************************************************
+ *  
+ *  User join/leave/rooms
+ * 
+ *****************************************************************/
+
+
+socket.on("roomList", function(list) {
+    for (let r = 0; r < $$(".rooms").length; r++)
+        $$(".rooms")[r].innerHTML = "";
+    for (let i = 0; i < list.length; i++) {
+        let uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
+        let uniCode = "";
+        for (let j = 0; j < uni.length; j++) {
+            uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+        }
+        let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
+        let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}</li>`;
+        appendDOM(HTML, '.rooms', false);
+    }
+    appendDOM(`<li class="room--show">Show rooms</li>`, '.rooms', false);
+    if ($(".rooms--modal")) {
+        for (let i = 0; i < list.length; i++) {
+            let uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
+            let uniCode = "";
+            for (let j = 0; j < uni.length; j++) {
+                uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+            }
+            let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
+            console.log();
+            console.log(activeRoom);
+            let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}</li>`;
+            appendDOM(HTML, '.rooms--modal', false);
+        }
+    }
+});
+
+socket.on("userConnected", function(data) {
+    if (!data.self) {
+        const time = getTime();
+        const HTML = `<li class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></li>`;
+        appendDOM(HTML, ".panel--middle");
+    } else {
+        if(!location.hash){
+            $(".rooms--title").innerHTML = ""; 
+            let uni = data.roomIcon.indexOf("-") != -1?data.roomIcon.split("-"):[data.roomIcon];
+            let uniCode="";
+            for(let j = 0; j< uni.length;j++){
+                uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+            }
+            appendDOM(`<i>${uniCode}</i> <span>${data.roomName}</span>`, '.rooms--title');
+        }
+    }
+    $("#uc").innerHTML = data.users;
+    socket.emit("roomList", true);
+});
+socket.on("changeRoom", function(rid) {
+    console.log(rid);
+    location.hash = `/${rid}`;
+});
 if(location.hash){
     let hash = location.hash;
-    let name = decodeURIComponent(hash.substring(1));
-    const rooms = $$(".room--change");
-    for(let i = 0; i< rooms.length; i++) {
-        rooms[i].classList.remove("room--active");
-    }
-    const selRooms = $$(`.room--change[data-name="${name}"]`);
-    for(let i = 0; i< selRooms.length; i++) {
-        selRooms[i].classList.add("room--active");
-    }        
-    $(".rooms--title").innerHTML = "";        
-    socket.emit("changeRoom", name, function(roomInfo) {
-        appendDOM(`<i>${roomInfo.icon}</i> <span>${roomInfo.name}</span>`, '.rooms--title');
-        appendDOM(
-            `<li class="info--change">
-                <div class="noselect info--room"><i>${roomInfo.icon}</i></div>
-                <div class="info--changeCont">Joined "${roomInfo.name}"</div>
-            </li>`, 
-            '.panel--middle'
-        );
+    let rid = decodeURIComponent(hash.substring(2));
+    socket.emit("changeRoom", rid, function(roomInfo) {
+        if(rid !== roomInfo.id){
+            location.hash = `/${roomInfo.id}`;
+        } else {
+            $(".rooms--title").innerHTML = ""; 
+            let uni = roomInfo.icon.indexOf("-") != -1?roomInfo.icon.split("-"):[roomInfo.icon];
+            let uniCode="";
+            for(let j = 0; j< uni.length;j++){
+                uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+            }
+            appendDOM(`<i>${uniCode}</i> <span>${roomInfo.name}</span>`, '.rooms--title');
+            appendDOM(
+                `<li class="info--change">
+                    <div class="noselect info--room"><i>${uniCode}</i></div>
+                    <div class="info--changeCont">Joined "${roomInfo.name}"</div>
+                </li>`, 
+                '.panel--middle', true
+            );
+        }
+        
     });
+} else {
+    socket.emit("userConnected", null);
 }
 window.addEventListener("hashchange",function(){
     let hash = location.hash;
-    let name = decodeURIComponent(hash.substring(1));
+    let rid = decodeURIComponent(hash.substring(2));
     const rooms = $$(".room--change");
     for(let i = 0; i< rooms.length; i++) {
         rooms[i].classList.remove("room--active");
     }
-    const selRooms = $$(`.room--change[data-name="${name}"]`);
+    const selRooms = $$(`.room--change[data-rid="${rid}"]`);
     for(let i = 0; i< selRooms.length; i++) {
         selRooms[i].classList.add("room--active");
     }        
-    $(".rooms--title").innerHTML = "";        
-    socket.emit("changeRoom", name, function(roomInfo) {
-        appendDOM(`<i>${icon}</i> <span>${name}</span>`, '.rooms--title');
-        appendDOM(
-            `<li class="info--change">
-                <div class="noselect info--room"><i>${icon}</i></div>
-                <div class="info--changeCont">Joined "${name}"</div>
-            </li>`, 
-            '.panel--middle'
-        );
+    socket.emit("changeRoom", rid, function(roomInfo) {
+        if(rid !== roomInfo.id){
+            location.hash = `/${roomInfo.id}`;
+        } else {
+            $(".rooms--title").innerHTML = "";        
+            let uni = roomInfo.icon.indexOf("-") != -1?roomInfo.icon.split("-"):[roomInfo.icon];
+            let uniCode="";
+            for(let j = 0; j< uni.length;j++){
+                uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+            }
+            appendDOM(`<i>${uniCode}</i> <span>${roomInfo.name}</span>`, '.rooms--title');
+            appendDOM(
+                `<li class="info--change">
+                    <div class="noselect info--room"><i>${uniCode}</i></div>
+                    <div class="info--changeCont">Joined "${roomInfo.name}"</div>
+                </li>`, 
+                '.panel--middle'
+            );
+        }
+        
     });
 },false);

@@ -2,9 +2,10 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.0.5
+ *   Version: 1.1.0
  * 
  */
+
 
 const domFromText = html => new DOMParser().parseFromString(html, 'text/html').body.childNodes;
 let sound = new Audio();
@@ -30,27 +31,57 @@ function formatSizeUnits(bytes) {
     return bytes;
 }
 
+(function(arr) {
+    arr.forEach(function(item) {
+        if (item.hasOwnProperty('append')) {
+            return;
+        }
+        Object.defineProperty(item, 'append', {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: function append() {
+                var argArr = Array.prototype.slice.call(arguments),
+                    docFrag = document.createDocumentFragment();
 
-function appendDOM(HTML, element = String, scroll = true) {
+                argArr.forEach(function(argItem) {
+                    var isNode = argItem instanceof Node;
+                    docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
+                });
+
+                this.appendChild(docFrag);
+            }
+        });
+    });
+})([Element.prototype, Document.prototype, DocumentFragment.prototype]);
+
+function appendDOM(HTML, element, scroll) {
+    scroll = !scroll ? true : false;
     const childNodes = domFromText(HTML);
     const middleDiv = $(".panel--middle");
     if ($$(".typing").length > 0) $(".typing").remove();
 
-    for (var i = 0; i < childNodes.length; i++) {
+    for (let i = 0; i < childNodes.length; i++) {
         $(element).append(childNodes[i]);
     }
-    if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
+
+    if ((middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
             middleDiv.scrollHeight,
             middleDiv.offsetHeight,
-            middleDiv.clientHeight,
-        ) - 250 && scroll) {
+            middleDiv.clientHeight
+        ) - 250) && scroll) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
     }
+    const panel = $(".panel--middle");
+    const pwh = $(".page__wrapper").offsetHeight;
+    const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
+    panel.style["max-height"] = pcalc + "px";
 }
 
 let errTim;
 
-function error(message, timeout = 2000) {
+function error(message, timeout) {
+    timeout = !timeout ? 2000 : timeout;
     const errID = "errID-" + randomString();
     const HTML = `<div data-eid="${errID}" class="tost tost--error noselect">Error: ${message}</div>`;
     if ($$(".tost").length > 0) $(".tost").remove();
@@ -76,7 +107,8 @@ function escapeHtml(unsafe) {
         .replace(/'/g, "&#039;");
 }
 
-function randomString(length = 15) {
+function randomString(length) {
+    length = !length ? 15 : length;
     const chars = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789";
     let string = "";
     for (let i = 0; i < length; i++) {
@@ -87,7 +119,8 @@ function randomString(length = 15) {
 
 let unread = 0;
 
-function newNotf(user, image = false) {
+function newNotf(user, image) {
+    image = image ? true : false;
     const title = "VV-Chat";
     document.title = `${escapeHtml(user.toUpperCase())} sent${(image)?" photo":" message"}`;
     clearTimeout(notf);
@@ -102,10 +135,10 @@ function newNotf(user, image = false) {
     try {
         navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
         if (navigator.vibrate) {
-            if (!localStorage.getItem("disableVibration"))
+            if (!window.localStorage.getItem("disableVibration"))
                 navigator.vibrate(150);
         }
-        if (!localStorage.getItem("mute")) {
+        if (!window.localStorage.getItem("mute")) {
             sound.src = "/static/pull-out.ogg";
             sound.play();
         }
@@ -140,10 +173,10 @@ window.addEventListener("DOMContentLoaded", function() {
                                 <div class="subtitle noselect">Change password</div>
                                 <div class="input__div">
                                     <div class="input__div--wrapper">
-                                            <input type="password" name="resetPasswordOld" placeholder="Type old password">
+                                            <input type="password" name="resetPasswordOld" placeholder="Type old password" autocomplete="current-password">
                                         </div>    
                                     <div class="input__div--wrapper">
-                                        <input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters">
+                                        <input type="password" name="resetPassword" placeholder="Type new password, at least 5 characters" autocomplete="new-password">
                                         <i class="material-icons noselect change--password">done</i>
                                     </div>
                                     <div class="status__div"></div>
@@ -153,15 +186,15 @@ window.addEventListener("DOMContentLoaded", function() {
                                     <ul class="activeSessions"></ul>
                                 </div>
                                 <div class="footer">
-                                    <div class="branding noselect">1.0.5</div>
+                                    <div class="branding noselect">1.1.0</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
                         </div>`;
             appendDOM(HTML, 'body', false);
-            if (localStorage.getItem("mute"))
+            if (window.localStorage.getItem("mute"))
                 $(".mute").checked = true;
-            if (localStorage.getItem("disableVibration"))
+            if (window.localStorage.getItem("disableVibration"))
                 $(".disableVibration").checked = true;
             $(".modal__div").classList.add("anim--opacity");
             $(".settings__cont").classList.add("anim--opacity", "anim--scale");
@@ -207,30 +240,38 @@ window.addEventListener("DOMContentLoaded", function() {
                     $(".status__div").classList.add("statusError");
                     $(".status__div").innerHTML = `Password to short`;
                 }
+            } else if (e.target && hasClass(e.target, 'wrap--aside') || hasClass(e.target.parentNode, 'wrap--aside')) {
+                if ($("aside").getAttribute("data-hidden") == "yes") {
+                    $("aside").style.flex = "0 0 250px";
+                    $("aside").setAttribute("data-hidden", "no");
+                } else {
+                    $("aside").style.flex = "0 0 0";
+                    $("aside").setAttribute("data-hidden", "yes");
+                }
             }
-        });
+        }, false);
 
         document.addEventListener('input', function(e) {
             if (e.target && hasClass(e.target, 'mute')) {
                 const mute = e.target.checked;
                 if (mute)
-                    localStorage.setItem("mute", true);
+                    window.localStorage.setItem("mute", true);
                 else
-                    localStorage.removeItem("mute");
+                    window.localStorage.removeItem("mute");
             } else if (e.target && hasClass(e.target, 'disableVibration')) {
                 const vibe = e.target.checked;
                 if (vibe) {
-                    localStorage.setItem("disableVibration", true);
+                    window.localStorage.setItem("disableVibration", true);
                 } else {
                     navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
                     if (navigator.vibrate) {
                         navigator.vibrate(100);
                     }
-                    localStorage.removeItem("disableVibration");
+                    window.localStorage.removeItem("disableVibration");
                 }
             }
 
-        });
+        }, false);
     }
 
 });
