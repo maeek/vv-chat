@@ -61,13 +61,12 @@ typings/
 .next
 
 # User sessions
-dist/sessions/*
+sessions/*
 
 # Users file
 src/users.json
 
 #Builds
 
-dist/public/js/func.js
-dist/public/js/client.js
-dist/index.js
+src/static/js/func.js
+src/static/js/client.js
