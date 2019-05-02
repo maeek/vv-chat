@@ -275,7 +275,7 @@ window.addEventListener("DOMContentLoaded", function() {
     }
     const emojis = new FontFace("KoHo", "url(/css/fonts/emoji.ttf)", {
         style: 'normal',
-        unicodeRange: 'U+2700-27BF, U+1F300-1F5FF, U+1F900-1F9FF, U+1F600-1F64F, U+1F680-1F6FF, U+2600-26FF',
+        unicodeRange: 'U+2700-27BF, U+1F300-1F5FF, U+1F900-1F9FF, U+1F600-1F64F, U+1F680-1F6FF, U+2600-26FF, U+1f1e6-1f251',
         weight: '400'
     });
     const loadedFont = emojis.load();
