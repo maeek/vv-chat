@@ -1034,7 +1034,6 @@ input[type="file"] {
     border: 0;
     border-radius: 0;
     box-shadow: none;
-    background: #22263a;
 }
 
 .endRecords {
@@ -2373,5 +2372,8 @@ aside .side--actions>a {
     }
     .mgmt--title span {
         font-size: 1.1rem;
+    }
+    .reverse {
+        padding: .4rem .6rem;
     }
 }

@@ -80,9 +80,14 @@ if (certFlag) {
     const privateKey = fs.readFileSync(config.certificateFiles.priv, 'utf8');
     const certificate = fs.readFileSync(config.certificateFiles.cert, 'utf8');
     const ca = fs.readFileSync(config.certificateFiles.ca, 'utf8');
-    const credentials = { key: privateKey, cert: certificate, ca: ca };
+    const options = {
+        protocols: ['h2', 'spdy/3.1', 'spdy/3', 'spdy/2'],
+        key: privateKey,
+        cert: certificate,
+        ca: ca
+    };
 
-    server = require('spdy').createServer(credentials, app);
+    server = require('spdy').createServer(options, app);
     config.https = true;
 } else {
     /* 
