@@ -273,7 +273,18 @@ window.addEventListener("DOMContentLoaded", function() {
 
         }, false);
     }
-
+    const emojis = new FontFace("KoHo", "url(/css/fonts/emoji.ttf)", {
+        style: 'normal',
+        unicodeRange: 'U+2700-27BF, U+1F300-1F5FF, U+1F900-1F9FF, U+1F600-1F64F, U+1F680-1F6FF, U+2600-26FF',
+        weight: '400'
+    });
+    const loadedFont = emojis.load();
+    loadedFont.then(function(loaded_font) {
+        // apply the font (which may rerender text and cause a page reflow)
+        // once the font has finished downloading
+        document.fonts.add(loaded_font);
+        document.body.style.fontFamily = "KoHo, sans-serif";
+    }).catch(e => console.log("Not supported"));
 });
 
 

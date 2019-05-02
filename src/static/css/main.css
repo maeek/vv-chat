@@ -11,13 +11,14 @@
 
 /* emojis */
 
-@font-face {
+
+/* @font-face {
     font-family: 'KoHo';
     font-style: normal;
     font-weight: 400;
     src: url(/css/fonts/emoji.ttf) format("truetype");
     unicode-range: U+1f1e6-U+34;
-}
+} */
 
 
 /* latin */
