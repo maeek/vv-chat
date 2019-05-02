@@ -84,7 +84,8 @@ body {
 
 body {
     height: 100%;
-    background: linear-gradient(to bottom, #21273c, #262b40);
+    /* background: linear-gradient(to bottom, #21273c, #262b40); */
+    background: linear-gradient(to bottom, #21273c, #1e2335);
 }
 
  ::selection {
@@ -123,6 +124,8 @@ body {
 
 .page-login .panel__div--right {
     flex: 1 0 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .page-login .panel__div--left {
@@ -164,6 +167,7 @@ body {
     width: 500px;
     max-width: 420px;
     min-height: 400px;
+    margin: auto 0;
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -357,10 +361,11 @@ input[type="file"] {
 
 .page-chat .panel--top,
 .page-manage .panel--top {
-    background: #191e2f;
+    /* background: #191e2f; */
     overflow: hidden;
     flex: 0 0 auto;
     align-items: center;
+    z-index: 1;
 }
 
 .page-chat .panel--top .title,
@@ -426,14 +431,6 @@ input[type="file"] {
     font-size: 1.3rem;
 }
 
-
-/* .panel .clear_chat:hover,
-.panel .settings:hover,
-.panel .logout:hover {
-    padding-top: 1.3rem;
-    height: 2.8rem;
-} */
-
 .clear_chat:hover,
 .settings:hover {
     background: #66caff;
@@ -455,7 +452,7 @@ input[type="file"] {
     justify-content: flex-start;
     align-items: flex-start;
     padding: 0 0 .2rem 0;
-    background: url(/static/bg.png);
+    /* background: url(/static/bg.png); */
     background-size: 500px 500px;
     margin: 0;
     transform: translate3d(0, 0, 0);
@@ -466,16 +463,17 @@ input[type="file"] {
     flex: 0 0 auto;
     justify-content: space-between;
     align-items: center;
-    background: #3b415a;
+    /* background: #3b415a; */
     transition: background .3s;
     color: #F0F0F0;
     position: relative;
-    border-top: 4px solid #2d3246;
+    /* border-top: 4px solid #2d3246; */
+    border-top: 3px solid #242a40;
 }
 
 .text {
     flex: 1 0 auto;
-    height: 100%;
+    height: 4.4rem;
 }
 
 .panel--bottom a {
@@ -497,12 +495,56 @@ input[type="file"] {
     color: #66caff;
 }
 
+.sendEmoji {
+    position: absolute;
+    top: -20.4rem;
+    right: .5rem;
+    width: 18rem;
+    height: 20rem;
+    background: rgba(55, 64, 93, 0.8);
+    border-radius: 5px;
+    padding: .5rem 0;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 5px #161b2d;
+}
+
+.emojiList {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    transform: translate3d(0, 0, 0);
+    scroll-behavior: smooth;
+    overflow: hidden auto;
+    height: 100%;
+}
+
+.actions .select__emoji {
+    padding: .3rem;
+    font-style: normal;
+    margin: .1rem;
+    border-radius: 15px;
+    background: #282d42;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+}
+
+.actions .select__emoji:hover {
+    background: #000;
+}
+
 .textField {
     width: 100%;
     height: 100%;
     padding: .7rem 1rem;
     border: 0;
-    border-right: 1px solid #2f344a;
+    /* border-right: 1px solid #2f344a; */
     font-size: 1rem;
     background: transparent;
     outline: none;
@@ -532,15 +574,18 @@ input[type="file"] {
     color: #000;
     padding: .2rem;
     font-family: 'KoHo', sans-serif;
+    opacity: 0;
 }
 
 .from__me {
     align-self: flex-end;
     flex-direction: row;
+    transform: translateX(-10rem);
 }
 
 .to__me {
     flex-direction: row-reverse;
+    transform: translateX(10rem);
 }
 
 .time {
@@ -557,6 +602,7 @@ input[type="file"] {
     max-width: 750px;
     white-space: pre-wrap;
     cursor: default;
+    transition: all .3s;
 }
 
 .from__me .message {
@@ -618,7 +664,6 @@ input[type="file"] {
 
 .message--image {
     border-radius: 10px;
-    background: #000 !important;
     padding: 0;
     overflow: hidden;
     display: flex;
@@ -627,6 +672,8 @@ input[type="file"] {
     align-items: flex-start;
     box-shadow: 0 0 20px #181e2f;
     position: relative;
+    max-height: 400px;
+    max-width: 400px;
 }
 
 .message--image .loader {
@@ -685,13 +732,22 @@ input[type="file"] {
     text-align: center;
     font-family: 'KoHo', sans-serif;
     color: #5a658a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .joined span {
     display: inline-block;
-    padding: .3rem 1rem;
-    border-radius: 40px;
-    border: 1px solid #5a658a;
+    padding: .3rem 1.5rem;
+}
+
+.joined span.line {
+    flex: 1 0 auto;
+    height: 1px;
+    background: #2d334a;
+    border-radius: 0;
+    padding: 0;
 }
 
 .error,
@@ -1083,6 +1139,12 @@ input[type="file"] {
 .transition-enter {
     transition: all .2s;
     transform: translateY(0);
+    opacity: 1;
+}
+
+.transition-X {
+    transition: all .2s;
+    transform: translateX(0);
     opacity: 1;
 }
 
@@ -1723,8 +1785,8 @@ aside .info {
 aside .logout,
 aside .settings,
 aside .clear_chat {
-    border-radius: 0;
-    margin: 0;
+    border-radius: 15px;
+    margin: .3rem;
     -ms-grid-row-align: auto;
     align-self: auto;
     padding: .5rem;
@@ -1786,7 +1848,7 @@ aside ul {
 
 .rooms__cont ul li,
 aside ul li {
-    margin: 0;
+    margin: .3rem;
     font-weight: 100;
     font-size: .9rem;
     padding: .4rem .5rem;
@@ -1797,7 +1859,9 @@ aside ul li {
     align-items: center;
     justify-content: flex-start;
     position: relative;
-    word-break: keep-all;
+    word-break: break-word;
+    padding-left: 1.5rem;
+    border-radius: 30px;
 }
 
 .rooms__cont ul li i:not(.roomDelete),
@@ -1817,6 +1881,7 @@ aside ul li i:not(.roomDelete),
     display: flex;
     justify-content: center;
     align-items: center;
+    flex: 0 0 auto;
 }
 
 .rooms__cont ul li:hover .roomDelete,
@@ -1830,7 +1895,7 @@ aside ul li:hover .roomDelete {
     opacity: 0;
     top: 50%;
     color: #71bae8;
-    right: .3rem;
+    right: .4rem;
     transform: translateY(-50%);
     font-size: 1.2rem;
 }
@@ -1877,7 +1942,6 @@ aside .info span.rooms--status i {
 .room--active {
     background: #27304c;
     color: #c6e1ff;
-    margin: 0;
 }
 
 .room--active i {
@@ -1938,7 +2002,7 @@ aside h4 {
 aside .side--actions>i,
 aside .side--actions>a {
     background: #131725;
-    flex: 0 0 50%;
+    flex: 0 0 calc(50% - .6rem);
     padding: 2.2rem 0;
 }
 
@@ -2023,6 +2087,10 @@ aside .side--actions>a {
     color: #ababab;
 }
 
+.italic {
+    font-style: italic;
+}
+
 .nodisplay {
     display: none;
 }
@@ -2051,6 +2119,50 @@ aside .side--actions>a {
     animation-duration: 1s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
+}
+
+.whatIsThis {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'KoHo', sans-serif;
+    text-align: center;
+}
+
+.whatIsThis .cmon {
+    word-wrap: normal;
+    font-size: 1.2rem;
+    color: #1fa9ff;
+    margin-bottom: 1rem;
+}
+
+.whatIsThis .notsupported {
+    word-wrap: break-word;
+    color: #71bae8;
+    max-width: 100%;
+}
+
+.whatIsThis ul {
+    width: auto;
+    text-align: left;
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.whatIsThis ul li {
+    text-align: center;
+    padding: .3rem;
+}
+
+.whatIsThis ul li a {
+    color: #7eb8dc;
+    background: #2e3654;
+    padding: .3rem .5rem;
+    border-radius: 15px;
 }
 
 @keyframes lds-roller {
@@ -2090,13 +2202,35 @@ aside .side--actions>a {
         width: 100%;
     }
     .message {
+        font-size: 1.2rem;
         max-width: calc(100vw - 100px);
+    }
+    .who {
+        width: 2.1rem;
+        height: 2.1rem;
+        flex: 0 0 2.1rem;
     }
     .time {
         display: none;
     }
     .ms {
+        position: relative;
         max-width: 100%;
+    }
+    .ms:hover .time {
+        display: block;
+        position: absolute;
+        top: 0;
+        border-radius: 8px;
+        z-index: 1;
+    }
+    .to__me:hover .time {
+        right: .3rem;
+        background: #1d1d25;
+    }
+    .from__me:hover .time {
+        left: .3rem;
+        background: #043e63;
     }
     .panel--bottom {
         flex: 0 0 auto;
@@ -2141,6 +2275,7 @@ aside .side--actions>a {
         align-items: center;
         justify-content: flex-start;
         padding: .1rem 0;
+        background: #1b1f2f;
     }
     aside .logo__div {
         padding: .2rem 1.2rem;
@@ -2228,5 +2363,15 @@ aside .side--actions>a {
     }
     .wrap--aside {
         display: none;
+    }
+    .sendEmoji {
+        top: -18.3rem;
+        right: 0;
+        width: 100%;
+        height: 18rem;
+        padding: .5rem 0;
+    }
+    .mgmt--title span {
+        font-size: 1.1rem;
     }
 }

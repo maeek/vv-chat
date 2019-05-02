@@ -426,7 +426,13 @@ io.of('/chat').on('connection', function(socket) {
         if (typeof socket.handshake.session !== undefined && socket.handshake.session.valid) {
             let roomList = fs.readFileSync(config.roomsFile, "utf-8");
             if (roomList) {
-                roomList = JSON.parse(roomList).list;
+                roomList = JSON.parse(roomList).list.filter(el => {
+                    return {
+                        id: el.id,
+                        name: el.name,
+                        icon: el.icon
+                    }
+                });
                 socket.emit("roomList", roomList);
             }
         } else {

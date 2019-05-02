@@ -2,7 +2,7 @@ const domFromText=html=>new DOMParser().parseFromString(html,'text/html').body.c
                             <div class="settings__cont">
                                 <div class="settings__exit noselect"><i class="material-icons">close</i></div>
                                 <div class="title noselect">Settings</div>
-                                <p class="description noselect">Change settings for your account.</p>
+                                <p class="description noselect">Change settings for your account - ${Cookies.get('user')}</p>
                                 <div class="subtitle noselect">Notifications</div>
                                 <div class="input__div">
                                     <div class="input__div--wrapper input__div--wrapper--nobg">

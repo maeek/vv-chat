@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -34,9 +34,7 @@
             <div class="info">
                 <h4 class="noselect">Chat rooms</h4>
 
-                <ul class="rooms noselect">
-                    <li class="room--show">Show rooms</li>
-                </ul>
+                <ul class="rooms noselect"></ul>
             </div>
             <div class="side--actions">
                 <i class="material-icons settings settings--popup noselect" title="Settings">settings</i>
@@ -50,7 +48,7 @@
             <nav class="panel panel--top">
                 <div class="wrap--aside noselect"><i class="material-icons">menu</i></div>
                 <div class="title">
-                    <div class="mgmt--title rooms--title noselect"><i>&nbsp;&nbsp;&nbsp;&nbsp;</i> <span>Loading...</span></div>
+                    <div class="mgmt--title rooms--title noselect changeRoom"><i>&nbsp;&nbsp;&nbsp;&nbsp;</i> <span>Loading...</span></div>
                 </div>
                 <div class="info">
                     <div class="users noselect" title="Online users"><i class="material-icons">people</i><span id="uc">0</span></div>
@@ -59,21 +57,35 @@
             </nav>
             <ul class="panel panel--middle"></ul>
             <footer class="panel panel--bottom">
+                <div class="actions noselect">
+                    <i class="material-icons photo" title="Send photo">photo</i>
+                    <input type="file" accept="image/*" multiple>
+                </div>
                 <div class="text">
                     <textarea type="text" class="textField" name="textField" placeholder="Type message here..."></textarea>
                 </div>
                 <div class="actions noselect">
-                    <i class="material-icons photo" title="Send photo">photo</i>
-                    <input type="file" accept="image/*" multiple>
+                    <div class="sendEmoji" style="display: none">
+                        <div class="emojiList">
+                            <div class="lds-roller">
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <i class="material-icons emojis" title="Emojis">tag_faces</i>
                     <i class="material-icons send" title="Send message">send</i>
                 </div>
             </footer>
         </div>
     </main>
-
-
-
-
 </body>
 
 </html>

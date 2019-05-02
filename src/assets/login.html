@@ -12,7 +12,7 @@
     <meta property="og:title" content="VV-Chat">
     <meta property="og:image" content="/static/vv_cc.png">
     <title>VV-Chat Login</title>
-    <script defer src="/js/func.js"></script>
+    <script defer src="/js/login.js"></script>
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
     <link rel="stylesheet" href="/css/main.min.css">
 </head>
@@ -56,35 +56,6 @@
             </div>
         </div>
     </div>
-    <script defer>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            if (document.querySelector('input[name="username"]').value.trim().length > 1 && document.querySelector('input[name="password"]').value.trim().length > 4) {
-                $(".finger").innerHTML = "autorenew";
-                $(".finger").classList.add("spin");
-                return true;
-            } else {
-                if (document.querySelector('input[name="username"]').value.trim().length < 1)
-                    document.querySelector('input[name="username"]').style["box-shadow"] = '0px 3px 1px #ff4747';
-                if (document.querySelector('input[name="password"]').value.trim().length < 5)
-                    document.querySelector('input[name="password"]').style["box-shadow"] = '0px 3px 1px #ff4747';
-                e.preventDefault();
-                return false;
-            }
-        });
-        let hash = location.hash.substring(1);
-        switch (hash) {
-            case "wrong":
-                document.querySelector(".status__div").classList.add("statusError");
-                document.querySelector(".status__div").innerHTML = `You enterd wrong username or password`;
-                break;
-            case "error":
-                document.querySelector(".status__div").classList.add("statusError");
-                document.querySelector(".status__div").innerHTML = `Couldn't log in to this account`;
-                break;
-            default:
-                break;
-        }
-    </script>
 </body>
 
 </html>

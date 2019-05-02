@@ -198,6 +198,7 @@ function appendMessage(socket) {
             appendDOM(HTML, ".panel--middle", true);
             const middleDiv = $(".panel--middle");
             middleDiv.scrollTop = middleDiv.scrollHeight;
+            $(`.ms[data-mid="${mid}"]`).classList.add("transition-X");
             $(".textField").value = "";
             $(".textField").focus();
         } else {
@@ -228,6 +229,7 @@ socket.on("message", function(data) {
             </li>;`;
     if ($$(".typing").length > 0) $(".typing").remove();
     appendDOM(HTML, ".panel--middle");
+    $(`.ms[data-mid="${mid}"]`).classList.add("transition-X");
     const isUp = `<div data-mid="${mid}" class="tost noselect">
                     <div class="who" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                     <div class="text">${escapeHtml(message.length > 25?message.substring(0,25)+"...":message)}</div>
@@ -308,6 +310,49 @@ $(".textField").addEventListener("keydown", function(e) {
     }
 });
 
+/*
+ * Send Emojis
+ */
+document.addEventListener('click', function(e) {
+    if (e.target && hasClass(e.target, 'select__emoji')) {
+        let uni = e.target.getAttribute("data-index");
+        uni = uni.indexOf("-") != -1 ? uni.split("-") : [uni];
+        let uniCode = "";
+        for (let j = 0; j < uni.length; j++) {
+            uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+        }
+        $(".textField").value += uniCode + "\u{2063}";
+    } else if (e.target && hasClass(e.target, 'emojis')) {
+        if ($(".sendEmoji").style["display"] == "none") {
+            if ($$(".select__emoji").length < 1) {
+                fetch("/js/emoji.json", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }).then(res => res.json()).then(emojis => {
+                    $(".emojiList").innerHTML = "";
+                    for (let i = 0; i < emojis.list.length; i++) {
+                        let uni = emojis.list[i].indexOf("-") != -1 ? emojis.list[i].split("-") : [emojis.list[i]];
+                        let uniCode = "";
+                        for (let j = 0; j < uni.length; j++) {
+                            uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+                        }
+                        appendDOM(`<i class="select__emoji" data-index="${emojis.list[i]}">${uniCode}</i>`, '.emojiList');
+                    }
+                }).catch(() => {
+                    $(".emojiList").innerHTML = "";
+                    appendDOM(`<i class="material-icons noselect failed-to-fetch">warning</i>`, ".emojiList");
+                });
+            }
+            $(".sendEmoji").style["display"] = "flex";
+        } else {
+            $(".sendEmoji").style["display"] = "none";
+        }
+    } else if (e.target && !$(".sendEmoji").contains(e.target)) {
+        $(".sendEmoji").style["display"] = "none";
+    }
+});
 
 /*****************************************************************
  * 
@@ -342,6 +387,8 @@ function appendImage(socket, files) {
                         const panelMiddle = $(".panel--middle");
                         getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
                             appendDOM(HTML, ".panel--middle", false);
+                            $(`.ms[data-mid="${mid}"]`).classList.add("transition-X");
+
                             socket.emit("image", {
                                 username: Cookies.get("user"),
                                 type: file.type,
@@ -388,6 +435,7 @@ socket.on("image", function(image) {
                 </li>`;
     getImageDimensions(`data:${image.type};base64,${image.img}`).then(dims => {
         appendDOM(HTML, ".panel--middle", false);
+        $(`.ms[data-mid="${image.mid}"]`).classList.add("transition-X");
         middleDiv.scrollTop += dims.h;
         if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
                 middleDiv.scrollHeight,
@@ -467,6 +515,7 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
                 </li>`;
                 getImageDimensions(`data:${fileType};base64,${arrayBuffer}`).then(dims => {
                     appendDOM(HTML, ".panel--middle", false);
+                    $(`.ms[data-mid="${mid}"]`).classList.add("transition-X");
                     socket.emit("image", {
                         username: Cookies.get("user"),
                         type: fileType,
@@ -541,7 +590,6 @@ window.addEventListener("focus", function() {
     socket.io._reconnectionAttempts = 10;
     socket.io.open(function() {
         if (socket.io.readyState == "open") {
-            console.log(status);
             const errorEl = $$(".error, .reconnect");
             if (errorEl.length > 0) {
                 for (let i = 0; i < errorEl.length; i++)
@@ -566,14 +614,11 @@ $(".clear_chat").addEventListener("click", function(e) {
     const messages = $$(".panel--middle li");
     revSelectedIndex = -1;
     for (let i = 0; i < messages.length; i++) {
-        const t = messages.length < 200 ? i * 3 : i * 2;
+        const t = messages.length < 200 ? 100 + (i * 3) : 10 + (i * 2);
         let ms = messages[i];
-        console.log(ms);
         setTimeout(function() {
-            console.log(ms)
             ms.classList.add("transition-leave");
             setTimeout(function() {
-                console.log(ms)
                 ms.remove();
             }, 300);
         }, t);
@@ -668,16 +713,30 @@ socket.on("reverseMessage", function(mid) {
     for (let i = 0; i < ms.length; i++) {
         let mess = ms[i];
         if (typeof mess !== undefined && mess != null) {
-            if (!hasClass(mess, 'modal__div')) {
-                mess.classList.add("transition-leave");
-            } else {
+            for (let i = 0; i < $$(".from__me[data-selected]").length; i++) {
+                $$(".from__me[data-selected]")[i].removeAttribute("style");
+                $$(".from__me[data-selected]")[i].removeAttribute("data-selected");
+            }
+            if (hasClass(mess, 'modal__div')) {
                 $(".gallery__cont").classList.remove("anim--opacity");
                 $(".img__div").classList.remove("anim--scale");
                 $(".modal__div").classList.remove("anim--opacity");
+                setTimeout(function() {
+                    mess.remove();
+                }, 200);
             }
             setTimeout(function() {
-                mess.remove();
-            }, 200)
+                if (hasClass(mess, 'from__me')) {
+                    if (mess.querySelector(".reverse"))
+                        mess.querySelector(".reverse").remove();
+                    mess.querySelector(".message").innerHTML = "You removed a message";
+                } else {
+                    mess.querySelector(".message").innerHTML = "Message removed";
+                }
+                mess.querySelector(".message").style.background = "#38405a";
+                mess.querySelector(".message").classList.remove("message--image");
+                mess.querySelector(".message").classList.add("italic");
+            }, 200);
         }
     }
 
@@ -837,8 +896,8 @@ document.addEventListener('click', function(e) {
                 }, 300);
             }
         }
-    } else if (e.target && hasClass(e.target, 'room--show') || hasClass(e.target.parentNode, 'room--show')) {
-        const btn = hasClass(e.target.parentNode, 'room--show') ? e.target.parentNode : e.target;
+    } else if (e.target && hasClass(e.target, 'changeRoom') || hasClass(e.target.parentNode, 'changeRoom')) {
+        const btn = hasClass(e.target.parentNode, 'changeRoom') ? e.target.parentNode : e.target;
         const HTML = `<div class="modal__div">
                             <div class="settings__cont rooms__cont">
                                 <div class="settings__exit noselect"><i class="material-icons">close</i></div>
@@ -949,7 +1008,6 @@ socket.on("roomList", function(list) {
         let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}</li>`;
         appendDOM(HTML, '.rooms', false);
     }
-    appendDOM(`<li class="room--show">Show rooms</li>`, '.rooms', false);
     if ($(".rooms--modal")) {
         for (let i = 0; i < list.length; i++) {
             let uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
@@ -958,8 +1016,6 @@ socket.on("roomList", function(list) {
                 uniCode += String.fromCodePoint(parseInt(uni[j], 16));
             }
             let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-            console.log();
-            console.log(activeRoom);
             let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}</li>`;
             appendDOM(HTML, '.rooms--modal', false);
         }
@@ -969,7 +1025,7 @@ socket.on("roomList", function(list) {
 socket.on("userConnected", function(data) {
     if (!data.self) {
         const time = getTime();
-        const HTML = `<li class="joined"><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span></li>`;
+        const HTML = `<li class="joined"><span class="line"></span><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span><span class="line"></span></li>`;
         appendDOM(HTML, ".panel--middle");
     } else {
         if(!location.hash){
@@ -986,7 +1042,6 @@ socket.on("userConnected", function(data) {
     socket.emit("roomList", true);
 });
 socket.on("changeRoom", function(rid) {
-    console.log(rid);
     location.hash = `/${rid}`;
 });
 if(location.hash){
