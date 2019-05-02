@@ -8,7 +8,7 @@
 
 console.log("WORKER: started");
 
-var version = 'v1.1.1::';
+var version = 'v1.1.11::';
 var CACHE = 'network-or-cache';
 var OFFLINE_PAGE = '/static/offline.html';
 var offlineFundamentals = [
@@ -24,6 +24,7 @@ var offlineFundamentals = [
     '/static/bg.png',
     '/static/err.jpg',
     '/favicon.ico',
+    '/css/fonts/emoji.ttf',
     '/css/fonts/KoHo.woff2',
     '/css/fonts/KoHo-ext.woff2',
     '/css/fonts/Major.woff2',

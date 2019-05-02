@@ -9,6 +9,17 @@
 }
 
 
+/* emojis */
+
+@font-face {
+    font-family: 'KoHo';
+    font-style: normal;
+    font-weight: 400;
+    src: url(/css/fonts/emoji.ttf) format("truetype");
+    unicode-range: U+1f1e6-U+34;
+}
+
+
 /* latin */
 
 @font-face {
@@ -507,6 +518,7 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     box-shadow: 0 0 5px #161b2d;
+    font-family: 'KoHo', sans-serif;
 }
 
 .emojiList {
@@ -1881,6 +1893,7 @@ aside ul li i:not(.roomDelete),
     justify-content: center;
     align-items: center;
     flex: 0 0 auto;
+    font-family: 'KoHo', sans-serif;
 }
 
 .rooms__cont ul li:hover .roomDelete,
