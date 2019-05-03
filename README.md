@@ -60,7 +60,7 @@ File structure
 {
     "users": [{
             "username": "",
-            "password": "",
+            "password": "", // hash
             "first": true/false, // If true user will be asked for new password
             "clientId": "" // Random string, default length is 22 characters
         }]
