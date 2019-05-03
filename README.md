@@ -94,6 +94,7 @@ $ node passwordHash.js password
 
 Add this to your vhost configuration file
 ```
+Protocols h2
 ProxyPass "/" "h2://localhost:3000/"
 ProxyPassReverse "/" "https://localhost:3000/"
 ```
