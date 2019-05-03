@@ -481,6 +481,7 @@ input[type="file"] {
     position: relative;
     /* border-top: 4px solid #2d3246; */
     border-top: 3px solid #242a40;
+    height: 4.5rem;
 }
 
 .text {
@@ -494,6 +495,9 @@ input[type="file"] {
 
 .actions {
     padding: .7rem .4rem .7rem .3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .actions i {
@@ -918,6 +922,14 @@ input[type="file"] {
     margin: 0 .15rem;
 }
 
+.toDelete {
+    background: rgba(43, 52, 84, 0.5);
+}
+
+.ms.ms--removed .message {
+    background: #38405a;
+}
+
 .page-manage .input__div {
     margin: 0;
     padding: .3rem .8rem;
@@ -1164,6 +1176,14 @@ input[type="file"] {
     transition: all .2s;
     transform: translateY(-50%);
     opacity: 0;
+}
+
+.from__me.transition-leave {
+    transform: translateX(10rem);
+}
+
+.to__me.transition-leave {
+    transform: translateX(-10rem);
 }
 
 .tost {
@@ -1897,6 +1917,10 @@ aside ul li i:not(.roomDelete),
     font-family: 'KoHo', sans-serif;
 }
 
+.mgmt--title i.material-icons {
+    font-family: "Material Icons";
+}
+
 .rooms__cont ul li:hover .roomDelete,
 aside ul li:hover .roomDelete {
     opacity: 1;
@@ -2390,4 +2414,216 @@ aside .side--actions>a {
     .reverse {
         padding: .4rem .6rem;
     }
+}
+
+.pure-dark .spacer {
+    background: #404040;
+}
+
+.pure-dark .page-login .panel__div--left {
+    filter: grayscale(1);
+}
+
+body.pure-dark {
+    background: #000;
+}
+
+.pure-dark .input__div button,
+.pure-dark .input__div input,
+.pure-dark .settings__cont .input__div button {
+    background: #404040;
+    box-shadow: 0 3px 1px #636363;
+}
+
+.pure-dark aside {
+    background-color: #080808;
+}
+
+.pure-dark aside .side--actions>a,
+.pure-dark aside .side--actions>i {
+    background-color: #171717;
+}
+
+.pure-dark .panel--bottom {
+    border-top: 3px solid #151414;
+}
+
+.pure-dark .clear_chat,
+.pure-dark .logout,
+.pure-dark .settings {
+    background: #3c3c3c;
+}
+
+.pure-dark .rooms__cont .room--active,
+.pure-dark .room--active {
+    background: #232323;
+}
+
+.pure-dark .rooms__cont ul li:hover,
+.pure-dark aside ul li:hover {
+    background: #2d2d2d;
+}
+
+.pure-dark .settings__cont {
+    background-color: #1b1b1b;
+}
+
+.pure-dark .user--input input,
+.pure-dark .settings__cont .input__div input,
+.pure-dark .user--name input {
+    background: #3a3a3a;
+}
+
+.pure-dark .settings__cont .input__div .input__div--wrapper {
+    background: transparent;
+}
+
+.pure-dark .settings__cont .input__div--wrapper i {
+    background: #5d5d5d;
+}
+
+.pure-dark .settings__cont .input__div {
+    border-bottom: 1px solid #404040;
+}
+
+.pure-dark .settings__cont .activeSessions li:first-child {
+    border-bottom: 1px solid #616161;
+    color: #a5a5a5;
+}
+
+.pure-dark .settings__exit {
+    background: #4c4c4c;
+}
+
+.pure-dark input[type=checkbox]~.checkboxWrapper {
+    background: #484848;
+    border: 1px solid #292929;
+}
+
+.pure-dark input[type=checkbox]~.checkboxWrapper::after {
+    background: #1e95e0;
+}
+
+.pure-dark .icon--prev,
+.pure-dark .info--change i,
+.pure-dark .mgmt--title i,
+.pure-dark .rooms__cont ul li i:not(.roomDelete),
+.pure-dark aside ul li i:not(.roomDelete) {
+    background: rgba(92, 154, 255, 0.3);
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.pure-dark .actions .select__emoji,
+.pure-dark .select__icon {
+    background: #4e4e4e;
+}
+
+.pure-dark .sendEmoji,
+.pure-dark .room__icons {
+    background-color: rgba(60, 60, 60, 0.78);
+}
+
+.pure-dark ::-webkit-scrollbar {
+    background-color: #3c3c3c;
+}
+
+.pure-dark ::-webkit-scrollbar-thumb {
+    background: #989898;
+}
+
+.pure-dark .user--record {
+    background: #1d1d1d;
+}
+
+.pure-dark .user--record:nth-of-type(even) {
+    background: #212121;
+}
+
+.pure-dark .joined {
+    color: #ababab;
+}
+
+.pure-dark .joined span.line {
+    background: #3c3c3c;
+}
+
+.pure-dark .who {
+    background: #272727;
+}
+
+.pure-dark .modal__fileinfo,
+.pure-dark .gallery__download,
+.pure-dark .modal__exit,
+.pure-dark .settings__exit {
+    background: #272727;
+}
+
+.pure-dark .info--change {
+    background: #151414;
+}
+
+.pure-dark .to__me .message {
+    background: #2f2f2f;
+}
+
+.pure-dark .toDelete {
+    background: rgba(41, 41, 41, 0.5);
+}
+
+.pure-dark .ms.ms--removed .message {
+    background: #1b1b1b;
+}
+
+.pure-dark .usersTyping,
+.pure-dark .usersRead,
+.pure-dark .typing {
+    background: #1e1e1e;
+}
+
+.pure-dark .typing .who,
+.pure-dark .read .who {
+    background: #272727;
+}
+
+.pure-dark .lds-roller div:after {
+    background: #a8a8a8;
+}
+
+.pure-dark .clear_chat:hover,
+.pure-dark .settings:hover {
+    background: #66caff;
+    color: #0e0e0e;
+}
+
+.pure-dark .logout:hover {
+    background: #ff6e6e;
+    color: #fefefe;
+}
+
+.pure-dark .modal__exit:hover,
+.pure-dark .settings__exit:hover {
+    background: #ff6e6e;
+}
+
+.pure-dark .panel__div--left {
+    filter: grayscale(1);
+}
+
+.pure-dark .input__div button:focus,
+.pure-dark .input__div button:hover {
+    background: #204774;
+    color: #1fa9ff;
+    box-shadow: 0 3px 1px #0b3463;
+}
+
+.pure-dark .message--image {
+    box-shadow: 0 0 20px #1b1b1b;
+}
+
+.pure-dark .gallery__download:hover {
+    background: #0068a9;
+}
+
+.pure-dark .actions .select__emoji:hover {
+    background: #000;
 }

@@ -613,8 +613,8 @@ window.addEventListener("blur", function() {
 $(".clear_chat").addEventListener("click", function(e) {
     const messages = $$(".panel--middle li");
     revSelectedIndex = -1;
-    for (let i = 0; i < messages.length; i++) {
-        const t = messages.length < 200 ? 100 + (i * 3) : 10 + (i * 2);
+    for (let i = messages.length - 1; i >= 0; i--) {
+        const t = messages.length < 300 ? ((messages.length - 1) * 5) - (5 * i) : 0;
         let ms = messages[i];
         setTimeout(function() {
             ms.classList.add("transition-leave");
@@ -669,13 +669,13 @@ $(".panel--middle").addEventListener('click', function(e) {
         const mid = messageDiv.getAttribute("data-mid");
         if (e.ctrlKey) {
             if (typeof messageDiv.getAttribute("data-selected") === undefined || messageDiv.getAttribute("data-selected") == null) {
-                messageDiv.style.background = "rgba(43, 52, 84, 0.5)";
+                messageDiv.classList.add("toDelete");
                 messageDiv.setAttribute("data-selected", mid);
                 const nodes = Array.prototype.slice.call($$(".from__me")),
                     liRef = messageDiv;
                 revSelectedIndex = nodes.indexOf(liRef);
             } else {
-                messageDiv.removeAttribute("style");
+                messageDiv.classList.remove("toDelete");
                 messageDiv.removeAttribute("data-selected");
                 if ($$(".from__me[data-selected]").length === 0) revSelectedIndex = -1;
             }
@@ -686,12 +686,12 @@ $(".panel--middle").addEventListener('click', function(e) {
             const index = nodes.indexOf(liRef);
             if (index > revSelectedIndex) {
                 for (let i = revSelectedIndex; i <= index; i++) {
-                    $$(".from__me")[i].style.background = "rgba(43, 52, 84, 0.5)";
+                    $$(".from__me")[i].classList.add("toDelete");
                     $$(".from__me")[i].setAttribute("data-selected", $$(".from__me")[i].getAttribute("data-mid"));
                 }
             } else {
                 for (let i = revSelectedIndex; i >= index; i--) {
-                    $$(".from__me")[i].style.background = "rgba(43, 52, 84, 0.5)";
+                    $$(".from__me")[i].classList.add("toDelete");
                     $$(".from__me")[i].setAttribute("data-selected", $$(".from__me")[i].getAttribute("data-mid"));
                 }
             }
@@ -714,7 +714,7 @@ socket.on("reverseMessage", function(mid) {
         let mess = ms[i];
         if (typeof mess !== undefined && mess != null) {
             for (let i = 0; i < $$(".from__me[data-selected]").length; i++) {
-                $$(".from__me[data-selected]")[i].removeAttribute("style");
+                $$(".from__me[data-selected]")[i].classList.remove("toDelete");
                 $$(".from__me[data-selected]")[i].removeAttribute("data-selected");
             }
             if (hasClass(mess, 'modal__div')) {
@@ -733,7 +733,7 @@ socket.on("reverseMessage", function(mid) {
                 } else {
                     mess.querySelector(".message").innerHTML = "Message removed";
                 }
-                mess.querySelector(".message").style.background = "#38405a";
+                mess.classList.add("ms--removed");
                 mess.querySelector(".message").classList.remove("message--image");
                 mess.querySelector(".message").classList.add("italic");
             }, 200);

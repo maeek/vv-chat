@@ -66,6 +66,9 @@ sessions/*
 # Users file
 src/users.json
 
+# Rooms file
+src/rooms.json
+
 #Builds
 
 src/static/js/func.js

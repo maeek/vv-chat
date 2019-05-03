@@ -71,11 +71,12 @@ function appendDOM(HTML, element, scroll) {
             middleDiv.clientHeight
         ) - 250) && scroll) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
+        // const panel = $(".panel--middle");
+        // const pwh = $(".page__wrapper").clientHeight;
+        // const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
+        // panel.style["height"] = pcalc + "px";
     }
-    const panel = $(".panel--middle");
-    const pwh = $(".page__wrapper").offsetHeight;
-    const pcalc = pwh - $(".panel--top").offsetHeight - $(".panel--bottom").offsetHeight;
-    panel.style["max-height"] = pcalc + "px";
+
 }
 
 let errTim;
