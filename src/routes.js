@@ -13,25 +13,16 @@ const express = require('express');
 const MobileDetect = require('mobile-detect');
 const router = express.Router();
 const Store = require('./Store');
+const randomString = require('./randomString');
 
-
-function randomString(length = 15) {
-    const chars = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789$_!?";
-    let string = "";
-    for (let i = 0; i < length; i++) {
-        string += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return string;
-}
-
-router.get('/', function(req, res) {
+router.get('/', function route_get_main(req, res) {
     res.redirect(301, "/login/");
 });
 
 /* 
- * Allow access to /src/static/js/manage.js only for root
+ * Allow access to /static/js/manage.js only for root
  */
-router.get('/js/manage.js', function(req, res) {
+router.get('/js/manage.js', function route_get_manageJs(req, res) {
     if (req.session.valid && req.session.auth == "root") {
         res.sendFile(__dirname + '/static/js/manage.js');
     } else {
@@ -43,14 +34,14 @@ router.get('/js/manage.js', function(req, res) {
  * User management route
  */
 router.route('/manage/')
-    .get((req, res) => {
+    .get(function route_get_manage(req, res) {
         if (req.session.auth == "root") {
             res.sendFile(__dirname + '/assets/manage.html');
         } else {
             res.redirect(301, '/chat/');
         }
     })
-    .post((req, res) => {
+    .post(function route_post_manage(req, res) {
         if (req.session.auth == "root") {
             /* 
              * Check for usersFile 
@@ -62,7 +53,7 @@ router.route('/manage/')
             } else {
                 switch (req.body.action) {
                     case "getUsers":
-                        (function() {
+                        (function manage_getUsers() {
                             let userObj = JSON.parse(fs.readFileSync(config.usersFile));
                             for (let i = 0; i < userObj.users.length; i++) {
                                 delete userObj.users[i].password;
@@ -76,7 +67,7 @@ router.route('/manage/')
 
                         break;
                     case "deleteUser":
-                        (function() {
+                        (function manage_deleteUser() {
                             let userObj = JSON.parse(fs.readFileSync(config.usersFile));
                             const user = req.body.user.trim();
                             if (user != "root") {
@@ -91,7 +82,7 @@ router.route('/manage/')
                         })();
                         break;
                     case "createUser":
-                        (function() {
+                        (function manage_createUser() {
                             let userObj = JSON.parse(fs.readFileSync(config.usersFile));
                             const user = req.body.user.toLowerCase().trim();
                             const format = /^[a-zA-Z0-9@!\.\-]+$/;
@@ -124,7 +115,7 @@ router.route('/manage/')
                         })();
                         break;
                     case "resetPassword":
-                        (function() {
+                        (function manage_resetPassword() {
                             let userObj = JSON.parse(fs.readFileSync(config.usersFile));
                             const user = req.body.user.trim();
                             const password = randomString();
@@ -160,14 +151,14 @@ router.route('/manage/')
  * Password change route
  */
 router.route('/setup/')
-    .get((req, res) => {
+    .get(function route_get_setup(req, res) {
         if (req.session.setup) {
             res.sendFile(__dirname + '/assets/changePass.html');
         } else {
             res.redirect(301, '/chat/');
         }
     })
-    .post((req, res) => {
+    .post(function route_post_setup(req, res) {
         if (!fs.existsSync(config.usersFile)) {
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
             res.redirect(301, "/setup/");
@@ -181,7 +172,7 @@ router.route('/setup/')
                 } else {
                     const salt = bcrypt.genSaltSync();
                     let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                    bcrypt.hash(password, salt, null, function(err, hash) {
+                    bcrypt.hash(password, salt, null, function setup_first_hash(err, hash) {
                         if (!err) {
                             usersObj.users = usersObj.users.filter(el => {
                                 if (el.username == name) {
@@ -215,7 +206,7 @@ router.route('/setup/')
                         return user.username == req.session.user;
                     });
                     if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
-                        bcrypt.hash(password, salt, null, function(err, hash) {
+                        bcrypt.hash(password, salt, null, function setup_hash(err, hash) {
                             if (!err) {
                                 usersObj.users = usersObj.users.filter(el => {
                                     if (el.username == name)
@@ -251,13 +242,20 @@ router.route('/setup/')
  * Login route
  */
 router.route('/login/')
-    .get((req, res) => {
-        if (!req.session.valid)
+    .get(function route_get_login(req, res) {
+        if (!req.session.valid) {
+            /* Clear expired/invalid cookies */
+            res.clearCookie("user.sid");
+            res.clearCookie("user");
+            res.clearCookie("io");
+            res.clearCookie("clientId");
             res.sendFile(__dirname + '/assets/login.html');
-        else
+        } else {
             res.redirect(301, "/chat/");
+        }
     })
-    .post((req, res) => {
+    .post(function route_post_login(req, res) {
+
         /* 
          * Check for usersFile 
          * Prevent unnecessary errors if you accidentaly deleted the file or you don't have permissions
@@ -275,7 +273,7 @@ router.route('/login/')
             });
 
             if (usersFile.users.length == 1) {
-                bcrypt.compare(password, usersFile.users[0].password, function(err, result) {
+                bcrypt.compare(password, usersFile.users[0].password, function login_compareHash(err, result) {
                     if (err) {
                         console.log(`ERROR: failed to hash password at "/login/" for user: "${username}" error description:\n${err}`);
                         res.redirect(301, `/login/#error`);
@@ -337,7 +335,7 @@ router.route('/login/')
 /* 
  * Chat application route
  */
-router.get('/chat/', (req, res) => {
+router.get('/chat/', function route_get_chat(req, res) {
     if (req.session.valid) {
         if (req.session.auth != "root") {
             if (req.session.setup) {
@@ -357,7 +355,7 @@ router.get('/chat/', (req, res) => {
 /* 
  * Deleting session
  */
-router.get('/logout', (req, res) => {
+router.get('/logout', function route_get_logout(req, res) {
     if (req.session.valid) {
         Store.destroy(req.session.id, (err) => {
             if (err != null) console.log("ERROR: Session already destroyed, description:\n" + err);
@@ -374,6 +372,11 @@ router.get('/logout', (req, res) => {
     res.redirect(301, "/login/");
 });
 
-
+/* 
+ * 404 handler
+ */
+router.all('*', function route_not_found(req, res, next) {
+    res.status(404).sendFile(__dirname + '/assets/error.html');
+});
 
 module.exports = router;

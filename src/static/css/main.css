@@ -481,10 +481,11 @@ input[type="file"] {
     position: relative;
     /* border-top: 4px solid #2d3246; */
     border-top: 3px solid #242a40;
-    height: 4.5rem;
+    height: 4.6rem;
+    z-index: 2;
 }
 
-.text {
+.panel--bottom .text {
     flex: 1 0 auto;
     height: 4.4rem;
 }
@@ -1208,6 +1209,7 @@ input[type="file"] {
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
+    z-index: 1;
 }
 
 .tost--error {
@@ -2082,7 +2084,6 @@ aside .side--actions>a {
 }
 
 .icon--prev {
-    width: 2rem;
     margin: 0;
     display: flex;
     justify-content: center;
@@ -2200,6 +2201,21 @@ aside .side--actions>a {
     background: #2e3654;
     padding: .3rem .5rem;
     border-radius: 15px;
+}
+
+.room--count {
+    position: absolute;
+    border-radius: 15px;
+    background: #116dc5;
+    width: 1.5rem;
+    height: 1.5rem;
+    left: .7rem;
+    top: .1rem;
+    font-size: .8rem;
+    color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 @keyframes lds-roller {

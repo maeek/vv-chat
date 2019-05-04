@@ -30,7 +30,7 @@ const middleDiv = $(".panel--middle");
  * 
  *****************************************************************/
 
-window.addEventListener("DOMContentLoaded", function() {
+window.addEventListener("DOMContentLoaded", function DOMLoaded() {
     const el = $("aside .info");
     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
     const panel = $(".panel--middle");
@@ -47,7 +47,7 @@ window.addEventListener("DOMContentLoaded", function() {
     }
 
 
-    window.addEventListener("resize", function() {
+    window.addEventListener("resize", function win_resized() {
         const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
         if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
             const calc = wh - $("aside .logo__div").offsetHeight - $("aside .side--actions").offsetHeight;
@@ -76,7 +76,7 @@ window.addEventListener("DOMContentLoaded", function() {
 /* 
  * Connection errors
  */
-socket.on("connect_error", function() {
+socket.on("connect_error", function socket_connect_error() {
     const errorEl = $$(".error:not(.reconnect)");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
@@ -89,7 +89,7 @@ socket.on("connect_error", function() {
     appendDOM(HTML, ".panel--middle");
     $("#uc").innerHTML = 0;
 });
-socket.on("connect_failed", function() {
+socket.on("connect_failed", function socket_connect_failed() {
     const errorEl = $$(".error:not(.reconnect)");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
@@ -103,7 +103,7 @@ socket.on("connect_failed", function() {
     $("#uc").innerHTML = 0;
 });
 
-socket.on("connect_timeout", function() {
+socket.on("connect_timeout", function socket_connect_timeout() {
     const errorEl = $$(".error:not(.reconnect)");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
@@ -120,7 +120,7 @@ socket.on("connect_timeout", function() {
 /* 
  * Reconnection errors
  */
-socket.on("reconnecting", function(at) {
+socket.on("reconnecting", function socket_reconnecting(at) {
     const errorEl = $$(".reconnect");
     const HTML = `<li class="error reconnect">
                     <div class="who noselect recAttemps">${at}/10</div>
@@ -132,7 +132,7 @@ socket.on("reconnecting", function(at) {
         appendDOM(HTML, ".panel--middle");
     $("#uc").innerHTML = 0;
 });
-socket.on("reconnect_failed", function() {
+socket.on("reconnect_failed", function socket_reconnect_failed() {
     const errorEl = $$(".reconnect");
     const HTML = `<li class="error reconnect">
             <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
@@ -147,7 +147,7 @@ socket.on("reconnect_failed", function() {
     }
 });
 
-socket.on("reconnect", function() {
+socket.on("reconnect", function socket_reconnect() {
     const errorEl = $$(".error, .reconnect");
     if (errorEl.length > 0)
         for (let i = 0; i < errorEl.length; i++)
@@ -158,7 +158,7 @@ socket.on("reconnect", function() {
 /* 
  * Invalid session logout
  */
-socket.on("invalidSession", function(status) {
+socket.on("invalidSession", function socket_invalidSession(status) {
     if (status) {
         socket.close();
         location.href = "/logout";
@@ -212,7 +212,7 @@ function appendMessage(socket) {
 }
 
 let isUpTimeout;
-socket.on("message", function(data) {
+socket.on("message", function socket_message(data) {
     let message = data.message;
     const mid = data.mid,
         time = data.time,
@@ -262,8 +262,8 @@ socket.on("message", function(data) {
 
 
 
-$(".send").addEventListener("click", function() { appendMessage(socket) });
-$(".textField").addEventListener("keydown", function(e) {
+$(".send").addEventListener("click", function send_click() { appendMessage(socket) });
+$(".textField").addEventListener("keydown", function send_textField(e) {
     const codes = [
         17,
         18,
@@ -313,7 +313,7 @@ $(".textField").addEventListener("keydown", function(e) {
 /*
  * Send Emojis
  */
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function send_emojis(e) {
     if (e.target && hasClass(e.target, 'select__emoji')) {
         let uni = e.target.getAttribute("data-index");
         uni = uni.indexOf("-") != -1 ? uni.split("-") : [uni];
@@ -425,7 +425,7 @@ function appendImage(socket, files) {
     }
 }
 
-socket.on("image", function(image) {
+socket.on("image", function socket_image(image) {
     const time = getTime();
     const HTML = `<li class="ms ${image.username==Cookies.get("user")?"from__me":"to__me"}" data-mid="${image.mid}">
                     <div class="time noselect">${time}</div>
@@ -473,7 +473,7 @@ socket.on("image", function(image) {
     newNotf(image.username, true);
 });
 
-$("input[type='file']").addEventListener('input', function(e) {
+$("input[type='file']").addEventListener('input', function send_file_input(e) {
     e.stopPropagation();
     e.preventDefault();
     let files = e.target.files;
@@ -483,7 +483,7 @@ $("input[type='file']").addEventListener('input', function(e) {
         error('Selected too many photos, limit is 4')
 }, false);
 
-$(".photo").addEventListener("click", function(e) {
+$(".photo").addEventListener("click", function send_file_click(e) {
     if (window.File && window.FileReader && window.FileList && window.Blob) {
         $("input[type='file']").click();
     } else {
@@ -491,7 +491,7 @@ $(".photo").addEventListener("click", function(e) {
     }
 });
 
-$(".textField").addEventListener("paste", function(pasteEvent) {
+$(".textField").addEventListener("paste", function send_file_paste(pasteEvent) {
     if (Cookies.get("user")) {
         let items = pasteEvent.clipboardData.items;
         for (let i = 0; i < items.length; i++) {
@@ -551,7 +551,7 @@ $(".textField").addEventListener("paste", function(pasteEvent) {
  * 
  *****************************************************************/
 
-$(".panel--middle").addEventListener('click', function(e) {
+$(".panel--middle").addEventListener('click', function show_image_popup(e) {
     if (e.target && hasClass(e.target.parentNode, 'message--image')) {
         const data = e.target.getAttribute("src");
         const type = e.target.getAttribute("data-type");
@@ -584,7 +584,7 @@ $(".panel--middle").addEventListener('click', function(e) {
  * 
  *****************************************************************/
 
-window.addEventListener("focus", function() {
+window.addEventListener("focus", function win_focus() {
     $(".textField").focus();
     socket.io.reconnection(true);
     socket.io._reconnectionAttempts = 10;
@@ -599,7 +599,7 @@ window.addEventListener("focus", function() {
         }
     });
 });
-window.addEventListener("blur", function() {
+window.addEventListener("blur", function win_blur() {
     socket.io._reconnectionAttempts = 0;
 });
 
@@ -610,7 +610,7 @@ window.addEventListener("blur", function() {
  * 
  *****************************************************************/
 
-$(".clear_chat").addEventListener("click", function(e) {
+$(".clear_chat").addEventListener("click", function clear_chat(e) {
     const messages = $$(".panel--middle li");
     revSelectedIndex = -1;
     for (let i = messages.length - 1; i >= 0; i--) {
@@ -633,21 +633,21 @@ $(".clear_chat").addEventListener("click", function(e) {
  *****************************************************************/
 
 const dropImage = $('.panel--bottom');
-dropImage.addEventListener('dragover', function(evt) {
+dropImage.addEventListener('dragover', function send_image_dragover(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     evt.dataTransfer.dropEffect = 'copy';
     $('.textField').setAttribute("placeholder", "Drop image here");
     $('.panel--bottom').style.background = "#454d6f";
 }, false);
-dropImage.addEventListener('dragleave', function(evt) {
+dropImage.addEventListener('dragleave', function send_image_leave(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     $('.panel--bottom').removeAttribute("style");
     $('.textField').setAttribute("placeholder", "Type message here");
 
 }, false);
-dropImage.addEventListener('drop', function(evt) {
+dropImage.addEventListener('drop', function send_image_drop(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     let files = evt.dataTransfer.files;
@@ -663,7 +663,7 @@ dropImage.addEventListener('drop', function(evt) {
  * 
  *****************************************************************/
 let revSelectedIndex = -1;
-$(".panel--middle").addEventListener('click', function(e) {
+$(".panel--middle").addEventListener('click', function delete_sent_messages(e) {
     if (e.target && hasClass(e.target, 'reverse') || hasClass(e.target.parentNode, 'reverse')) {
         const messageDiv = hasClass(e.target.parentNode, 'reverse') ? e.target.parentNode.parentNode : e.target.parentNode;
         const mid = messageDiv.getAttribute("data-mid");
@@ -708,7 +708,7 @@ $(".panel--middle").addEventListener('click', function(e) {
     }
 });
 
-socket.on("reverseMessage", function(mid) {
+socket.on("reverseMessage", function socket_reverseMessage(mid) {
     const ms = $$(`[data-mid="${mid}"]`);
     for (let i = 0; i < ms.length; i++) {
         let mess = ms[i];
@@ -721,11 +721,11 @@ socket.on("reverseMessage", function(mid) {
                 $(".gallery__cont").classList.remove("anim--opacity");
                 $(".img__div").classList.remove("anim--scale");
                 $(".modal__div").classList.remove("anim--opacity");
-                setTimeout(function() {
+                setTimeout(function remove_image_popup() {
                     mess.remove();
                 }, 200);
             }
-            setTimeout(function() {
+            setTimeout(function remove_message() {
                 if (hasClass(mess, 'from__me')) {
                     if (mess.querySelector(".reverse"))
                         mess.querySelector(".reverse").remove();
@@ -750,7 +750,7 @@ socket.on("reverseMessage", function(mid) {
  *****************************************************************/
 let userTyping = [];
 let timeout;
-socket.on("typing", function(mid) {
+socket.on("typing", function socket_typing(mid) {
             const midPos = userTyping.indexOf(mid.user);
             if (midPos == -1) {
                 userTyping.push(mid.user);
@@ -772,7 +772,7 @@ socket.on("typing", function(mid) {
             </li>`;
     appendDOM(HTML, ".panel--middle", false);
     clearTimeout(timeout);
-    timeout = setTimeout(function() {
+    timeout = setTimeout(function remove_typing() {
         const el = $$(".who-typer");
         for (let i = 0; i < el.length; i++) {
             const user = el[i].getAttribute("data-user");
@@ -789,7 +789,7 @@ socket.on("typing", function(mid) {
  * 
  *****************************************************************/
 
-socket.on("activeSessions", (data) => {
+socket.on("activeSessions", function socket_activeSessions(data) {
     const sessions = $$("li[data-socketid]");
     for (let i = 0; i < sessions.length; i++)
         sessions[i].remove();
@@ -807,8 +807,8 @@ socket.on("activeSessions", (data) => {
     }
 });
 if ($$(".settings--popup").length > 0) {
-    $(".settings--popup").addEventListener("click", function() {
-        socket.emit("activeSessions", true, function(data) {
+    $(".settings--popup").addEventListener("click", function settings_popup_click() {
+        socket.emit("activeSessions", true, function socket_activeSessions_popup(data) {
             const sessions = $$(".session__li");
             for (let i = 0; i < sessions.length; i++)
                 sessions[i].remove();
@@ -830,12 +830,12 @@ if ($$(".settings--popup").length > 0) {
         });
     });
 }
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function doc_click(e) {
     if (e.target && hasClass(e.target, 'tost') || hasClass(e.target.parentNode, 'tost')) {
         middleDiv.scrollTop = middleDiv.scrollHeight;
         if (hasClass(e.target, 'tost')) e.target.classList.add("tost-leave");
         else e.target.parentNode.classList.add("tost-leave");
-        setTimeout(function() {
+        setTimeout(function tost_remove() {
             if (hasClass(e.target, 'tost')) e.target.remove();
             else e.target.parentNode.remove();
         }, 300);
@@ -844,7 +844,7 @@ document.addEventListener('click', function(e) {
         $(".gallery__cont").classList.remove("anim--opacity");
         $(".img__div").classList.remove("anim--scale");
         $(".modal__div").classList.remove("anim--opacity");
-        setTimeout(function() {
+        setTimeout(function modal_exit() {
             $(".modal__div").remove();
         }, 300);
     }
@@ -861,12 +861,12 @@ document.addEventListener('click', function(e) {
             anchor.href = window.URL.createObjectURL(blob);
             anchor.dataset.downloadurl = [type+';charset=utf8', anchor.download, anchor.href].join(':');
             anchor.click();
-        })
+        });
        
     } else if (e.target && hasClass(e.target, 'remove--session') || hasClass(e.target.parentNode, 'remove--session')) {
         const btn = hasClass(e.target.parentNode, 'remove--session') ? e.target.parentNode : e.target;
         const socketId = btn.parentNode.getAttribute("data-socketid");
-        socket.emit("removeSession", socketId, (data) => {
+        socket.emit("removeSession", socketId, function socket_EmitRemoveSession(data) {
             const sessions = $$(".session__li");
             for (let i = 0; i < sessions.length; i++)
                 sessions[i].remove();
@@ -995,7 +995,7 @@ document.addEventListener('click', function(e) {
  *****************************************************************/
 
 
-socket.on("roomList", function(list) {
+socket.on("roomList", function socket_roomList(list) {
     for (let r = 0; r < $$(".rooms").length; r++)
         $$(".rooms")[r].innerHTML = "";
     for (let i = 0; i < list.length; i++) {
@@ -1005,7 +1005,7 @@ socket.on("roomList", function(list) {
             uniCode += String.fromCodePoint(parseInt(uni[j], 16));
         }
         let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-        let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}</li>`;
+        let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name} <div class="room--count">${list[i].online}</div></li>`;
         appendDOM(HTML, '.rooms', false);
     }
     if ($(".rooms--modal")) {
@@ -1016,13 +1016,13 @@ socket.on("roomList", function(list) {
                 uniCode += String.fromCodePoint(parseInt(uni[j], 16));
             }
             let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-            let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}</li>`;
+            let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name} <div class="room--count">${list[i].online}</div></li>`;
             appendDOM(HTML, '.rooms--modal', false);
         }
     }
 });
 
-socket.on("userConnected", function(data) {
+socket.on("userConnected", function socket_userConnected(data) {
     if (!data.self) {
         const time = getTime();
         const HTML = `<li class="joined"><span class="line"></span><span>${escapeHtml(data.username)} ${data.status?"joined chat":"left chat"} - ${time}</span><span class="line"></span></li>`;
@@ -1041,13 +1041,13 @@ socket.on("userConnected", function(data) {
     $("#uc").innerHTML = data.users;
     socket.emit("roomList", true);
 });
-socket.on("changeRoom", function(rid) {
+socket.on("changeRoom", function socket_changeRoom(rid) {
     location.hash = `/${rid}`;
 });
 if(location.hash){
     let hash = location.hash;
     let rid = decodeURIComponent(hash.substring(2));
-    socket.emit("changeRoom", rid, function(roomInfo) {
+    socket.emit("changeRoom", rid, function socket_EmitChangeRoom(roomInfo) {
         if(rid !== roomInfo.id){
             location.hash = `/${roomInfo.id}`;
         } else {
@@ -1071,7 +1071,7 @@ if(location.hash){
 } else {
     socket.emit("userConnected", null);
 }
-window.addEventListener("hashchange",function(){
+window.addEventListener("hashchange",function win_hashchange(){
     let hash = location.hash;
     let rid = decodeURIComponent(hash.substring(2));
     const rooms = $$(".room--change");
@@ -1082,10 +1082,11 @@ window.addEventListener("hashchange",function(){
     for(let i = 0; i< selRooms.length; i++) {
         selRooms[i].classList.add("room--active");
     }        
-    socket.emit("changeRoom", rid, function(roomInfo) {
+    socket.emit("changeRoom", rid, function socket_EmitChangeRoom2(roomInfo) {
         if(rid !== roomInfo.id){
             location.hash = `/${roomInfo.id}`;
         } else {
+            socket.emit("roomList", true);
             $(".rooms--title").innerHTML = "";        
             let uni = roomInfo.icon.indexOf("-") != -1?roomInfo.icon.split("-"):[roomInfo.icon];
             let uniCode="";

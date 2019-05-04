@@ -85,7 +85,7 @@ socket.on("roomList", function(list) {
         for (let j = 0; j < uni.length; j++) {
             uniCode += String.fromCodePoint(parseInt(uni[j], 16));
         }
-        let HTML = `<li class="room--change" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}<i class="material-icons roomDelete">delete</i></li>`;
+        let HTML = `<li class="room--change" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}<div class="room--count">${list[i].online}</div><i class="material-icons roomDelete">delete</i></li>`;
         appendDOM(HTML, '.rooms', false);
     }
     appendDOM(`<li class="room--show">Show rooms</li>`, '.rooms', false);
@@ -96,7 +96,7 @@ socket.on("roomList", function(list) {
             for (let j = 0; j < uni.length; j++) {
                 uniCode += String.fromCodePoint(parseInt(uni[j], 16));
             }
-            let HTML = `<li class="room--change" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}<i class="material-icons roomDelete">delete</i></li>`;
+            let HTML = `<li class="room--change" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name}<div class="room--count">${list[i].online}</div><i class="material-icons roomDelete">delete</i></li>`;
             appendDOM(HTML, '.rooms--modal', false);
         }
     }

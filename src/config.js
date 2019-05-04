@@ -26,4 +26,18 @@ const config = {
         priv: 'server.key'
     }
 }
+
+
+/* Docker SSL cert settings */
+if (process.env.DOCKER) {
+    config.roomsFile = '/app/input/rooms.json';
+    config.usersFile = '/app/input/users.json';
+    config.certificateFiles = {
+        cert: '/app/input/cert.pem',
+        ca: '/app/input/chain.pem',
+        priv: '/app/input/privkey.pem',
+    }
+}
+
+
 module.exports = config;

@@ -19,7 +19,7 @@
     <script src='/js/bluebird.min.js'></script>
     <script src='/js/json3.min.js'></script>
     <script src='/js/fetch.js'></script>
-    <script defer src="/js/func.js"></script>
+    <script defer src="/js/clientFunc.js"></script>
     <script defer src="/js/client.js"></script>
 </head>
 
@@ -34,7 +34,20 @@
             <div class="info">
                 <h4 class="noselect">Chat rooms</h4>
 
-                <ul class="rooms noselect"></ul>
+                <ul class="rooms noselect">
+                    <li class="loader__div">
+                        <div class="lds-roller">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </li>
+                </ul>
             </div>
             <div class="side--actions">
                 <i class="material-icons settings settings--popup noselect" title="Settings">settings</i>

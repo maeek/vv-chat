@@ -8,7 +8,7 @@
 
 console.log("WORKER: started");
 
-var version = 'v1.1.11::';
+var version = 'v1.1.12::';
 var CACHE = 'network-or-cache';
 var OFFLINE_PAGE = '/static/offline.html';
 var offlineFundamentals = [
@@ -16,7 +16,7 @@ var offlineFundamentals = [
     '/css/main.min.css',
     '/static/offline.html',
     '/js/emoji.json',
-    '/js/func.js',
+    '/js/clientFunc.js',
     '/js/client.js',
     '/js/socket.io.js',
     '/js/js.cookie.main.js',

@@ -5,10 +5,10 @@
     "private": true,
     "main": "index.js",
     "scripts": {
-        "build": "./node_modules/.bin/babel src/client.js src/func.js -d src/static/js/ && cp src/static/js/src/client.js src/static/js/src/func.js src/static/js/ && rm -rf src/static/js/src",
+        "build": "./node_modules/.bin/babel src/client/client.js src/client/clientFunc.js -d src/static/js/ && cp src/static/js/src/client/client.js src/static/js/src/client/clientFunc.js src/static/js/ && rm -rf src/static/js/src",
         "start": "npm run build && node index.js",
         "dev": "npm run build && DEBUG=express:* node index.js",
-        "docker": "npm run build && DOCKER=aaaaaaaaaaaaaaaaaaa node index.js",
+        "docker": "npm run build && DOCKER=true node index.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "config": {

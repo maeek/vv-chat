@@ -8,8 +8,9 @@
 
 
 const domFromText = html => new DOMParser().parseFromString(html, 'text/html').body.childNodes;
+
 let sound = new Audio();
-sound.src = "/static/pull-out.ogg"
+sound.src = "/static/pull-out.ogg";
 
 const $ = element => document.querySelector(element);
 const $$ = element => document.querySelectorAll(element);
@@ -80,7 +81,6 @@ function appendDOM(HTML, element, scroll) {
 }
 
 let errTim;
-
 function error(message, timeout) {
     timeout = !timeout ? 2000 : timeout;
     const errID = "errID-" + randomString();
@@ -281,8 +281,6 @@ window.addEventListener("DOMContentLoaded", function() {
     });
     const loadedFont = emojis.load();
     loadedFont.then(function(loaded_font) {
-        // apply the font (which may rerender text and cause a page reflow)
-        // once the font has finished downloading
         document.fonts.add(loaded_font);
         document.body.style.fontFamily = "KoHo, sans-serif";
     }).catch(e => console.log("Not supported"));

@@ -71,6 +71,6 @@ src/rooms.json
 
 #Builds
 
-src/static/js/func.js
+src/static/js/clientFunc.js
 src/static/js/client.js
 server.*

@@ -1,3 +1,11 @@
+/*
+ *   Author: maeek
+ *   Description: No history simple websocket chat
+ *   Github: https://github.com/maeek/vv-chat
+ *   Version: 1.1.0
+ * 
+ */
+
 (function(arr) {
     arr.forEach(function(item) {
         if (item.hasOwnProperty('append')) {
@@ -47,7 +55,8 @@ navigator.browserSpecs = (function() {
         version: M[1]
     };
 })();
-const domFromText = function(html) {
+
+function domFromText(html) {
     return new DOMParser().parseFromString(html, 'text/html').body.childNodes
 };
 
@@ -57,7 +66,7 @@ function appendDOM(HTML, element) {
         document.querySelector(element).append(childNodes[i]);
     }
 }
-window.addEventListener("DOMContentLoaded", function() {
+window.addEventListener("DOMContentLoaded", function DOMLoaded() {
     try {
         const emojis = new FontFace("KoHo", "url(/css/fonts/emoji.ttf)", {
             style: 'normal',
@@ -68,7 +77,7 @@ window.addEventListener("DOMContentLoaded", function() {
     } catch (e) {
         console.log("Not supported");
     }
-    document.querySelector('form').addEventListener('submit', function(e) {
+    document.querySelector('form').addEventListener('submit', function login_submit(e) {
         if (document.querySelector('input[name="username"]').value.trim().length > 1 && document.querySelector('input[name="password"]').value.trim().length > 4) {
             document.querySelector(".finger").innerHTML = "autorenew";
             document.querySelector(".finger").classList.add("spin");
