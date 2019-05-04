@@ -1,5 +1,5 @@
 # VV-CHAT
-Simple websocket chat written in javascript
+Websocket chat written in javascript
 
 ### Features
 
