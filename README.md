@@ -49,7 +49,7 @@ Mount your volume to ```/app/input/``` and place there certificates, users.json 
 The password for root account will be generated on first start
 
 
-#### config.js
+#### src/config.js
 Change this settings for your own needs
 
 | Name | Default values |
@@ -61,7 +61,7 @@ Change this settings for your own needs
 | Default room values | ```{id: "landing", name: "Main", icon: "0x1f47e"} //👾``` |
 | Certificates | ```./server.[crt, csr, key]``` |
 
-#### users.json
+#### src/users.json
 File structure
 ```
 {
@@ -74,7 +74,7 @@ File structure
 }
 ```
 
-#### rooms.json
+#### src/rooms.json
 File structure
 ```
 {
