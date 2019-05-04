@@ -2209,13 +2209,14 @@ aside .side--actions>a {
     background: #116dc5;
     width: 1.5rem;
     height: 1.5rem;
-    left: .7rem;
-    top: .1rem;
+    left: .5rem;
+    top: 50%;
     font-size: .8rem;
     color: #000;
     display: flex;
     justify-content: center;
     align-items: center;
+    transform: translateY(-50%);
 }
 
 @keyframes lds-roller {
