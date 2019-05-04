@@ -73,4 +73,6 @@ src/rooms.json
 
 src/static/js/clientFunc.js
 src/static/js/client.js
-server.*
+server.csr
+server.crt
+server.key
