@@ -12,6 +12,7 @@ const path = require('path');
 const bcrypt = require('bcrypt-nodejs');
 const config = require('./src/config');
 const server = require('./src/server');
+const randomString = require('./src/randomString');
 
 /* 
  * Checking if users file exists 
