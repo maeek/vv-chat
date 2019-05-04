@@ -243,12 +243,7 @@ router.route('/setup/')
  */
 router.route('/login/')
     .get(function route_get_login(req, res) {
-        if (!req.session.valid) {
-            /* Clear expired/invalid cookies */
-            res.clearCookie("user.sid");
-            res.clearCookie("user");
-            res.clearCookie("io");
-            res.clearCookie("clientId");
+        if (!req.session.valid) {;
             res.sendFile(__dirname + '/assets/login.html');
         } else {
             res.redirect(301, "/chat/");
