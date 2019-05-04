@@ -1005,7 +1005,7 @@ socket.on("roomList", function socket_roomList(list) {
             uniCode += String.fromCodePoint(parseInt(uni[j], 16));
         }
         let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-        let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name} <div class="room--count">${list[i].online}</div></li>`;
+        let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
         appendDOM(HTML, '.rooms', false);
     }
     if ($(".rooms--modal")) {
@@ -1016,7 +1016,7 @@ socket.on("roomList", function socket_roomList(list) {
                 uniCode += String.fromCodePoint(parseInt(uni[j], 16));
             }
             let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-            let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> ${list[i].name} <div class="room--count">${list[i].online}</div></li>`;
+            let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
             appendDOM(HTML, '.rooms--modal', false);
         }
     }

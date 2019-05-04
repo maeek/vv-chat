@@ -2203,20 +2203,16 @@ aside .side--actions>a {
     border-radius: 15px;
 }
 
-.room--count {
-    position: absolute;
-    border-radius: 15px;
-    background: #116dc5;
-    width: 1.5rem;
-    height: 1.5rem;
-    left: .5rem;
-    top: 50%;
-    font-size: .8rem;
-    color: #000;
+.room--details {
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    align-items: center;
-    transform: translateY(-50%);
+    align-items: flex-start;
+}
+
+.room--count {
+    font-size: .8rem;
+    color: #969fab;
 }
 
 @keyframes lds-roller {
