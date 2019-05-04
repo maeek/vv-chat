@@ -273,7 +273,7 @@ router.route('/login/')
             });
 
             if (usersFile.users.length == 1) {
-                bcrypt.compare(password, usersFile.users[0].password, function login_compareHash(err, result) {
+                bcrypt.compare(password, usersFile.users[0].password, (err, result) => {
                     if (err) {
                         console.log(`ERROR: failed to hash password at "/login/" for user: "${username}" error description:\n${err}`);
                         res.redirect(301, `/login/#error`);
