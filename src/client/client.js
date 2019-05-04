@@ -999,24 +999,24 @@ socket.on("roomList", function socket_roomList(list) {
     for (let r = 0; r < $$(".rooms").length; r++)
         $$(".rooms")[r].innerHTML = "";
     for (let i = 0; i < list.length; i++) {
-        let uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
+        const uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
         let uniCode = "";
         for (let j = 0; j < uni.length; j++) {
             uniCode += String.fromCodePoint(parseInt(uni[j], 16));
         }
-        let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-        let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
+        const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
+        const HTML = `<li class="room--change ${hasActive} ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
         appendDOM(HTML, '.rooms', false);
     }
     if ($(".rooms--modal")) {
         for (let i = 0; i < list.length; i++) {
-            let uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
+            const uni = list[i].icon.indexOf("-") != -1 ? list[i].icon.split("-") : [list[i].icon];
             let uniCode = "";
             for (let j = 0; j < uni.length; j++) {
                 uniCode += String.fromCodePoint(parseInt(uni[j], 16));
             }
-            let activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
-            let HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
+            const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? "room--active" : "" : i==0?"room--active":"";
+            const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
             appendDOM(HTML, '.rooms--modal', false);
         }
     }
