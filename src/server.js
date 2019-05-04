@@ -10,8 +10,6 @@
 const fs = require('fs');
 const config = require('./config');
 
-/* Load express app */
-const app = require('./expressApp');
 
 /* 
  * Checking if certificate files exist 
@@ -23,8 +21,12 @@ for (const file in config.certificateFiles) {
     if (!fs.existsSync(config.certificateFiles[file])) {
         certNotFound.push(config.certificateFiles[file])
         certFlag = false;
+        config.https = false;
     }
 }
+
+/* Load express app */
+const app = require('./expressApp');
 
 if (certFlag) {
     /* 
@@ -41,7 +43,7 @@ if (certFlag) {
     };
 
     server = require('spdy').createServer(options, app);
-    config.https = true;
+
 } else {
     /* 
      * No certificates, starting HTTP, NOT SECURE!
@@ -49,7 +51,6 @@ if (certFlag) {
     console.log(`Couldn't find this certificates:\n${certNotFound.join("\n")}`);
     console.log(`###################################\n#     SERVER RUNNING PLAIN HTTP   #\n###################################`);
     server = require('http').createServer(app);
-    config.https = false;
 }
 
 /* Load socket.io */
