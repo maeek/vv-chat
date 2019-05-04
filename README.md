@@ -12,6 +12,8 @@ Websocket chat written in javascript
   - Links highlight
   - Emojis
   - Chat Rooms
+  - PWA
+  - Mobile friendly
 
 ### Page screenshots
 ![Login page](https://raw.githubusercontent.com/maeek/vv-chat/master/src/static/static/vv-login.png)
