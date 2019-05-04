@@ -2428,6 +2428,9 @@ aside .side--actions>a {
     .reverse {
         padding: .4rem .6rem;
     }
+    .rooms .loader__div {
+        display: none;
+    }
 }
 
 .pure-dark .spacer {
