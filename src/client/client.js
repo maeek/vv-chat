@@ -881,8 +881,8 @@ document.addEventListener('click', function doc_click(e) {
                 );
             }
         });
-    } else if (e.target && hasClass(e.target, 'room--change') || hasClass(e.target.parentNode, 'room--change')) {
-        const btn = hasClass(e.target.parentNode, 'room--change') ? e.target.parentNode : e.target;
+    } else if (e.target && hasClass(e.target, 'room--change') || hasClass(e.target.parentNode, 'room--change') || hasClass(e.target.parentNode.parentNode, 'room--change')) {
+        const btn = hasClass(e.target.parentNode, 'room--change') ? e.target.parentNode : hasClass(e.target.parentNode.parentNode, 'room--change')? e.target.parentNode.parentNode : e.target;
         if(!hasClass(btn,"room--active")){
             const rid = btn.getAttribute("data-rid");
             location.hash = `/${encodeURIComponent(rid)}`;
