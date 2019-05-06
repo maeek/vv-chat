@@ -514,10 +514,10 @@ input[type="file"] {
 
 .sendEmoji {
     position: absolute;
-    top: -20.4rem;
+    top: -24.4rem;
     right: .5rem;
-    width: 18rem;
-    height: 20rem;
+    width: 20rem;
+    height: 24rem;
     background: rgba(55, 64, 93, 0.8);
     border-radius: 5px;
     padding: .5rem 0;
