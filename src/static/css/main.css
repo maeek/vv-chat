@@ -544,9 +544,9 @@ input[type="file"] {
     margin: .1rem;
     border-radius: 15px;
     background: #282d42;
-    width: 2rem;
-    height: 2rem;
-    font-size: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.6rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -563,7 +563,7 @@ input[type="file"] {
     padding: .7rem 1rem;
     border: 0;
     /* border-right: 1px solid #2f344a; */
-    font-size: 1rem;
+    font-size: 1.1rem;
     background: transparent;
     outline: none;
     color: #F0F0F0;
@@ -622,7 +622,7 @@ input[type="file"] {
     white-space: pre-wrap;
     cursor: default;
     transition: all .3s;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
 }
 
 .from__me .message {
@@ -1896,7 +1896,6 @@ aside ul li {
     justify-content: flex-start;
     position: relative;
     word-break: break-word;
-    padding-left: 1.5rem;
     border-radius: 30px;
 }
 
@@ -1905,8 +1904,8 @@ aside ul li i:not(.roomDelete),
 .mgmt--title i,
 .info--change i,
 .icon--prev {
-    font-size: 1rem;
-    margin-right: 1.3rem;
+    font-size: 1.2rem;
+    margin-right: 1rem;
     font-style: normal;
     position: relative;
     border-radius: 50%;
@@ -2211,10 +2210,11 @@ aside .side--actions>a {
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    font-size:1rem;
 }
 
 .room--count {
-    font-size: .8rem;
+    font-size: .9rem;
     color: #969fab;
 }
 
