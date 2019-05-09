@@ -2532,6 +2532,12 @@ body.pure-dark {
 .pure-dark .settings__cont .input__div input,
 .pure-dark .user--name input {
     background: #3a3a3a;
+    box-shadow: none;
+}
+
+.pure-dark .settings__cont .input__div .input__div--wrapper:nth-of-type(even) input {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .pure-dark .settings__cont .input__div .input__div--wrapper {
@@ -2540,6 +2546,8 @@ body.pure-dark {
 
 .pure-dark .settings__cont .input__div--wrapper i {
     background: #5d5d5d;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .pure-dark .settings__cont .input__div {
