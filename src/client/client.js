@@ -31,6 +31,21 @@ const middleDiv = $(".panel--middle");
  *****************************************************************/
 
 window.addEventListener("DOMContentLoaded", function DOMLoaded() {
+
+    if (location.protocol == "http:") {
+        appendDOM(`<div class="http noselect">
+                    <div class="http--icon"><i class="material-icons">warning</i></div>
+                    <div class="http--description">Warning: HTTPS is not enabled which means that this page is not secure, use it at own risk. If you're administrator please provide SSL certificates, <a href="https://letsencrypt.org/getting-started/">check how to get them</a>.</div>
+                    <i class="material-icons http--close">close</i>
+                </div>`, 'body');
+    }
+
+    document.addEventListener("click", function(e) {
+        if (e.target && hasClass(e.target, 'http--close')) {
+            document.querySelector(".http").remove();
+        }
+    });
+
     const el = $("aside .info");
     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
     const panel = $(".panel--middle");

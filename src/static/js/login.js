@@ -66,7 +66,25 @@ function appendDOM(HTML, element) {
         document.querySelector(element).append(childNodes[i]);
     }
 }
+
+function hasClass(elem, cls) {
+    if (!('className' in elem)) return;
+    return !!elem.className.match(new RegExp("\\b" + cls + "\\b"));
+}
 window.addEventListener("DOMContentLoaded", function DOMLoaded() {
+    if (location.protocol == "http:") {
+        appendDOM(`<div class="http noselect">
+                    <div class="http--icon"><i class="material-icons">warning</i></div>
+                    <div class="http--description">Warning: HTTPS is not enabled which means that this page is not secure, use it at own risk. If you're administrator please provide SSL certificates, <a href="https://letsencrypt.org/getting-started/">check how to get them</a>.</div>
+                    <i class="material-icons http--close">close</i>
+                </div>`, 'body');
+    }
+    document.addEventListener("click", function(e) {
+        if (e.target && hasClass(e.target, 'http--close')) {
+            document.querySelector(".http").remove();
+        }
+    });
+
     try {
         const emojis = new FontFace("KoHo", "url(/css/fonts/emoji.ttf)", {
             style: 'normal',
