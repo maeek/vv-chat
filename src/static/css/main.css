@@ -2710,3 +2710,8 @@ body.pure-dark {
 .pure-dark .actions .select__emoji:hover {
     background: #000;
 }
+
+.pure-dark .error,
+.pure-dark .info--change {
+    background-color: #080808;
+}
