@@ -81,6 +81,7 @@ function appendDOM(HTML, element, scroll) {
 }
 
 let errTim;
+
 function error(message, timeout) {
     timeout = !timeout ? 2000 : timeout;
     const errID = "errID-" + randomString();
@@ -160,6 +161,13 @@ window.addEventListener("DOMContentLoaded", function() {
                                 <div class="settings__exit noselect"><i class="material-icons">close</i></div>
                                 <div class="title noselect">Settings</div>
                                 <p class="description noselect">Change settings for your account - ${Cookies.get("user")}</p>
+                                <div class="subtitle noselect">Theme</div>
+                                <div class="input__div">
+                                    <div class="input__div--wrapper input__div--wrapper--nobg">
+                                        <span>Pure black</span>
+                                        <label><input type="checkbox" name="themeBlack" class="themeBlack"><div class="checkboxWrapper themeBlack"></div></label>
+                                    </div>
+                                </div>
                                 <div class="subtitle noselect">Notifications</div>
                                 <div class="input__div">
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
@@ -197,6 +205,8 @@ window.addEventListener("DOMContentLoaded", function() {
                 $(".mute").checked = true;
             if (window.localStorage.getItem("disableVibration"))
                 $(".disableVibration").checked = true;
+            if (hasClass($("body"), 'pure-dark'))
+                $(`[name="themeBlack"]`).checked = true;
             $(".modal__div").classList.add("anim--opacity");
             $(".settings__cont").classList.add("anim--opacity", "anim--scale");
         });
@@ -270,8 +280,13 @@ window.addEventListener("DOMContentLoaded", function() {
                     }
                     window.localStorage.removeItem("disableVibration");
                 }
+            } else if (e.target && hasClass(e.target, 'themeBlack')) {
+                if (hasClass($("body"), 'pure-dark')) {
+                    $("body").classList.remove("pure-dark");
+                } else {
+                    $("body").classList.add("pure-dark");
+                }
             }
-
         }, false);
     }
     const emojis = new FontFace("KoHo", "url(/css/fonts/emoji.ttf)", {

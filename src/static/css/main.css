@@ -1564,6 +1564,8 @@ input[type="file"] {
     padding: .72rem 1.4rem;
     background: #475177;
     border-radius: 30px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
     cursor: pointer;
     height: 100%;
     transition: background .2s, color .2s;
@@ -1572,6 +1574,11 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     flex: 0 0 auto;
+}
+
+.settings__cont .input__div .input__div--wrapper:nth-of-type(even) input {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .settings__cont .spacer {
@@ -1757,6 +1764,14 @@ input[type="checkbox"]:checked~.checkboxWrapper::after {
 
 input[type="checkbox"]~.checkboxWrapper.vibrate::after {
     content: "vibration";
+}
+
+input[type="checkbox"]:checked~.checkboxWrapper.themeBlack::after {
+    content: "lens";
+}
+
+input[type="checkbox"]~.checkboxWrapper.themeBlack::after {
+    content: "adjust";
 }
 
 input[type="checkbox"]:checked~.checkboxWrapper.vibrate::after {
