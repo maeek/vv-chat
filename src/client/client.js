@@ -6,8 +6,28 @@
  * 
  */
 
-'use strict';
 
+'use strict';
+import {
+    $,
+    $$,
+    hasClass,
+    getImageDimensions,
+    getTime,
+    formatSizeUnits,
+    appendDOM,
+    errTim,
+    error,
+    escapeHtml,
+    randomString,
+    unread,
+    newNotf,
+    openSettings,
+    settingsInput,
+    emojis,
+    operations,
+    windowWasFocused
+} from '/js/clientFunc.js';
 
 /*****************************************************************
  * 
@@ -16,13 +36,46 @@
  *****************************************************************/
 
 let socket = io.connect(`/chat`, {
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: 10
-    }),
-    notf;
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: 10
+});
 const middleDiv = $(".panel--middle");
+
+
+
+
+/*****************************************************************
+ * 
+ * Append polyfill
+ * 
+ *****************************************************************/
+
+(function(arr) {
+    arr.forEach(function(item) {
+        if (item.hasOwnProperty('append')) {
+            return;
+        }
+        Object.defineProperty(item, 'append', {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: function append() {
+                var argArr = Array.prototype.slice.call(arguments),
+                    docFrag = document.createDocumentFragment();
+
+                argArr.forEach(function(argItem) {
+                    var isNode = argItem instanceof Node;
+                    docFrag.appendChild(isNode ? argItem : document.createTextNode(String(argItem)));
+                });
+
+                this.appendChild(docFrag);
+            }
+        });
+    });
+})([Element.prototype, Document.prototype, DocumentFragment.prototype]);
+
 
 /*****************************************************************
  * 
@@ -225,6 +278,8 @@ function appendMessage(socket) {
         location.href = "/logout";
     }
 }
+
+window.onfocus = windowWasFocused();
 
 let isUpTimeout;
 socket.on("message", function socket_message(data) {
@@ -1120,3 +1175,44 @@ window.addEventListener("hashchange",function win_hashchange(){
         
     });
 },false);
+
+
+
+/*****************************************************************
+ *  
+ *  Service worker
+ * 
+ *****************************************************************/
+
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: "/" }).then(function(r) {
+        console.log("SW scope:", r.scope);
+        console.log('ServiceWorker zarejestrowany.')
+    }).catch(function(e) {
+        console.log('Ups! Błąd przy rejestracji ServiceWorkera! ' + e)
+    });
+}
+
+
+/*****************************************************************
+ *  
+ *  Loading emojis font, 
+ * 
+ *****************************************************************/
+
+window.addEventListener("DOMContentLoaded", function() {
+    const loadedFont = emojis.load();
+    loadedFont.then(function(loaded_font) {
+        document.fonts.add(loaded_font);
+        document.body.style.fontFamily = "KoHo, sans-serif";
+    }).catch(e => console.log("Not supported"));
+
+
+    if ($$(".settings--popup").length > 0) {
+        $(".settings--popup").addEventListener("click", openSettings);
+        document.addEventListener('click', operations, false);
+        document.addEventListener('input', settingsInput, false);
+    }    
+
+});

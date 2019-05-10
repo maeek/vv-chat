@@ -6,6 +6,19 @@
  * 
  */
 
+'use-strict';
+
+import {
+    $,
+    $$,
+    emojis,
+    hasClass,
+    appendDOM,
+    error,
+    openSettings,
+    operations,
+    settingsInput
+} from '/js/clientFunc.js';
 
 function getUsers() {
     $(".users__table").innerHTML = "";
@@ -418,4 +431,43 @@ document.addEventListener('input', function(e) {
             $(".room--name--prev").innerHTML = "Room name can only contain a-z A-Z 0-9 -@!.";
         }
     }
+});
+
+/*****************************************************************
+ *  
+ *  Service worker
+ * 
+ *****************************************************************/
+
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: "/" }).then(function(r) {
+        console.log("SW scope:", r.scope);
+        console.log('ServiceWorker zarejestrowany.')
+    }).catch(function(e) {
+        console.log('Ups! Błąd przy rejestracji ServiceWorkera! ' + e)
+    });
+}
+
+
+/*****************************************************************
+ *  
+ *  Loading emojis font, 
+ * 
+ *****************************************************************/
+
+window.addEventListener("DOMContentLoaded", function() {
+    const loadedFont = emojis.load();
+    loadedFont.then(function(loaded_font) {
+        document.fonts.add(loaded_font);
+        document.body.style.fontFamily = "KoHo, sans-serif";
+    }).catch(e => console.log("Not supported"));
+
+
+    if ($$(".settings--popup").length > 0) {
+        $(".settings--popup").addEventListener("click", openSettings);
+        document.addEventListener('click', operations, false);
+        document.addEventListener('input', settingsInput, false);
+    }
+
 });
