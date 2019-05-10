@@ -287,7 +287,6 @@ export {
     error,
     escapeHtml,
     randomString,
-    unread,
     newNotf,
     openSettings,
     settingsInput,

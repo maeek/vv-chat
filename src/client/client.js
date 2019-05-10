@@ -20,7 +20,6 @@ import {
     error,
     escapeHtml,
     randomString,
-    unread,
     newNotf,
     openSettings,
     settingsInput,
