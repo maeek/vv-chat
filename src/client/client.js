@@ -280,8 +280,7 @@ function appendMessage(socket) {
 }
 
 window.onfocus = function() {
-    unread = 0;
-    document.title = `VV-Chat`;
+    windowWasFocused();
 };
 
 let isUpTimeout;

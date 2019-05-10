@@ -40,6 +40,15 @@ self.addEventListener("install", function(event) {
             return cache.addAll(offlineFundamentals);
         })
         .then(function() {
+            var offlineRequest = new Request(OFFLINE_PAGE);
+            event.waitUntil(
+                fetch(offlineRequest).then(function(response) {
+                    return caches.open('offline').then(function(cache) {
+                        console.log('WORKER: Cached offline page', response.url);
+                        return cache.put(offlineRequest, response);
+                    });
+                })
+            );
             console.log('WORKER: install completed');
         }).catch(function(e) {
             console.log("WORKER: install failed - " + e)
@@ -86,8 +95,9 @@ self.addEventListener("fetch", function(event) {
             }
 
             function unableToResolve() {
-                console.log('WORKER: fetch request failed in both cache and network.');
-                return cache.match(OFFLINE_PAGE);
+                return caches.open('offline').then(function(cache) {
+                    return cache.match('offline.html');
+                });
             }
         }));
 });
