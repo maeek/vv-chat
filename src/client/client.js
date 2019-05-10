@@ -20,6 +20,7 @@ import {
     error,
     escapeHtml,
     randomString,
+    unread,
     newNotf,
     openSettings,
     settingsInput,
@@ -278,7 +279,10 @@ function appendMessage(socket) {
     }
 }
 
-window.onfocus = windowWasFocused();
+window.onfocus = function() {
+    unread = 0;
+    document.title = `VV-Chat`;
+};
 
 let isUpTimeout;
 socket.on("message", function socket_message(data) {
