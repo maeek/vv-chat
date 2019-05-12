@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
  *   Author: maeek
  *   Description: No history simple websocket chat
@@ -19,7 +20,7 @@ let certFlag = true,
     server;
 for (const file in config.certificateFiles) {
     if (!fs.existsSync(config.certificateFiles[file])) {
-        certNotFound.push(config.certificateFiles[file])
+        certNotFound.push(config.certificateFiles[file]);
         certFlag = false;
         config.https = false;
     }
@@ -48,8 +49,8 @@ if (certFlag) {
     /* 
      * No certificates, starting HTTP, NOT SECURE!
      */
-    console.log(`Couldn't find this certificates:\n${certNotFound.join("\n")}`);
-    console.log(`###################################\n#     SERVER RUNNING PLAIN HTTP   #\n###################################`);
+    console.log(`Couldn't find this certificates:\n${certNotFound.join('\n')}`);
+    console.log('###################################\n#     SERVER RUNNING PLAIN HTTP   #\n###################################');
     server = require('http').createServer(app);
 }
 

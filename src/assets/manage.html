@@ -14,12 +14,6 @@
     <title>VV-Chat</title>
     <link rel="stylesheet" href="/css/main.min.css">
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
-    <script src="/js/js.cookie.min.js"></script>
-    <script defer src="/js/socket.io.js"></script>
-    <script src='/js/bluebird.min.js'></script>
-    <script src='/js/json3.min.js'></script>
-    <script src='/js/fetch.js'></script>
-    <script defer type="module" src="/js/manage.js"></script>
 </head>
 
 <body class="page-manage">
@@ -58,21 +52,44 @@
             </div>
 
         </aside>
-        <div class="page__wrapper">
+        <div class="page__wrapper" style="flex-wrap: nowrap">
             <nav class="panel panel--top">
                 <div class="wrap--aside noselect"><i class="material-icons">menu</i></div>
                 <div class="title noselect">
-                    <div class="mgmt--title"><i class="material-icons">device_hub</i> Management</div>
+                    <div class="mgmt--title">Management</div>
                 </div>
                 <div class="info">
                     <i class="material-icons settings refresh--users noselect" title="Refresh users">refresh</i>
                 </div>
             </nav>
+            <div class="panel panel--bottom noselect">
+                <div class="root--info">
+                    <span>This account has administrative privileges. You won't be able to chat from this account.</span>
+                </div>
+            </div>
+            <div class="users--actions">
+                <div class="user--record users--count">
+                    Users: <span id="usrc"></span>
+                </div>
+                <div class="user--record user--add">
+                    Add user <i class="material-icons">add</i>
+                </div>
+            </div>
+            <div class="user--record user--title noselect">
+                <span>
+                    <i class="material-icons switch-view">view_module</i>
+                </span>
+                <span>
+                        <label>
+                            <input type="checkbox" name="blockAll"><div class="checkboxWrapper"></div>
+                        </label>
+                        <span title="Block all users"><i class="material-icons">check</i>/<i class="material-icons">block</i></span>
+                </span>
+                <span style="flex:1 0 auto">Name</span>
+                <span>Actions</span>
+            </div>
             <div class="panel panel--middle">
                 <ul class="users__table">
-                    <li class="user--record user--add">
-                        Add user <i class="material-icons">add</i>
-                    </li>
                     <li class="loader__div">
                         <div class="lds-roller">
                             <div></div>
@@ -88,13 +105,15 @@
                 </ul>
                 <div class="endRecords"></div>
             </div>
-            <footer class="panel panel--bottom noselect">
-                <div class="root--info">
-                    <span>This account has administrative privileges. You won't be able to chat from this account. <a href="/logout">Switch to different account</a></span>
-                </div>
-            </footer>
+
         </div>
     </main>
+    <script src="/js/js.cookie.min.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <script src='/js/bluebird.min.js'></script>
+    <script src='/js/json3.min.js'></script>
+    <script src='/js/fetch.js'></script>
+    <script defer type="module" src="/js/manage.js"></script>
 </body>
 
 </html>

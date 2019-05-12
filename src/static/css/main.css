@@ -129,9 +129,8 @@ body {
 }
 
 .http {
-    position: fixed;
-    top: 0;
-    left: 0;
+    font-family: 'KoHo';
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: flex-start;
@@ -141,7 +140,6 @@ body {
     color: #d00707;
     border: 1px solid #ffaeae;
     border-radius: 5px;
-    z-index: 15;
 }
 
 .http--icon {
@@ -158,7 +156,7 @@ body {
 }
 
 .http--close {
-    position: fixed;
+    position: absolute;
     top: .3rem;
     cursor: pointer !important;
     right: .3rem;
@@ -582,9 +580,6 @@ input[type="file"] {
 .actions .select__emoji {
     padding: .3rem;
     font-style: normal;
-    margin: .1rem;
-    border-radius: 15px;
-    background: #282d42;
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1.4rem;
@@ -595,7 +590,7 @@ input[type="file"] {
 }
 
 .actions .select__emoji:hover {
-    background: #000;
+    background: #282d42;
 }
 
 .textField {
@@ -987,22 +982,19 @@ input[type="file"] {
     width: 100%;
     font-family: 'KoHo', sans-serif;
     color: #7c8fa5;
-    padding: .4rem .8rem;
+    padding: .5rem .8rem;
     border-radius: 20px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 
 .root--info span {
     flex: 1 0 100%;
-    text-align: center;
-    padding: .5rem 1rem;
 }
 
 .root--info a {
     word-wrap: keep-all;
-    display: block;
 }
 
 .mgmt--title {
@@ -1033,7 +1025,7 @@ input[type="file"] {
 
 .users__table {
     width: 100%;
-    margin: 0;
+    margin: 0 .3rem;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -1066,7 +1058,7 @@ input[type="file"] {
     transition: transform .2s, opacity .2s;
 }
 
-.user--record:nth-of-type(even) {
+ul .user--record:nth-of-type(even) {
     background: #202842;
 }
 
@@ -1103,6 +1095,7 @@ input[type="file"] {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+    height: auto;
 }
 
 .endRecords {
@@ -1145,6 +1138,37 @@ input[type="file"] {
     justify-content: center;
     align-items: center;
     transition: width .2s;
+}
+
+.user--add,
+.users--count {
+    background: linear-gradient(270deg, #003d65, #00558a);
+    transition: background .3s;
+    cursor: pointer;
+    color: #FFF;
+    padding: .9rem 1rem;
+    margin: 0 .5rem;
+    width: 10rem;
+}
+
+.users--count {
+    cursor: default;
+}
+
+.user--add:hover {
+    background: linear-gradient(270deg, #004775, #0069ab);
+}
+
+.users--actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    padding: .5rem 0;
+}
+
+.users--actions div {
+    padding: .6rem 1rem;
 }
 
 .user--input input {
@@ -1276,18 +1300,6 @@ input[type="file"] {
 
 .tost .text {
     padding: 0 1rem;
-}
-
-.user--add {
-    background: linear-gradient(270deg, #003d65, #00558a);
-    transition: background .3s;
-    cursor: pointer;
-    color: #FFF;
-    padding: .9rem 1rem;
-}
-
-.user--add:hover {
-    background: linear-gradient(270deg, #004775, #0069ab);
 }
 
 .user--add-cont {
@@ -1469,8 +1481,8 @@ input[type="file"] {
     max-width: 600px;
     width: 100%;
     background: #3B415A;
-    padding: 1rem;
-    border-radius: 20px;
+    padding: .5rem;
+    border-radius: 15px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -1500,12 +1512,12 @@ input[type="file"] {
 
 .settings__cont .subtitle {
     font-size: .8rem;
-    margin: .2rem 1.5rem;
+    margin: .2rem .5rem;
 }
 
 .settings__cont .input__div {
     flex: 0 0 auto;
-    padding: .2rem 1rem 1rem 1rem;
+    padding: .2rem .5rem 1rem .5rem;
     margin: 0 0 1rem;
     width: 100%;
     display: flex;
@@ -1721,7 +1733,7 @@ input[type="checkbox"] {
 
 .input__div--wrapper span {
     flex: 1 0 auto;
-    padding: .5rem .8rem;
+    padding: .5rem .3rem;
     font-weight: 100;
 }
 
@@ -1760,6 +1772,149 @@ input[type="checkbox"]:checked~.checkboxWrapper::after {
     content: "volume_off";
     left: 1.7rem;
     background: #ABABAB;
+}
+
+.user--record input[type="checkbox"]~.checkboxWrapper {
+    padding: .7rem 1.2rem;
+    border-radius: 30px;
+    margin: 0 0 0 .5rem;
+    position: relative;
+    background: #475177;
+    cursor: pointer;
+    border: 1px solid #343a56;
+}
+
+.user--record input[type="checkbox"]~.checkboxWrapper::after {
+    position: absolute;
+    font-family: 'Material Icons';
+    content: "check";
+    -webkit-font-feature-settings: 'liga';
+    font-feature-settings: 'liga';
+    top: 0;
+    left: 0;
+    height: 1.4rem;
+    width: 1.4rem;
+    border-radius: 30px;
+    background: #0069ab;
+    font-size: 1rem;
+    color: #FEFEFE;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: left .3s, background .3s, color .3s;
+    box-shadow: 1px 1px 2px #343a53;
+}
+
+.user--record input[type="checkbox"]:checked~.checkboxWrapper::after {
+    content: "block";
+    left: 1rem;
+    color: #000;
+    background: #ABABAB;
+}
+
+.user--title {
+    font-weight: 900;
+    color: #fff;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0 .5rem;
+    background: #1a1f2f;
+}
+
+.switch-view {
+    font-size: 2rem;
+    color: #c6e1ff;
+    cursor: pointer;
+    padding: .3rem 0;
+    flex: 1 0 100%;
+}
+
+.user--title span {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    margin: .3rem;
+}
+
+.user--title span span {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+
+.user--title span span i {
+    font-size: .8rem;
+    margin: 0 .1rem;
+}
+
+.user--title input[type="checkbox"]~.checkboxWrapper {
+    margin: 0;
+}
+
+.grid .user--ban {
+    align-self: flex-start;
+}
+
+.grid .user--record input[type=checkbox]~.checkboxWrapper {
+    margin: 0;
+}
+
+.grid .user--record .who {
+    margin: 0 .5rem;
+}
+
+.grid .user--name {
+    margin: .3rem 0;
+    padding: 0;
+}
+
+.grid .user--record .who {
+    margin: .5rem;
+}
+
+.grid .users__table {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.grid .user--record,
+.user--add,
+.users--count {
+    border-radius: 10px;
+}
+
+.grid .user--title {
+    border-radius: 0;
+}
+
+.grid .user--record:not(.user--add):not(.user--title):not(.users--count):not(.user--add-cont) {
+    min-width: 10rem;
+    width: auto;
+    flex: 0 0 auto;
+    flex-direction: column;
+    margin: .3rem;
+    padding: .4rem;
+}
+
+.grid .user--add-cont {
+    flex: 1 0 auto;
+    flex-direction: row;
+    margin: .5rem;
+    width: -webkit-fill-available;
+}
+
+.user--add,
+.users--count {
+    height: auto;
+}
+
+.user--add i {
+    font-size: 1rem;
 }
 
 input[type="checkbox"]~.checkboxWrapper.vibrate::after {
@@ -2120,9 +2275,6 @@ aside .side--actions>a {
 .select__icon {
     padding: .4rem;
     font-style: normal;
-    margin: .2rem;
-    border-radius: 15px;
-    background: #282d42;
     width: 2.3rem;
     height: 2.3rem;
     font-size: 1rem;
@@ -2133,11 +2285,11 @@ aside .side--actions>a {
 }
 
 .select__icon:hover {
-    background: #000;
+    background: #282d42;
 }
 
 .select__icon.icon--active {
-    background: #000;
+    background: #282d42;
 }
 
 .icon--prev {
@@ -2488,6 +2640,9 @@ aside .side--actions>a {
     }
     .rooms .loader__div {
         display: none;
+    }
+    .grid .users__table {
+        justify-content: center;
     }
 }
 

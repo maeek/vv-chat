@@ -32,9 +32,9 @@ app.use(cookieParser());
 
 app.use(function(req, res, next) {
     /* Remove express default X-Powered-By header */
-    res.removeHeader("X-Powered-By");
+    res.removeHeader('X-Powered-By');
     /* CSP allow service worker */
-    res.header('Content-Security-Policy', "worker-src 'self'");
+    res.header('Content-Security-Policy', 'worker-src \'self\'');
     next();
 });
 

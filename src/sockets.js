@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
  *   Author: maeek
  *   Description: No history simple websocket chat
@@ -25,7 +26,7 @@ module.exports = function(io) {
     /* 
      * Allow socket.io use session
      */
-    io.of("/chat").use(sharedsession(session, { autoSave: true }));
+    io.of('/chat').use(sharedsession(session, { autoSave: true }));
 
     /* 
      * Socket.io 
@@ -45,10 +46,10 @@ module.exports = function(io) {
          * Get active sessions matching clientId
          */
         function activeSessions(clientId) {
-            return new Promise(function(resolve, reject) {
+            return new Promise(function(resolve) {
                 Store.list(function(el, list) {
                     list = list.map((el) => {
-                        let active = JSON.parse(fs.readFileSync(__dirname + "/../sessions/" + el, 'utf-8'));
+                        let active = JSON.parse(fs.readFileSync(__dirname + '/../sessions/' + el, 'utf-8'));
                         if (active.clientId == clientId)
                             return {
                                 clientId: active.clientId,
@@ -84,22 +85,22 @@ module.exports = function(io) {
         /* 
          * Notify users when client connects/disconnects
          */
-        socket.on("userConnected", function socket_userConnected(wRoom) {
+        socket.on('userConnected', function socket_userConnected(wRoom) {
             if (checkSession()) {
-                let roomIcon, rid;
+                let roomIcon, rid, nRoom, roomList, roomName;
                 /* Leaving all rooms */
                 socket.leaveAll();
                 /* Check if user provided room id */
                 nRoom = wRoom ? wRoom : config.defaultRoom.id;
 
-                roomList = JSON.parse(fs.readFileSync(config.roomsFile, "utf-8")).list;
+                roomList = JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list;
 
                 /* Get room matching id */
                 roomList = roomList.filter(el => {
                     if (el.id == nRoom) {
                         roomName = el.name;
                         roomIcon = el.icon;
-                        rid = el.id
+                        rid = el.id;
                         return el;
                     }
                 });
@@ -118,7 +119,7 @@ module.exports = function(io) {
                 /* Get users in room */
                 io.of('/chat').in(room).clients((error, clients) => {
                     /* Notify users */
-                    socket.to(`${room}`).emit("userConnected", {
+                    socket.to(`${room}`).emit('userConnected', {
                         status: true,
                         self: false,
                         username: socket.handshake.session.user,
@@ -130,7 +131,7 @@ module.exports = function(io) {
                     });
 
                     /* Send details to user */
-                    socket.emit("userConnected", {
+                    socket.emit('userConnected', {
                         status: true,
                         self: true,
                         username: socket.handshake.session.user,
@@ -147,13 +148,13 @@ module.exports = function(io) {
                  */
                 activeSessions(socket.handshake.session.clientId).then((list) => {
                     for (let i = 0; i < list.length; i++) {
-                        io.of('/chat').to(`${list[i].socketId}`).emit("activeSessions", list);
+                        io.of('/chat').to(`${list[i].socketId}`).emit('activeSessions', list);
                     }
                 });
 
             } else {
                 socket.leave(room);
-                socket.emit("invalidSession", true);
+                socket.emit('invalidSession', true);
             }
         });
 
@@ -161,7 +162,7 @@ module.exports = function(io) {
         /* 
          * Load active sessions for clientId
          */
-        socket.on("activeSessions", function socket_activeSessions(user, fn) {
+        socket.on('activeSessions', function socket_activeSessions(user, fn) {
             if (checkSession()) {
                 activeSessions(socket.handshake.session.clientId).then((list) => {
                     fn(list);
@@ -173,22 +174,22 @@ module.exports = function(io) {
         /* 
          * User can log out devices on which he's logged in
          */
-        socket.on("removeSession", function socket_removeSession(s, fn) {
+        socket.on('removeSession', function socket_removeSession(s, fn) {
             if (checkSession()) {
                 const clientId = socket.handshake.session.clientId;
                 /* Get sessions id from Store */
                 Store.list(function(opt, list) {
                     list = list.map((el) => {
                         /* Read session file matching id */
-                        let active = JSON.parse(fs.readFileSync(__dirname + "/../sessions/" + el, 'utf-8'));
+                        let active = JSON.parse(fs.readFileSync(__dirname + '/../sessions/' + el, 'utf-8'));
 
                         if (active.clientId == clientId && active.socketId == s) {
                             /* Destroy session matching clientId and socketId */
-                            Store.destroy(el.substring(0, el.indexOf(".json")), (err) => {
+                            Store.destroy(el.substring(0, el.indexOf('.json')), (err) => {
                                 if (err != null)
-                                    console.log("ERROR: Session already destroyed, description:\n" + err);
+                                    console.log('ERROR: Session already destroyed, description:\n' + err);
                                 /* Send logout message to deleted session */
-                                io.of("/chat").to(`${s}`).volatile.emit("invalidSession", true);
+                                io.of('/chat').to(`${s}`).volatile.emit('invalidSession', true);
                             });
                         } else {
                             if (active.clientId == clientId)
@@ -217,10 +218,10 @@ module.exports = function(io) {
         /* 
          * Sending/Receiving text messages
          */
-        socket.on("message", function socket_message(data) {
+        socket.on('message', function socket_message(data) {
             if (checkSession()) {
-                if (data.message != "" && data.message.length > 0)
-                    socket.to(`${room}`).emit("message", {
+                if (data.message != '' && data.message.length > 0)
+                    socket.to(`${room}`).emit('message', {
                         username: socket.handshake.session.user,
                         message: data.message,
                         time: getTime(),
@@ -228,7 +229,7 @@ module.exports = function(io) {
                     });
             } else {
                 socket.leave(room);
-                socket.emit("invalidSession", true);
+                socket.emit('invalidSession', true);
             }
         });
 
@@ -236,10 +237,10 @@ module.exports = function(io) {
         /* 
          * Sending/Receiving images
          */
-        socket.on("image", function socket_image(image, fn) {
+        socket.on('image', function socket_image(image, fn) {
             if (checkSession()) {
-                if (image.type.indexOf("image") >= 0) {
-                    socket.to(`${room}`).emit("image", {
+                if (image.type.indexOf('image') >= 0) {
+                    socket.to(`${room}`).emit('image', {
                         username: socket.handshake.session.user,
                         name: image.name ? image.name : randomString(8),
                         type: image.type,
@@ -251,7 +252,7 @@ module.exports = function(io) {
                 }
             } else {
                 socket.leave(room);
-                socket.emit("invalidSession", true);
+                socket.emit('invalidSession', true);
             }
         });
 
@@ -259,14 +260,14 @@ module.exports = function(io) {
         /* 
          * Deleting sent messages
          */
-        socket.on("reverseMessage", function socket_reverseMessage(mid) {
+        socket.on('reverseMessage', function socket_reverseMessage(mid) {
             if (checkSession()) {
                 if (mid.indexOf(socket.handshake.session.clientId) > 0) {
-                    socket.nsp.to(`${room}`).emit("reverseMessage", mid);
+                    socket.nsp.to(`${room}`).emit('reverseMessage', mid);
                 }
             } else {
                 socket.leave(room);
-                socket.emit("invalidSession", true);
+                socket.emit('invalidSession', true);
             }
         });
 
@@ -274,9 +275,9 @@ module.exports = function(io) {
         /* 
          * Notify users when someones typing
          */
-        socket.on("typing", function socket_typing(user) {
+        socket.on('typing', function socket_typing(user) {
             if (checkSession()) {
-                socket.to(`${room}`).emit("typing", user);
+                socket.to(`${room}`).emit('typing', user);
             }
         });
 
@@ -284,12 +285,12 @@ module.exports = function(io) {
         /* 
          * Not yet implemented
          */
-        socket.on("read", function socket_read(user) {
+        socket.on('read', function socket_read(user) {
             if (checkSession()) {
-                socket.to(`${room}`).emit("read", user);
+                socket.to(`${room}`).emit('read', user);
             } else {
                 socket.leave(room);
-                socket.emit("invalidSession", true);
+                socket.emit('invalidSession', true);
             }
         });
 
@@ -297,9 +298,9 @@ module.exports = function(io) {
         /* 
          * Listing avialable chat rooms
          */
-        socket.on("roomList", function socket_roomList() {
+        socket.on('roomList', function socket_roomList() {
             if (checkSession()) {
-                let roomList = fs.readFileSync(config.roomsFile, "utf-8");
+                let roomList = fs.readFileSync(config.roomsFile, 'utf-8');
                 if (roomList) {
                     roomList = JSON.parse(roomList).list.filter(el => {
                         return {
@@ -307,11 +308,11 @@ module.exports = function(io) {
                             name: el.name,
                             icon: el.icon,
                             online: 0
-                        }
+                        };
                     });
                     let clientsLength = [];
                     for (let i = 0; i < roomList.length; i++) {
-                        clientsLength.push(new Promise((res, rej) => {
+                        clientsLength.push(new Promise((res) => {
                             io.of('/chat').in(roomList[i].id).clients((error, clients) => {
                                 delete roomList[i].password;
                                 roomList[i].online = clients.length;
@@ -320,13 +321,13 @@ module.exports = function(io) {
                         }));
                     }
                     Promise.all(clientsLength).then(() => {
-                        io.of("/chat").emit("roomList", roomList);
+                        io.of('/chat').emit('roomList', roomList);
                         clientsLength = [];
                     });
                 }
             } else {
                 socket.leave(room);
-                socket.emit("invalidSession", true);
+                socket.emit('invalidSession', true);
             }
         });
 
@@ -334,15 +335,16 @@ module.exports = function(io) {
         /* 
          * Changing active room
          */
-        socket.on("changeRoom", function socket_changeRoom(wRoom, fn) {
+        socket.on('changeRoom', function socket_changeRoom(wRoom, fn) {
             if (checkSession()) {
+                let nRoom, roomList, roomIcon, roomName, rid;
                 nRoom = wRoom ? wRoom : config.defaultRoom.id;
-                roomList = JSON.parse(fs.readFileSync(config.roomsFile, "utf-8")).list;
+                roomList = JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list;
                 roomList = roomList.filter(el => {
                     if (el.id == nRoom) {
                         roomName = el.name;
                         roomIcon = el.icon;
-                        rid = el.id
+                        rid = el.id;
                         return el;
                     }
                 });
@@ -353,7 +355,7 @@ module.exports = function(io) {
                 }
                 if (rid == wRoom) {
                     io.of('/chat').in(room).clients((error, clients) => {
-                        socket.to(`${room}`).emit("userConnected", {
+                        socket.to(`${room}`).emit('userConnected', {
                             status: false,
                             self: false,
                             username: socket.handshake.session.user,
@@ -366,14 +368,14 @@ module.exports = function(io) {
                         socket.join(room);
 
                         io.of('/chat').in(room).clients((error, clients) => {
-                            socket.to(`${room}`).emit("userConnected", {
+                            socket.to(`${room}`).emit('userConnected', {
                                 status: true,
                                 self: false,
                                 username: socket.handshake.session.user,
                                 time: getTime(),
                                 users: clients.length
                             });
-                            socket.emit("userConnected", {
+                            socket.emit('userConnected', {
                                 status: true,
                                 self: true,
                                 username: socket.handshake.session.user,
@@ -387,7 +389,7 @@ module.exports = function(io) {
                     id: rid,
                     name: roomName,
                     icon: roomIcon,
-                })
+                });
             }
         });
 
@@ -395,22 +397,22 @@ module.exports = function(io) {
         /* 
          * Add rooms
          */
-        socket.on("addRoom", function socket_addRoom(newRoom, fn) {
+        socket.on('addRoom', function socket_addRoom(newRoom, fn) {
             if (checkSession()) {
-                if (socket.handshake.session.auth == "root" || socket.handshake.session.auth == "mod") {
-                    cRoom = newRoom;
-                    let roomList = JSON.parse(fs.readFileSync(config.roomsFile, "utf-8"));
-                    const format = /^[a-zA-Z0-9@!\.\-\sAaĄąĆćĘęŁłŃńÓóSsŚśŹźŻż]+$/;
+                if (socket.handshake.session.auth == 'root' || socket.handshake.session.auth == 'mod') {
+                    let cRoom = newRoom;
+                    let roomList = JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8'));
+                    const format = /^[a-zA-Z0-9@!.\-\sAaĄąĆćĘęŁłŃńÓóSsŚśŹźŻż]+$/;
                     if (roomList) {
                         if (format.test(cRoom.name) && cRoom.name.length <= 30) {
-                            cRoom.icon = cRoom.icon ? cRoom.icon : JSON.parse(fs.readFileSync(__dirname + "/static/js/emoji.json", "utf-8")).list[Math.floor(Math.random() * 813)];
+                            cRoom.icon = cRoom.icon ? cRoom.icon : JSON.parse(fs.readFileSync(__dirname + '/static/js/emoji.json', 'utf-8')).list[Math.floor(Math.random() * 813)];
                             const newRoom = {
                                 id: randomString(10),
                                 name: cRoom.name,
                                 icon: cRoom.icon,
                                 password: {
                                     required: false,
-                                    hash: ""
+                                    hash: ''
                                 }
                             };
                             roomList.list.push(newRoom);
@@ -424,7 +426,7 @@ module.exports = function(io) {
                                     });
                                     let clientsLength = [];
                                     for (let i = 0; i < roomList.list.length; i++) {
-                                        clientsLength.push(new Promise((res, rej) => {
+                                        clientsLength.push(new Promise((res) => {
                                             io.of('/chat').in(roomList.list[i].id).clients((error, clients) => {
                                                 roomList.list[i].online = clients.length;
                                                 res();
@@ -432,7 +434,7 @@ module.exports = function(io) {
                                         }));
                                     }
                                     Promise.all(clientsLength).then(() => {
-                                        io.of("/chat").emit("roomList", roomList.list);
+                                        io.of('/chat').emit('roomList', roomList.list);
                                         clientsLength = [];
                                     });
                                 }
@@ -440,7 +442,7 @@ module.exports = function(io) {
                         } else {
                             fn({
                                 status: false,
-                                message: "Name not satisfying requirements"
+                                message: 'Name not satisfying requirements'
                             });
                         }
                     } else {
@@ -449,7 +451,7 @@ module.exports = function(io) {
                 } else {
                     fn({
                         status: false,
-                        message: "Not authorized"
+                        message: 'Not authorized'
                     });
                 }
             }
@@ -459,10 +461,10 @@ module.exports = function(io) {
         /* 
          * Delete rooms
          */
-        socket.on("deleteRoom", function socket_deleteRoom(rid) {
+        socket.on('deleteRoom', function socket_deleteRoom(rid) {
             if (checkSession()) {
-                if (socket.handshake.session.auth == "root" || socket.handshake.session.auth == "mod") {
-                    let roomList = JSON.parse(fs.readFileSync(config.roomsFile, "utf-8"));
+                if (socket.handshake.session.auth == 'root' || socket.handshake.session.auth == 'mod') {
+                    let roomList = JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8'));
                     if (rid != config.defaultRoom.id) {
                         roomList.list = roomList.list.filter(el => {
                             return el.id != rid;
@@ -470,10 +472,10 @@ module.exports = function(io) {
                     }
                     fs.writeFile(config.roomsFile, JSON.stringify(roomList), (err) => {
                         if (!err) {
-                            io.of("/chat").to(rid).emit("changeRoom", config.defaultRoom.id);
+                            io.of('/chat').to(rid).emit('changeRoom', config.defaultRoom.id);
                             let clientsLength = [];
                             for (let i = 0; i < roomList.list.length; i++) {
-                                clientsLength.push(new Promise((res, rej) => {
+                                clientsLength.push(new Promise((res) => {
                                     io.of('/chat').in(roomList.list[i].id).clients((error, clients) => {
                                         roomList.list[i].online = clients.length;
                                         res();
@@ -481,7 +483,7 @@ module.exports = function(io) {
                                 }));
                             }
                             Promise.all(clientsLength).then(() => {
-                                io.of("/chat").emit("roomList", roomList.list);
+                                io.of('/chat').emit('roomList', roomList.list);
                                 clientsLength = [];
                             });
                         } else {
@@ -496,10 +498,10 @@ module.exports = function(io) {
         /* 
          * Socket disconnect event, notifying users when user left
          */
-        socket.on("disconnect", function socket_disconnect() {
+        socket.on('disconnect', function socket_disconnect() {
             if (checkSession()) {
                 io.of('/chat').in(room).clients((error, clients) => {
-                    socket.nsp.to(`${room}`).emit("userConnected", {
+                    socket.nsp.to(`${room}`).emit('userConnected', {
                         status: false,
                         self: false,
                         username: socket.handshake.session.user,
@@ -509,7 +511,7 @@ module.exports = function(io) {
                 });
                 activeSessions(socket.handshake.session.clientId).then((list) => {
                     for (let i = 0; i < list.length; i++) {
-                        io.of('/chat').to(`${list[i].socketId}`).emit("activeSessions", list);
+                        io.of('/chat').to(`${list[i].socketId}`).emit('activeSessions', list);
                     }
                 });
             }

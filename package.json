@@ -5,7 +5,7 @@
     "private": true,
     "main": "index.js",
     "scripts": {
-        "build": "./node_modules/.bin/babel src/client/client.js src/client/clientFunc.js -d src/static/js/ && cp src/static/js/src/client/client.js src/static/js/src/client/clientFunc.js src/static/js/ && rm -rf src/static/js/src",
+        "build": "./node_modules/.bin/babel src/client/client.js src/client/manage.js src/client/clientFunc.js -d src/static/js/",
         "start": "npm run build && node index.js",
         "dev": "npm run build && DEBUG=express:* node index.js",
         "docker": "npm run build && DOCKER=true node index.js",
@@ -31,11 +31,14 @@
     },
     "homepage": "https://github.com/maeek/vv-chat#readme",
     "devDependencies": {
-        "@babel/core": "^7.4.3",
-        "@babel/preset-env": "^7.4.3",
-        "babel-cli": "^6.26.0",
-        "babel-core": "^6.26.3",
-        "babel-preset-env": "^1.7.0"
+        "@babel/cli": "^7.0.0-beta.44",
+        "@babel/core": "^7.0.0-beta.44",
+        "babel-eslint": "^6.1.2",
+        "babel-preset-env": "^1.7.0",
+        "eslint": "^5.16.0",
+        "eslint-plugin-import": "^2.17.2",
+        "eslint-plugin-node": "^9.0.1",
+        "eslint-plugin-promise": "^4.1.1"
     },
     "dependencies": {
         "bcrypt-nodejs": "0.0.3",
