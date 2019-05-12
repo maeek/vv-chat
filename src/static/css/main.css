@@ -1025,8 +1025,8 @@ input[type="file"] {
 
 .users__table {
     width: 100%;
-    margin: 0 .3rem;
-    padding: 0;
+    margin: 0;
+    padding: 0 .3rem;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
