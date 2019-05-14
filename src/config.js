@@ -10,7 +10,7 @@
  */
 
 const fs = require('fs');
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcryptjs');
 const randomString = require('./randomString');
 
 

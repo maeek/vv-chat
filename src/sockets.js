@@ -40,7 +40,10 @@ module.exports = function(io) {
         function checkSession() {
             return typeof socket.handshake.session !== undefined && socket.handshake.session.valid ? true : false;
         }
-
+        function notAuthorized(socket) {
+            socket.emit('invalidSession', true);
+            socket.leave(room);
+        }
 
         /* 
          * Get active sessions matching clientId
@@ -48,25 +51,29 @@ module.exports = function(io) {
         function activeSessions(clientId) {
             return new Promise(function(resolve) {
                 Store.list(function(el, list) {
-                    list = list.map((el) => {
-                        let active = JSON.parse(fs.readFileSync(__dirname + '/../sessions/' + el, 'utf-8'));
-                        if (active.clientId == clientId)
-                            return {
-                                clientId: active.clientId,
-                                socketId: active.socketId,
-                                os: active.os,
-                                user: active.user,
-                                lastAccess: getTime(),
-                                status: true
-                            };
-                        else
-                            return null;
-                    });
-                    list = list.filter((el) => {
-                        return typeof el !== undefined && el != null && el.socketId;
-                    });
-                    if (list.length > 0)
-                        resolve(list);
+                    if(list){
+                        list = list.map((el) => {
+                            let active = JSON.parse(fs.readFileSync(__dirname + '/../sessions/' + el, 'utf-8'));
+                            if (active.clientId == clientId)
+                                return {
+                                    clientId: active.clientId,
+                                    socketId: active.socketId,
+                                    os: active.os,
+                                    user: active.user,
+                                    lastAccess: getTime(),
+                                    status: true
+                                };
+                            else
+                                return null;
+                        });
+                        list = list.filter((el) => {
+                            return typeof el !== undefined && el != null && el.socketId;
+                        });
+                        if (list.length > 0)
+                            resolve(list);
+                    } else {
+                        resolve([]);
+                    }
                 });
             });
         }
@@ -77,8 +84,12 @@ module.exports = function(io) {
          */
         if (checkSession()) {
             socket.handshake.session.socketId = socket.id;
+            socket.clientId = socket.handshake.session.clientId;
+            socket.user = socket.handshake.session.user;
             socket.handshake.session.save();
             // socket.join(room);
+        } else {
+            notAuthorized(socket);
         }
 
 
@@ -153,8 +164,7 @@ module.exports = function(io) {
                 });
 
             } else {
-                socket.leave(room);
-                socket.emit('invalidSession', true);
+                notAuthorized(socket);
             }
         });
 
@@ -220,16 +230,16 @@ module.exports = function(io) {
          */
         socket.on('message', function socket_message(data) {
             if (checkSession()) {
-                if (data.message != '' && data.message.length > 0)
+                const {message, mid} = data;                
+                if (message != '' && message.length > 0)
                     socket.to(`${room}`).emit('message', {
                         username: socket.handshake.session.user,
-                        message: data.message,
+                        message: message,
                         time: getTime(),
-                        mid: data.mid
+                        mid: mid
                     });
             } else {
-                socket.leave(room);
-                socket.emit('invalidSession', true);
+                notAuthorized(socket);
             }
         });
 
@@ -239,20 +249,20 @@ module.exports = function(io) {
          */
         socket.on('image', function socket_image(image, fn) {
             if (checkSession()) {
-                if (image.type.indexOf('image') >= 0) {
+                const {type, name, blob, mid} = image;
+                if (type.indexOf('image') >= 0) {
                     socket.to(`${room}`).emit('image', {
                         username: socket.handshake.session.user,
-                        name: image.name ? image.name : randomString(8),
-                        type: image.type,
+                        name: name ? name : randomString(8),
+                        type: type,
                         time: getTime(),
-                        img: image.blob,
-                        mid: image.mid
+                        img: blob,
+                        mid: mid
                     });
                     fn(true);
                 }
             } else {
-                socket.leave(room);
-                socket.emit('invalidSession', true);
+                notAuthorized(socket);
             }
         });
 
@@ -266,8 +276,7 @@ module.exports = function(io) {
                     socket.nsp.to(`${room}`).emit('reverseMessage', mid);
                 }
             } else {
-                socket.leave(room);
-                socket.emit('invalidSession', true);
+                notAuthorized(socket);
             }
         });
 
@@ -289,8 +298,7 @@ module.exports = function(io) {
             if (checkSession()) {
                 socket.to(`${room}`).emit('read', user);
             } else {
-                socket.leave(room);
-                socket.emit('invalidSession', true);
+                notAuthorized(socket);
             }
         });
 
@@ -326,8 +334,7 @@ module.exports = function(io) {
                     });
                 }
             } else {
-                socket.leave(room);
-                socket.emit('invalidSession', true);
+                notAuthorized(socket);
             }
         });
 

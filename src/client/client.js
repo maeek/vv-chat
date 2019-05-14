@@ -30,6 +30,31 @@ import {
     windowWasFocused
 } from '/js/clientFunc.js';
 
+
+/*
+const config = {
+    server: `${location.protocol}//${location.host}`,
+    customEmojiFont: true,
+    theme: {
+        default: 'none',
+        themes: [
+            "none",
+            "black",
+            "old",
+            "light",
+        ],
+    },
+    messageSettings: {
+        showEmojiBtn: true,
+        expandImages: false,
+        notificationSound: '/static/pull-out.ogg',
+        removedMessagesInfo: true,
+        imagesTransparency: true,
+    },
+    menuIsHidden: false,
+};
+*/
+
 /*****************************************************************
  * 
  * Initiating socket.io connection

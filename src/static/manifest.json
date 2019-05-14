@@ -23,5 +23,7 @@
     "background_color": "#191E2F",
     "display": "standalone",
     "scope": "/",
-    "theme_color": "#191E2F"
+    "theme_color": "#191E2F",
+    "permissions":["clipboardWrite", "clipboardRead", "cookies", "contextMenus", "background"],
+    "content_security_policy": "worker-src 'self'"
 }

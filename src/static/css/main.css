@@ -80,6 +80,26 @@
     -webkit-font-smoothing: antialiased;
 }
 
+:root {
+    --bg-body: linear-gradient(to bottom, #21273c, #1e2335);
+    --bg-scrollbar: #24283a;
+    --bg-scrollbar-thumb: #636a86;
+    --bg-dark: #0c0e19;
+    --color-blue: #1fa9ff;
+    --vv-icon: #217cce;
+    --color-grey: #ABABAB;
+    --color-white: #FFF;
+    --color-black: #000;
+    --color-almost-white: #FEFEFE;
+    --color-sky-blue: #7eb8dc;
+    --color-panel-bottom: #F0F0F0;
+    --border-panel--bottom: #242a40;
+    --bg-sendEmoji: rgba(55, 64, 93, 0.8);
+    --color-placeholder: #7c858e;
+    --message-hyperlink: #a3dcff;
+    --bg-who: #373f5a;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -728,6 +748,7 @@ input[type="file"] {
     align-items: flex-start;
     box-shadow: 0 0 20px #181e2f;
     position: relative;
+    background: #000;
     max-height: 400px;
     max-width: 400px;
 }
@@ -1236,7 +1257,7 @@ ul .user--record:nth-of-type(even) {
 
 .transition-X {
     transition: all .2s;
-    transform: translateX(0);
+    transform: translate(0);
     opacity: 1;
 }
 

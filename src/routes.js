@@ -9,12 +9,13 @@
 
 const config = require('./config');
 const fs = require('fs');
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcryptjs');
 const express = require('express');
 const MobileDetect = require('mobile-detect');
 const router = express.Router();
 const Store = require('./Store');
 const randomString = require('./randomString');
+const fileManip = require('./fileManip');
 
 router.get('/', function route_get_main(req, res) {
     res.redirect(301, '/login/');
@@ -55,111 +56,186 @@ router.route('/manage/')
                 switch (req.body.action) {
                 case 'getUsers':
                     (function manage_getUsers() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        for (let i = 0; i < userObj.users.length; i++) {
-                            delete userObj.users[i].password;
-                            delete userObj.users[i].first;
-                        }
-                        userObj.users = userObj.users.filter(el => {
-                            return el.username != 'root';
+                        /* Get users list */
+                        fileManip.readUsers(true, (err, data) => {
+                            if(!err)
+                                res.json(data.users);
                         });
-                        res.json(userObj.users);
                     })();
-
                     break;
                 case 'deleteUser':
                     (function manage_deleteUser() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const user = req.body.user.trim();
-                        if (user != 'root') {
-                            userObj.users = userObj.users.filter(el => {
-                                return el.clientId != user;
-                            });
-                            fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                            res.json({ status: true });
-                        } else {
-                            res.json({ status: false });
+                        function deleteUser(err,data) {
+                            if(!err){
+                                /* User to delete */
+                                const user = req.body.user.trim();
+                                /* Check if user is not root */
+                                if (user != 'root') {
+                                    data.users = data.users.filter(el => {
+                                        /* Return all users other than user to delete */
+                                        return el.clientId != user;
+                                    });
+                                    /* Write changes */
+                                    fileManip.writeUsers(data, (error)=>{
+                                        if(!error)
+                                            res.json({ status: true });
+                                        else
+                                            res.json({ status: false });                                                                            
+                                    })
+                                } else {
+                                    res.json({ status: false });
+                                }
+                            }
                         }
+                        fileManip.readUsers(false, deleteUser);
                     })();
                     break;
                 case 'block':
                     (function manage_blockUsers() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const uids = req.body.uids;
-                        const toBlock = req.body.block ? true : false;
-                        if (uids != 'root') {
-                            userObj.users = userObj.users.map(el => {
-                                if (uids.indexOf(el.clientId) != -1) {
-                                    el.blocked = toBlock;
-                                }
-                                return el;
-                            });
-                            fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                            res.json({ status: true, blocked: uids });
-                        } else {
-                            res.json({ status: false });
+                        
+                        /* Block / Unblock user */
+                        function blockUser(data) {
+                            
+                            /* Array of users ids to block */
+                            const uids = req.body.uids;
+                            
+                            /* Block / Unblock */
+                            const toBlock = req.body.block ? true : false;
+                            
+                            /* Check if array contain root, if not found, proceed*/
+                            if(uids.indexOf('root') != -1){
+                                data.users = data.users.map(el => {
+                            
+                                    /* Match user to block / unblock in users list */
+                                    if (uids.indexOf(el.clientId) != -1) {
+                                        /* Change status */
+                                        el.blocked = toBlock;
+                                    }
+                                    /* Return updated data */
+                                    return el;
+                                });
+                                
+                                /* Write changes */
+                                fileManip.writeUsers(data, (err)=> {
+                                    if(!err)
+                                        res.json({ status: true, blocked: uids });
+                                    else 
+                                        res.json({ status: false });
+                                });
+                            } else {
+                                /* Return if array contain root user */
+                                res.json({ status: false });
+                            }
                         }
+                        
+                        fileManip.readUsers(false, (err, data) => {
+                            if(!err)
+                                blockUser(data); 
+                        });
                     })();
                     break;
                 case 'createUser':
                     (function manage_createUser() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const user = req.body.user.toLowerCase().trim();
-                        const format = /^[a-zA-Z0-9@!.-]+$/;
-                        const salt = bcrypt.genSaltSync();
-                        const newPassword = randomString();
-                        bcrypt.hash(newPassword, salt, null, function(err, hash) {
-                            if (!err) {
-                                const newUser = {
-                                    username: user,
-                                    password: hash,
-                                    first: true,
-                                    clientId: randomString(22)
-                                };
-                                const checkUsers = userObj.users.filter(el => {
-                                    return el.username == user;
-                                });
-                                if (checkUsers.length == 0 && format.test(user)) {
-                                    userObj.users.push(newUser);
-                                    fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                                    res.json({ status: true, user: user.toLowerCase().trim(), password: newPassword, clientId: newUser.clientId });
+                        /* Create new user */
+                        function createUser(data, user){
+                            /* Username format */
+                            const format = /^[a-zA-Z0-9@!.-]+$/;
+                            /* Generate salt */
+                            const salt = bcrypt.genSaltSync();
+                            /* Generate random password */
+                            const newPassword = randomString();
+                            /* Hash password */
+                            bcrypt.hash(newPassword, salt, function(err, hash) {
+                                if (!err) {
+                                    /* New user object */
+                                    const newUser = {
+                                        username: user,
+                                        password: hash,
+                                        first: true,
+                                        clientId: randomString(22),
+                                        blocked: false
+                                    };
+                                    
+                                    /* Return user matching new username */
+                                    const checkUsers = data.users.filter(el => {
+                                        return el.username == user;
+                                    });
+
+                                    /* Check if username is taken and satisfy username format */                                    
+                                    if (checkUsers.length == 0 && format.test(user)) {
+                                        /* Add new user to the array */
+                                        data.users.push(newUser);
+                                        fileManip.writeUsers(data, err=>{
+                                            /* If write was successful send new user data */
+                                            if(!err)
+                                                res.json({ status: true, user: user.toLowerCase().trim(), password: newPassword, clientId: newUser.clientId });
+                                            else
+                                                console.log(`ERROR: failed to create user at "/manage" (createUser) - error description:\n${err}`);                                                                        
+                                        });
+                                    } else {
+                                        /* If username was taken or username didn't match the format */
+                                        res.json({ status: false });
+                                    }
                                 } else {
+                                    /* Password hash was unsuccessfull */
+                                    console.log(`ERROR: failed to hash password at "/manage" (createUser) for user: "${user}" error description:\n${err}`);
                                     res.json({ status: false });
                                 }
-
-                            } else {
-                                console.log(`ERROR: failed to hash password at "/manage" (createUser) for user: "${user}" error description:\n${err}`);
-                                res.json({ status: false });
-                            }
-                        });
+                            });
+                        }
+                        /* New username */
+                        const user = req.body.user.toLowerCase().trim();
+                        fileManip.readUsers(false, (err, data)=>{
+                            if(!err)
+                                createUser(data, user);
+                        })
+                        
                     })();
                     break;
                 case 'resetPassword':
                     (function manage_resetPassword() {
-                        let userObj = JSON.parse(fs.readFileSync(config.usersFile));
-                        const user = req.body.user.trim();
-                        const password = randomString();
-                        const salt = bcrypt.genSaltSync();
-                        bcrypt.hash(password, salt, null, function(err, hash) {
-                            if (!err) {
-                                userObj.users = userObj.users.filter(el => {
-                                    if (el.clientId == user) {
-                                        el.password = hash;
-                                        el.first = true;
-                                    }
-                                    return el;
-                                });
-
-                                fs.writeFileSync(config.usersFile, JSON.stringify(userObj));
-                                res.json({ status: true, password: password });
-                            } else {
-                                console.log(`ERROR: failed to hash password at "/manage" (resetPassword) for user: "${user}" error description:\n${err}`);
-                                res.json({ status: false });
-                            }
+                        /* Reset password */
+                        function resetPassword(data, user) {
+                            /* Generate new password */
+                            const password = randomString();
+                            /* Generate salt */
+                            const salt = bcrypt.genSaltSync();
+                            /* Hash password */
+                            bcrypt.hash(password, salt, function(err, hash) {
+                                if (!err) {
+                                    
+                                    /* Update password */
+                                    data.users = data.users.filter(el => {
+                                        if (el.clientId == user) {
+                                            el.password = hash;
+                                            el.first = true;
+                                        }
+                                        return el;
+                                    });
+                                    
+                                    /* Save changes */
+                                    fileManip.writeUsers(data, error=>{
+                                        if(!error)
+                                            res.json({ status: true, password: password });
+                                    });
+                                    
+                                } else {
+                                    console.log(`ERROR: failed to hash password at "/manage" (resetPassword) for user: "${user}" error description:\n${err}`);
+                                    res.json({ status: false });
+                                }
+                            });    
+                        }
+                        
+                        const clientId = req.body.user.trim();
+                        fileManip.readUsers(false, (err,data)=> {
+                            if(!err)
+                                resetPassword(data, clientId);
                         });
+                        
                     })();
                     break;
                 default:
+                    /* Return false if action didn't match */
                     res.json({ status: false });
                     break;
                 }
@@ -183,78 +259,85 @@ router.route('/setup/')
             console.log(`ERROR: file ${config.usersFile} doesn't exist`);
             res.redirect(301, '/setup/');
         } else {
-            if (req.session.setup) {
-                const password = req.body.password;
-                const repassword = req.body.repassword;
-                const name = req.session.user;
-                if (password != repassword && password.length < 5) {
-                    res.redirect(301, '/setup/');
-                } else {
+            /* Username */
+            const name = req.session.user;
+            /* Read users list */
+            fileManip.readUsers(false, (err, data)=>{
+                if(!err) {
+                    let changed = false;
+                    let newpass;
+                    /* Generate salt */
                     const salt = bcrypt.genSaltSync();
-                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                    bcrypt.hash(password, salt, null, function setup_first_hash(err, hash) {
-                        if (!err) {
-                            usersObj.users = usersObj.users.filter(el => {
-                                if (el.username == name) {
-                                    el.password = hash;
-                                    el.first = false;
-                                }
-                                return el;
-                            });
-                            fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                            req.session.setup = false;
-                            req.session.save((err) => {
-                                if (!err) {
-                                    res.redirect(301, '/chat/');
-                                } else {
-                                    console.log(err);
-                                }
-                            });
+                    
+                    /* If first login */
+                    if(req.session.setup){
+                        const password = req.body.password;
+                        const repassword = req.body.repassword;
+                        
+                        /* Check if passwords match */
+                        if (password != repassword && password.length < 5) {
+                            res.redirect(301, '/setup/');
                         } else {
-                            console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
+                            changed = true;
+                            newpass = password;
                         }
-                    });
-                }
-            } else {
-                const oldPassword = req.body.oldPassword;
-                const password = req.body.password;
-                if (password.length > 4) {
-                    const name = req.session.user;
-                    const salt = bcrypt.genSaltSync();
-                    let usersObj = JSON.parse(fs.readFileSync(config.usersFile));
-                    const userHash = usersObj.users.filter(user => {
-                        return user.username == req.session.user;
-                    });
-                    if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
-                        bcrypt.hash(password, salt, null, function setup_hash(err, hash) {
-                            if (!err) {
-                                usersObj.users = usersObj.users.filter(el => {
-                                    if (el.username == name)
+                    } else {
+                        const oldPassword = req.body.oldPassword;
+                        const password = req.body.password;
+                        
+                        if (password.length > 4) {
+                            const userHash = data.users.filter(user => {
+                                return user.username == req.session.user;
+                            });
+                            /* Compare old password with the one provided by user */
+                            if (bcrypt.compareSync(oldPassword, userHash[0].password) && userHash.length == 1) {
+                                newpass = password;
+                                changed = true;
+                            }
+                        } else {
+                            res.json({
+                                status: false
+                            });
+                        }
+                    }
+                   
+                    if(changed){
+                        /* Hash password */
+                        bcrypt.hash(newpass, salt, function setup_first_hash(error, hash) {
+                            if(!error){
+                                /* Update user */
+                                data.users = data.users.filter(el => {
+                                    if (el.username == name) {
                                         el.password = hash;
+                                        el.first = false;
+                                    }
                                     return el;
                                 });
-                                fs.writeFileSync(config.usersFile, JSON.stringify(usersObj));
-                                res.json({
-                                    status: true
-                                });
-                            } else {
-                                console.log(`ERROR: failed to hash password at "/setup/" for user: "${name}" error description:\n${err}`);
-                                res.json({
-                                    status: false
+                                /* Write changes */
+                                fileManip.writeUsers(data, w_err=>{
+                                    if(!w_err && req.session.setup) {
+                                        req.session.setup = false;                            
+                                        req.session.save((s_error) => {
+                                            if (!s_error) {
+                                                res.redirect(301, '/chat/');
+                                            } else {
+                                                console.log(s_error);
+                                            }
+                                        });
+                                    } else {
+                                        res.json({status: true});
+                                    }
                                 });
                             }
-                        });
+                        });    
                     } else {
-                        res.json({
-                            status: false
-                        });
-                    }
-                } else {
-                    res.json({
-                        status: false
-                    });
-                }
-            }
+                        if(req.session.setup) 
+                            res.redirect(301, '/setup/');    
+                        else
+                            res.json({status: false});                        
+                    }           
+               } 
+            });
         }
     });
 
