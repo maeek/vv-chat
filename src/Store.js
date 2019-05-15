@@ -11,7 +11,7 @@ const expressSession = require('express-session');
 const FileStore = require('session-file-store')(expressSession);
 
 /* Create sessions folder if doesn't exist */
-if (!fs.existsSync(__dirname + '/../sessions/')) fs.mkdirSync(__dirname + '/../sessions/', 744);
+if (!fs.existsSync(__dirname + '/../sessions/')) fs.mkdirSync(__dirname + '/../sessions/', 774);
 
 /* 
  * Initiate sessionStore 

@@ -1073,7 +1073,7 @@ socket.on('roomList', function socket_roomList (list) {
 });
 
 socket.on('userConnected', function socket_userConnected (data) {
-    if (!data.self) {
+    if (data.joined != Cookies.get('clientId')) {
         const time = getTime();
         const HTML = `<li class="joined"><span class="line"></span><span>${escapeHtml(data.username)} ${data.status ? 'joined chat' : 'left chat'} - ${time}</span><span class="line"></span></li>`;
         appendDOM(HTML, '.panel--middle');
@@ -1153,6 +1153,11 @@ window.addEventListener('hashchange', function win_hashchange () {
         }
     });
 }, false);
+
+
+if(!Cookies.get('clientId') || !Cookies.get('user'))
+    location.href = '/logout';
+
 
 /*****************************************************************
  *  

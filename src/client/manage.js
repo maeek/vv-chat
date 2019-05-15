@@ -116,7 +116,7 @@ socket.on('roomList', (list) => {
     for (let r = 0; r < $$('.rooms').length; r++) {
         $$('.rooms')[r].innerHTML = '';
     }
-
+    console.log(list);
     for (let i = 0; i < list.length; i++) {
         // Get room utf-8 icon
         const emoji = returnEmoji(list[i].icon);
@@ -580,7 +580,7 @@ document.addEventListener('click', (e) => {
         const icon = $('.icon--active') ? $('.icon--active').getAttribute('data-index') : null;
         socket.emit('addRoom', {
             name: roomName,
-            icon,
+            icon: icon,
         }, (res) => {
             if (!res.status) {
                 error(res.message);
