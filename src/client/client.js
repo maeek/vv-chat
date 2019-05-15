@@ -27,7 +27,8 @@ import {
     settingsInput,
     emojis,
     operations,
-    windowWasFocused
+    windowWasFocused,
+    returnEmoji
 } from '/js/clientFunc.js';
 
 
@@ -1079,13 +1080,11 @@ socket.on('userConnected', function socket_userConnected (data) {
         appendDOM(HTML, '.panel--middle');
     } else {
         if (!location.hash) {
-            $('.rooms--title').innerHTML = ''; 
-            let uni = data.roomIcon.indexOf('-') != -1 ? data.roomIcon.split('-') : [data.roomIcon];
-            let uniCode = '';
-            for (let j = 0; j < uni.length; j++) {
-                uniCode += String.fromCodePoint(parseInt(uni[j], 16));
+            if(data.roomIcon){
+                $('.rooms--title').innerHTML = ''; 
+                let uniCode = returnEmoji(data.roomIcon);
+                appendDOM(`<i>${uniCode}</i> <span>${data.roomName}</span>`, '.rooms--title');
             }
-            appendDOM(`<i>${uniCode}</i> <span>${data.roomName}</span>`, '.rooms--title');
         }
     }
     $('#uc').innerHTML = data.users;
