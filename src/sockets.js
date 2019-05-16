@@ -54,7 +54,7 @@ module.exports = function(io) {
             return new Promise(function(resolve) {
                 /* Getting all sessions */
                 Store.list(function(el, list) {
-                    if(list){
+                    if (list) {
                         /* Getting sessions matching clientId */
                         list = list.map((el) => {
                             let active = JSON.parse(fs.readFileSync(__dirname + '/../sessions/' + el, 'utf-8'));
@@ -106,15 +106,15 @@ module.exports = function(io) {
                 socket.leaveAll();
                 /* Check if user provided room id */
 
-                fileManip.getRoom(wRoom, room=>{
+                fileManip.getRoom(wRoom, room => {
                     let id, name, icon;
-                    if(room) {
+                    if (room) {
                         /* Get room matching id */
                         id = room.id;
                         name = room.name;
                         icon = room.icon;
                     } else {
-                        /* Set room details to default if id provided by user was not found */                
+                        /* Set room details to default if id provided by user was not found */
                         id = config.defaultRoom.id;
                         name = config.defaultRoom.name;
                         icon = config.defaultRoom.icon;
@@ -122,10 +122,10 @@ module.exports = function(io) {
                     /* Update user's active room */
                     activeRoom = id;
                     socket.join(id);
-                    
+
                     /* Get users in activeRoom */
                     io.of('/chat').in(activeRoom).clients((error, clients) => {
-                        if(!error){
+                        if (!error) {
                             /* Notify users */
                             socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                 status: true,
@@ -137,7 +137,7 @@ module.exports = function(io) {
                                 roomIcon: icon,
                                 rid: id
                             });
-                            
+
                             /* 
                              * Update active sessions for clientId
                              */
@@ -145,8 +145,8 @@ module.exports = function(io) {
                                 for (let i = 0; i < list.length; i++) {
                                     io.of('/chat').to(`${list[i].socketId}`).emit('activeSessions', list);
                                 }
-                            }); 
-                            
+                            });
+
                         } else {
                             console.log(`Failed to get active clients in "${id}:${name}" - description:\n ${error}`);
                         }
@@ -221,7 +221,7 @@ module.exports = function(io) {
          */
         socket.on('message', function socket_message(data) {
             if (checkSession()) {
-                const {message, mid} = data;                
+                const { message, mid } = data;
                 if (message != '' && message.length > 0)
                     socket.to(`${activeRoom}`).emit('message', {
                         username: socket.handshake.session.user,
@@ -240,7 +240,7 @@ module.exports = function(io) {
          */
         socket.on('image', function socket_image(image, fn) {
             if (checkSession()) {
-                const {type, name, blob, mid} = image;
+                const { type, name, blob, mid } = image;
                 if (type.indexOf('image') >= 0) {
                     socket.to(`${activeRoom}`).emit('image', {
                         username: socket.handshake.session.user,
@@ -306,15 +306,15 @@ module.exports = function(io) {
         socket.on('roomList', function socket_roomList() {
             if (checkSession()) {
                 /* Get all rooms, without sensitive informations */
-                fileManip.readRooms(true, (err, rooms)=>{
-                    if(!err){
-                        rooms.list = rooms.list.filter(el=>{
+                fileManip.readRooms(true, (err, rooms) => {
+                    if (!err) {
+                        rooms.list = rooms.list.filter(el => {
                             el.online = 0;
                             return el;
                         });
                         /* Initiate promises array */
                         let clientsLength = [];
-                        
+
                         for (let i = 0; i < rooms.list.length; i++) {
                             /* Push promise to the array */
                             clientsLength.push(new Promise((res) => {
@@ -323,7 +323,7 @@ module.exports = function(io) {
                                     res();
                                 });
                             }));
-                            
+
                         }
                         /* Sent rooms to users when all active users has been counted */
                         Promise.all(clientsLength).then(() => {
@@ -331,7 +331,7 @@ module.exports = function(io) {
                             /* Clear the array */
                             clientsLength = [];
                         });
-                    }   
+                    }
                 });
             } else {
                 notAuthorized(socket);
@@ -346,9 +346,9 @@ module.exports = function(io) {
             if (checkSession()) {
                 let icon, name, id;
                 /* Get specific room */
-                fileManip.getRoom(wRoom, (data)=>{
+                fileManip.getRoom(wRoom, (data) => {
                     /* If room wan not found data will be false */
-                    if(data){
+                    if (data) {
                         id = data.id;
                         name = data.name;
                         icon = data.icon;
@@ -363,7 +363,7 @@ module.exports = function(io) {
                             /* Notify clients when user leave */
                             socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                 status: false,
-                                joined: socket.handshake.session.clientId,                            
+                                joined: socket.handshake.session.clientId,
                                 username: socket.handshake.session.user,
                                 time: getTime(),
                                 users: clients.length - 1
@@ -373,12 +373,12 @@ module.exports = function(io) {
                             /* Update active room and join */
                             activeRoom = id;
                             socket.join(activeRoom);
-    
+
                             /* Notify users about new user in room */
                             io.of('/chat').in(activeRoom).clients((error, clients) => {
                                 socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                     status: true,
-                                    joined: socket.handshake.session.clientId,                                
+                                    joined: socket.handshake.session.clientId,
                                     username: socket.handshake.session.user,
                                     time: getTime(),
                                     users: clients.length
@@ -392,7 +392,7 @@ module.exports = function(io) {
                         name: name,
                         icon: icon,
                     });
-                });                
+                });
             }
         });
 
@@ -406,14 +406,14 @@ module.exports = function(io) {
                     /* Room name format */
                     const format = /^[a-zA-Z0-9@!.\-\sAaĄąĆćĘęŁłŃńÓóSsŚśŹźŻż]+$/;
                     /* Get all rooms */
-                    fileManip.readRooms(false, (err, data)=>{
-                        if(!err){
-                            let {name, icon} = newRoom;
-                            
+                    fileManip.readRooms(false, (err, data) => {
+                        if (!err) {
+                            let { name, icon } = newRoom;
+
                             /* Set random icon if not set */
                             icon = icon ? icon : JSON.parse(fs.readFileSync(__dirname + '/static/js/emoji.json', 'utf-8')).list[Math.floor(Math.random() * 813)];
                             /* Test room name */
-                            if(format.test(name) && name.length <= 30) {
+                            if (format.test(name) && name.length <= 30) {
                                 /* Create room object */
                                 const createRoom = {
                                     id: randomString(10),
@@ -424,12 +424,12 @@ module.exports = function(io) {
                                         hash: ''
                                     }
                                 };
-                                
+
                                 /* Add new room to the list */
                                 data.list.push(createRoom);
-                                
+
                                 /* Write changes */
-                                fileManip.writeRooms(data, (w_err)=>{
+                                fileManip.writeRooms(data, (w_err) => {
                                     if (!w_err) {
                                         /* Send room details to user */
                                         fn({
@@ -438,10 +438,10 @@ module.exports = function(io) {
                                             name: name,
                                             icon: icon
                                         });
-                
-                                        /* Initiate promises array */                        
+
+                                        /* Initiate promises array */
                                         let clientsLength = [];
-                                        
+
                                         for (let i = 0; i < data.list.length; i++) {
                                             /* Push promise to the array */
                                             clientsLength.push(new Promise((res) => {
@@ -450,7 +450,7 @@ module.exports = function(io) {
                                                     res();
                                                 });
                                             }));
-                                            
+
                                         }
                                         /* Sent rooms to users when all active users has been counted */
                                         Promise.all(clientsLength).then(() => {
@@ -461,13 +461,13 @@ module.exports = function(io) {
                                     } else {
                                         console.log(`Error: Couldn't write to: ${config.roomsFile} - description:\n ${w_err}`);
                                     }
-                                    
+
                                 });
-                                
+
                             }
-                            
+
                         } else {
-                            console.log(`Error: Couldn't read: ${config.roomsFile}`);                        
+                            console.log(`Error: Couldn't read: ${config.roomsFile}`);
                             fn({
                                 status: false,
                                 message: 'Name not satisfying requirements'
@@ -485,18 +485,18 @@ module.exports = function(io) {
         socket.on('deleteRoom', function socket_deleteRoom(roomToDelete) {
             if (checkSession()) {
                 if (socket.handshake.session.auth == 'root' || socket.handshake.session.auth == 'mod') {
-                    fileManip.readRooms(false, (err, data)=> {
+                    fileManip.readRooms(false, (err, data) => {
                         if (roomToDelete != config.defaultRoom.id) {
                             data.list = data.list.filter(el => {
                                 return el.id != roomToDelete;
                             });
-                            fileManip.writeRooms(data, err=>{
+                            fileManip.writeRooms(data, err => {
                                 if (!err) {
-                                    
+
                                     io.of('/chat').to(roomToDelete).emit('changeRoom', config.defaultRoom.id);
-                                    
+
                                     let clientsLength = [];
-                                    
+
                                     for (let i = 0; i < data.list.length; i++) {
                                         /* Push promise to the array */
                                         clientsLength.push(new Promise((res) => {
@@ -505,7 +505,7 @@ module.exports = function(io) {
                                                 res();
                                             });
                                         }));
-                                        
+
                                     }
                                     /* Sent rooms to users when all active users has been counted */
                                     Promise.all(clientsLength).then(() => {
@@ -513,11 +513,11 @@ module.exports = function(io) {
                                         /* Clear the array */
                                         clientsLength = [];
                                     });
-                                    
+
                                 } else {
                                     console.log(`ERROR: Couldn't write changes to ${config.roomsFile}, description\n ${err}`);
-                                }  
-                            }); 
+                                }
+                            });
                         }
                     });
                 }
@@ -531,10 +531,10 @@ module.exports = function(io) {
         socket.on('disconnect', function socket_disconnect() {
             if (checkSession()) {
                 io.of('/chat').in(activeRoom).clients((error, clients) => {
-                    if(socket.clientId != 'root')
+                    if (socket.clientId != 'root')
                         socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                             status: false,
-                            joined: socket.handshake.session.clientId,                        
+                            joined: socket.handshake.session.clientId,
                             username: socket.handshake.session.user,
                             time: getTime(),
                             users: clients.length

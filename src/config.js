@@ -133,7 +133,10 @@ if (fs.existsSync(config.roomsFile)) {
 
             if (keys.indexOf('id') == -1) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "id", fixing.`);
-                roomsFile.list[i].clientId = randomString(22);
+                if (roomsFile.list[i].name != config.defaultRoom.name)
+                    roomsFile.list[i].id = randomString(22);
+                else
+                    roomsFile.list[i].id = config.defaultRoom.id;
             }
         }
         fs.writeFileSync(config.roomsFile, JSON.stringify(roomsFile));
