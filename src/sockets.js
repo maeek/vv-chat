@@ -129,7 +129,7 @@ module.exports = function(io) {
                             /* Notify users */
                             socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                 status: true,
-                                joined: socket.handshake.session.clientId,
+                                joined: socket.clientId,
                                 username: socket.handshake.session.user,
                                 time: getTime(),
                                 users: clients.length,
@@ -363,7 +363,7 @@ module.exports = function(io) {
                             /* Notify clients when user leave */
                             socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                 status: false,
-                                joined: socket.handshake.session.clientId,                            
+                                joined: socket.clientId,                            
                                 username: socket.handshake.session.user,
                                 time: getTime(),
                                 users: clients.length - 1
@@ -378,7 +378,7 @@ module.exports = function(io) {
                             io.of('/chat').in(activeRoom).clients((error, clients) => {
                                 socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                     status: true,
-                                    joined: socket.handshake.session.clientId,                                
+                                    joined: socket.clientId,                                
                                     username: socket.handshake.session.user,
                                     time: getTime(),
                                     users: clients.length
@@ -534,7 +534,7 @@ module.exports = function(io) {
                     if(socket.clientId != 'root')
                         socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                             status: false,
-                            joined: socket.handshake.session.clientId,                        
+                            joined: socket.clientId,                        
                             username: socket.handshake.session.user,
                             time: getTime(),
                             users: clients.length
