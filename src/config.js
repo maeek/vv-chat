@@ -130,7 +130,9 @@ if (fs.existsSync(config.roomsFile)) {
                     hash: ''
                 };
             }
-
+            if (keys.indexOf('clientId') >= 0) {
+                delete roomsFile.list[i].clientId;
+            }
             if (keys.indexOf('id') == -1) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "id", fixing.`);
                 if (roomsFile.list[i].name != config.defaultRoom.name)
