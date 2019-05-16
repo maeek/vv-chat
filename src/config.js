@@ -130,6 +130,8 @@ if (fs.existsSync(config.roomsFile)) {
                     hash: ''
                 };
             }
+
+            /* Clean for previous commit */
             if (keys.indexOf('clientId') >= 0) {
                 delete roomsFile.list[i].clientId;
             }
