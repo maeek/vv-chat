@@ -855,7 +855,11 @@ input[type="file"] {
     font-size: 1rem;
     margin: 0;
 }
-
+.man-rec {
+    padding:0 .3rem;
+    cursor: pointer;
+    text-decoration: underline;
+}
 .errorCont,
 .info--changeCont {
     display: flex;

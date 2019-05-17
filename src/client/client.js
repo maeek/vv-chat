@@ -1,6 +1,10 @@
+/* ESLINT RULES */
+
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 /* eslint-disable no-trailing-spaces */
+
+
 /*
  *   Author: maeek
  *   Description: No history simple websocket chat
@@ -28,10 +32,12 @@ import {
     emojis,
     operations,
     windowWasFocused,
-    returnEmoji
+    returnEmoji,
+    appendImage,
+    appendMessage
 } from '/js/clientFunc.js';
 
-
+/* ::TODO */
 /*
 const config = {
     server: `${location.protocol}//${location.host}`,
@@ -111,6 +117,7 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
     const panel = $('.panel--middle');
 
+    /* Alert user when using HTTP */
     if (location.protocol == 'http:' && !localStorage.getItem('useHTTP')) {
         prependDOM(`<div class="http noselect">
                     <div class="http--icon"><i class="material-icons">warning</i></div>
@@ -120,6 +127,7 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
         const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
         $('main').style['max-height'] = (wh - $('.http').offsetHeight) + 'px';
     }
+    /* Close http alert */
     document.addEventListener('click', function(e) {
         if (e.target && hasClass(e.target, 'http--close')) {
             $('main').removeAttribute('style');
@@ -130,32 +138,42 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
     });
 
     if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
+        /* Resize for Desktop */
         const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+        /* Resize <aside> */
         el.style['max-height'] = calc + 'px';
 
         const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+        /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
     } else {
+        /* Resize for Moblie */
         const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+        /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
     }
 
+    /* Window resize listener */    
     window.addEventListener('resize', function win_resized() {
         const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
         if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
             const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+            /* Resize <aside> */
             el.style['max-height'] = calc + 'px';
 
             const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
         } else {
             const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
         }
         $('aside').removeAttribute('style');
         $('aside').removeAttribute('data-hidden');
     });
-
+    
+    /* Focus text input on page load */
     $('.textField').focus();
 });
 
@@ -178,7 +196,8 @@ socket.on('connect_error', function socket_connect_error() {
                     <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
                     <div class="errorCont">Connection Error</div>
                 </li>`;
-    appendDOM(HTML, '.panel--middle');
+    /* Display Error */
+    appendDOM(HTML, '.panel--middle', true);
     $('#uc').innerHTML = 0;
 });
 socket.on('connect_failed', function socket_connect_failed() {
@@ -191,7 +210,8 @@ socket.on('connect_failed', function socket_connect_failed() {
                     <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
                     <div class="errorCont">Connection Error</div>
                 </li>`;
-    appendDOM(HTML, '.panel--middle');
+    /* Display Error */
+    appendDOM(HTML, '.panel--middle', true);
     $('#uc').innerHTML = 0;
 });
 
@@ -205,7 +225,8 @@ socket.on('connect_timeout', function socket_connect_timeout() {
                     <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
                     <div class="errorCont">Connection timeout</div>
                 </li>`;
-    appendDOM(HTML, '.panel--middle');
+    /* Display Error */
+    appendDOM(HTML, '.panel--middle', true);
     $('#uc').innerHTML = 0;
 });
 
@@ -218,21 +239,24 @@ socket.on('reconnecting', function socket_reconnecting(at) {
                     <div class="who noselect recAttemps">${at}/10</div>
                     <div class="errorCont">Reconnection attempt...</div>
                 </li>`;
-    if (errorEl.length > 0) { $('.recAttemps').innerHTML = at + '/10'; } else { appendDOM(HTML, '.panel--middle'); }
+    /* Display Error */
+    if (errorEl.length > 0) { $('.recAttemps').innerHTML = at + '/10'; } else { appendDOM(HTML, '.panel--middle', true); }
     $('#uc').innerHTML = 0;
 });
 socket.on('reconnect_failed', function socket_reconnect_failed() {
     const errorEl = $$('.reconnect');
     const HTML = `<li class="error reconnect">
             <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
-            <div class="errorCont">Reconnection failed, try refreshing the page</div>
+            <div class="errorCont">Reconnecting failed, <span class="man-rec">Click to reconnect manually</span></div>
         </li>`;
+    /* Display Error */
     if (errorEl.length > 0) {
         $('.recAttemps').innerHTML = '';
         appendDOM('<i class="material-icons">error</i>', '.recAttemps');
-        $('.reconnect .errorCont').innerHTML = 'Reconnecting failed, try refreshing the page';
+        $('.reconnect .errorCont').innerHTML = '';
+        appendDOM('Reconnecting failed, <span class="man-rec">Click to reconnect manually</span>', '.reconnect .errorCont');
     } else {
-        appendDOM(HTML, '.panel--middle');
+        appendDOM(HTML, '.panel--middle', true);
     }
 });
 
@@ -241,6 +265,7 @@ socket.on('reconnect', function socket_reconnect() {
     if (errorEl.length > 0) {
         for (let i = 0; i < errorEl.length; i++) { errorEl[i].remove(); }
     }
+    /* Alert users in room */
     socket.emit('userConnected', location.hash ? decodeURIComponent(location.hash.substring(2)) : null);
 });
 
@@ -260,69 +285,46 @@ socket.on('invalidSession', function socket_invalidSession(status) {
  * 
  *****************************************************************/
 
-function appendMessage(socket) {
-    let val = $('.textField').value.trim();
-    const time = getTime();
-    if (val != '' && Cookies.get('user')) {
-        if (socket.io.readyState == 'open') {
-            const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
-            socket.emit('message', {
-                username: Cookies.get('user'),
-                message: val,
-                time: time,
-                mid: mid
-            });
-            val = escapeHtml(val);
-            const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
-            let replacedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
-            const HTML = `<li class="ms from__me" data-mid="${mid}">
-                            <div class="time noselect">${time}</div>
-                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                            <div class="message">${replacedText}</div>
-                        </li>;`;
-            appendDOM(HTML, '.panel--middle', true);
-            const middleDiv = $('.panel--middle');
-            middleDiv.scrollTop = middleDiv.scrollHeight;
-            $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
-            $('.textField').value = '';
-            $('.textField').focus();
-        } else {
-            error('Failed sending message');
-            $('.textField').focus();
-        }
-    } else if (typeof Cookies.get('user') === 'undefined') {
-        socket.close();
-        location.href = '/logout';
-    }
-}
-
 window.onfocus = function() {
+    /* Clear unread messages on focus */
     windowWasFocused();
 };
 
+/* Initiate timeout for tost message if user scrolled up by 250px */
 let isUpTimeout;
+
+/*
+ * Receiveing messages
+ */
 socket.on('message', function socket_message(data) {
     let message = data.message;
-    const mid = data.mid;
-    const time = data.time;
-    const username = data.username;
+    const {mid, time, username} = data;
+    /* Get links from message */
     const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
-
+    /* Trim message */
     message = escapeHtml(message.trim());
-    let replacedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
-    const HTML = `<li class="ms ${username == Cookies.get('user') ? 'from__me' : 'to__me'}" data-mid="${escapeHtml(mid)}">
+    /* Replace links with anchors */
+    let preparedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
+    /* Check from whom is the message and properly set class */
+    const fromWho = username == Cookies.get('user') ? 'from__me' : 'to__me';
+    const fromSelf = username == Cookies.get('user') ? '<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>' : '';
+    const fromSelfIcon = username == Cookies.get('user') ? '' : '<div class="who noselect" data-user="' + escapeHtml(username) + '">' + escapeHtml(username.substring(0, 1).toUpperCase()) + '</div>';
+    /* Message template */
+    const HTML = `<li class="ms ${fromWho}" data-mid="${escapeHtml(mid)}">
                 <div class="time noselect">${time}</div>
-                ${username == Cookies.get('user') ? '<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>' : ''}
-                <div class="message">${replacedText}</div>
-                ${username == Cookies.get('user') ? '' : '<div class="who noselect" data-user="' + escapeHtml(username) + '">' + escapeHtml(username.substring(0, 1).toUpperCase()) + '</div>'}
+                ${fromSelf}
+                <div class="message">${preparedText}</div>
+                ${fromSelfIcon}
             </li>;`;
+            
+    /* Remove user typing info */
     if ($$('.typing').length > 0) $('.typing').remove();
+    
+    /* Append message */
     appendDOM(HTML, '.panel--middle');
+    /* Show message */
     $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
-    const isUp = `<div data-mid="${mid}" class="tost noselect">
-                    <div class="who" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
-                    <div class="text">${escapeHtml(message.length > 25 ? message.substring(0, 25) + '...' : message)}</div>
-                </div>`;
+    /* Detect if user scrolled up */
     if (middleDiv.scrollTop + middleDiv.clientHeight + $(`.ms[data-mid='${mid}']`).offsetHeight < Math.max(
         middleDiv.scrollHeight,
         middleDiv.offsetHeight,
@@ -333,10 +335,19 @@ socket.on('message', function socket_message(data) {
             $('.tost .who').innerHTML = escapeHtml(username.substring(0, 1).toUpperCase());
             $('.tost .text').innerHTML = escapeHtml(message.length > 25 ? message.substring(0, 25) + '...' : message);
         } else {
+            /* Tost template */
+            const isUp = `<div data-mid="${mid}" class="tost noselect">
+                            <div class="who" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
+                            <div class="text">${escapeHtml(message.length > 25 ? message.substring(0, 25) + '...' : message)}</div>
+                        </div>`;
+            /* Append tost message */
             appendDOM(isUp, 'body', false);
+            /* Show tost */
             $(`.tost[data-mid="${mid}"]`).classList.add('tost-enter');
         }
+        /* Clear timeout for tost */
         clearTimeout(isUpTimeout);
+        /* Set timeout to remove tost */
         isUpTimeout = setTimeout(function() {
             $(`.tost[data-mid="${mid}"]`).classList.add('tost-leave');
             setTimeout(function() {
@@ -344,13 +355,18 @@ socket.on('message', function socket_message(data) {
             }, 300);
         }, 3000);
     } else {
+        /* Scroll to bottom */
         middleDiv.scrollTop = middleDiv.scrollHeight;
     }
+    /* Notify user */
     newNotf(username);
 });
 
+/* Send message by clicking send icon */
 $('.send').addEventListener('click', function send_click() { appendMessage(socket); });
+/* Sending message by clicking enter and sending typing info */
 $('.textField').addEventListener('keydown', function send_textField(e) {
+    /* KeyCodes that generate fake typing (alt, shift, etc.) */
     const codes = [
         17,
         18,
@@ -384,13 +400,15 @@ $('.textField').addEventListener('keydown', function send_textField(e) {
         39,
         40,
         93,
-        13 // Disabling fake input keys (alt, shift, etc.)
+        13
     ];
+    /* Send typing message if keycode was not found in array */
     if (codes.indexOf(e.keyCode) == -1) {
         socket.emit('typing', {
             user: Cookies.get('user')
         });
     }
+    /* Send message when enter was hit without shift */
     if (e.keyCode == 13 && !e.shiftKey) {
         e.preventDefault();
         appendMessage(socket);
@@ -403,15 +421,14 @@ $('.textField').addEventListener('keydown', function send_textField(e) {
 document.addEventListener('click', function send_emojis(e) {
     if (e.target && hasClass(e.target, 'select__emoji')) {
         let uni = e.target.getAttribute('data-index');
-        uni = uni.indexOf('-') != -1 ? uni.split('-') : [uni];
-        let uniCode = '';
-        for (let j = 0; j < uni.length; j++) {
-            uniCode += String.fromCodePoint(parseInt(uni[j], 16));
-        }
+        const uniCode = returnEmoji(uni);
+        /* Insert emoji to text field */
         $('.textField').value += uniCode + '\u{2063}';
     } else if (e.target && hasClass(e.target, 'emojis')) {
+        /* Display emojis */
         if ($('.sendEmoji').style['display'] == 'none') {
-            if ($$('.select__emoji').length < 1) {
+            if ($$('.select__emoji').length < 5) {
+                /* Get emoji list */
                 fetch('/js/emoji.json', {
                     method: 'GET',
                     headers: {
@@ -420,11 +437,8 @@ document.addEventListener('click', function send_emojis(e) {
                 }).then(res => res.json()).then(emojis => {
                     $('.emojiList').innerHTML = '';
                     for (let i = 0; i < emojis.list.length; i++) {
-                        let uni = emojis.list[i].indexOf('-') != -1 ? emojis.list[i].split('-') : [emojis.list[i]];
-                        let uniCode = '';
-                        for (let j = 0; j < uni.length; j++) {
-                            uniCode += String.fromCodePoint(parseInt(uni[j], 16));
-                        }
+                        /* Get UTF-8 emoji */
+                        const uniCode = returnEmoji(emojis.list[i]);
                         appendDOM(`<i class="select__emoji" data-index="${emojis.list[i]}">${uniCode}</i>`, '.emojiList');
                     }
                 }).catch(() => {
@@ -437,6 +451,7 @@ document.addEventListener('click', function send_emojis(e) {
             $('.sendEmoji').style['display'] = 'none';
         }
     } else if (e.target && !$('.sendEmoji').contains(e.target)) {
+        /* Close emojis container */
         $('.sendEmoji').style['display'] = 'none';
     }
 });
@@ -447,78 +462,27 @@ document.addEventListener('click', function send_emojis(e) {
  * 
  *****************************************************************/
 
-function appendImage(socket, files) {
-    if (Cookies.get('user')) {
-        if (socket.io.readyState == 'open') {
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-
-                if (file.type.indexOf('image') >= 0) {
-                    const fileReader = new FileReader();
-                    fileReader.onloadend = function(e) {
-                        const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                        const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
-                        const time = getTime();
-                        const HTML = `<li class="ms from__me" data-mid="${mid}">
-                            <div class="time noselect">${time}</div>
-                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
-                            <div class="message message--image">
-                                <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
-                                <div class="loader"></div>
-                            </div>
-                            <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get('user'))}">${escapeHtml(Cookies.get('user').substring(0, 1).toUpperCase())}</div>
-                        </li>`;
-                        if ($$('.typing').length > 0) $('.typing').remove();
-
-                        const panelMiddle = $('.panel--middle');
-                        getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
-                            appendDOM(HTML, '.panel--middle', false);
-                            $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
-
-                            socket.emit('image', {
-                                username: Cookies.get('user'),
-                                type: file.type,
-                                name: file.name,
-                                blob: arrayBuffer,
-                                mid: mid
-                            }, (uploaded) => {
-                                if (uploaded) {
-                                    $(`.from__me[data-mid="${mid}"] .loader`).remove();
-                                }
-                            });
-                            panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
-                            if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
-                                panelMiddle.scrollHeight,
-                                panelMiddle.offsetHeight,
-                                panelMiddle.clientHeight
-                            ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } else { panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h; }
-                        });
-                        $('.textField').focus();
-                    };
-                    fileReader.readAsDataURL(file);
-                }
-            }
-        } else {
-            error('Failed sending message');
-            $('.textField').focus();
-        }
-    } else {
-        socket.close();
-        location.href = '/logout';
-    }
-}
-
 socket.on('image', function socket_image(image) {
+    /* Get time */
     const time = getTime();
-    const HTML = `<li class="ms ${image.username == Cookies.get('user') ? 'from__me' : 'to__me'}" data-mid="${image.mid}">
+    
+    const {username, mid, type, img, name} = image;
+    
+    /* Check from whom is the message */
+    const fromWho = username == Cookies.get('user') ? 'from__me' : 'to__me';
+    const fromSelf = username == Cookies.get('user') ? '<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>' : '';
+    const fromSelfIcon = username == Cookies.get('user') ? 'nodisplay' : '';
+    /* Image template */
+    const HTML = `<li class="ms ${fromWho}" data-mid="${mid}">
                     <div class="time noselect">${time}</div>
-                    ${image.username == Cookies.get('user') ? '<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>' : ''}
-                    <div class="message message--image"><img data-type="${image.type}" data-name="${image.name}" src="data:${image.type};base64,${image.img}"></div>
-                    <div class="who noselect ${image.username == Cookies.get('user') ? 'nodisplay' : ''}" data-user="${escapeHtml(image.username)}">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
+                    ${fromSelf}
+                    <div class="message message--image"><img data-type="${type}" data-name="${name}" src="data:${type};base64,${img}"></div>
+                    <div class="who noselect ${fromSelfIcon}" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                 </li>`;
-    getImageDimensions(`data:${image.type};base64,${image.img}`).then(dims => {
+    
+    getImageDimensions(`data:${type};base64,${img}`).then(dims => {
         appendDOM(HTML, '.panel--middle', false);
-        $(`.ms[data-mid="${image.mid}"]`).classList.add('transition-X');
+        $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
         middleDiv.scrollTop += dims.h;
         if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
             middleDiv.scrollHeight,
@@ -526,8 +490,8 @@ socket.on('image', function socket_image(image) {
             middleDiv.clientHeight
         ) - 250) { middleDiv.scrollTop = middleDiv.scrollHeight + dims.h; } else { middleDiv.scrollTop -= dims.h; }
     });
-    const isUp = `<div data-mid="${image.mid}" class="tost noselect">
-                    <div class="who">${escapeHtml(image.username.substring(0, 1).toUpperCase())}</div>
+    const isUp = `<div data-mid="${mid}" class="tost noselect">
+                    <div class="who">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                     <div class="text">Sent photo</div>
                 </div>`;
     if (middleDiv.scrollTop + middleDiv.clientHeight < Math.max(
@@ -536,21 +500,21 @@ socket.on('image', function socket_image(image) {
         middleDiv.clientHeight
     ) - 250) {
         if ($$('.tost').length > 0) {
-            $('.tost').setAttribute('data-mid', image.mid);
-            $('.tost .who').innerHTML = escapeHtml(image.username.substring(0, 1).toUpperCase());
+            $('.tost').setAttribute('data-mid', mid);
+            $('.tost .who').innerHTML = escapeHtml(username.substring(0, 1).toUpperCase());
             $('.tost .text').innerHTML = 'Sent photo';
         } else {
             appendDOM(isUp, 'body', false);
-            $(`.tost[data-mid="${image.mid}"]`).classList.add('tost-enter');
+            $(`.tost[data-mid="${mid}"]`).classList.add('tost-enter');
         }
         isUpTimeout = setTimeout(function() {
-            $(`.tost[data-mid="${image.mid}"]`).classList.add('tost-leave');
+            $(`.tost[data-mid="${mid}"]`).classList.add('tost-leave');
             setTimeout(function() {
-                $(`.tost[data-mid="${image.mid}"]`).remove();
+                $(`.tost[data-mid="${mid}"]`).remove();
             }, 300);
         }, 4000);
     }
-    newNotf(image.username, true);
+    newNotf(username, true);
 });
 
 $('input[type=\'file\']').addEventListener('input', function send_file_input(e) {
@@ -809,9 +773,9 @@ socket.on('reverseMessage', function socket_reverseMessage(mid) {
 });
 
 /*****************************************************************
- *  TODO
+ *  
  *  User typing notification
- * 
+ *  ::TODO
  *****************************************************************/
 let userTyping = [];
 let timeout;
@@ -1020,11 +984,7 @@ document.addEventListener('click', function doc_click (e) {
         }).then(res => res.json()).then(emojis => {
             $('.room__icons').innerHTML = '';
             for (let i = 0; i < emojis.list.length; i++) {
-                let uni = emojis.list[i].indexOf('-') != -1 ? emojis.list[i].split('-') : [emojis.list[i]];
-                let uniCode = '';
-                for (let j = 0; j < uni.length; j++) {
-                    uniCode += String.fromCodePoint(parseInt(uni[j], 16));
-                }
+                let uniCode = returnEmoji(list[i].icon);
                 appendDOM(`<i class="select__icon" data-index="${emojis.list[i]}">${uniCode}</i>`, '.room__icons');
             }
         }).catch(() => {
@@ -1038,6 +998,18 @@ document.addEventListener('click', function doc_click (e) {
         for (let i = 0; i < icons.length; i++) { icons[i].classList.remove('icon--active');}
         e.target.classList.add('icon--active');
         $('.icon--prev').innerHTML = e.target.innerHTML;
+    } else if (e.target && hasClass(e.target, 'man-rec')) {
+        socket.io.reconnection(true);
+        socket.io._reconnectionAttempts = 10;
+        socket.io.open(function() {
+            if (socket.io.readyState == 'open') {
+                const errorEl = $$('.error, .reconnect');
+                if (errorEl.length > 0) {
+                    for (let i = 0; i < errorEl.length; i++) { errorEl[i].remove(); }
+                    socket.emit('userConnected', location.hash ? decodeURIComponent(location.hash.substring(2)) : null);
+                }
+            }
+        });
     }
 });
 
@@ -1050,22 +1022,14 @@ document.addEventListener('click', function doc_click (e) {
 socket.on('roomList', function socket_roomList (list) {
     for (let r = 0; r < $$('.rooms').length; r++) { $$('.rooms')[r].innerHTML = ''; }
     for (let i = 0; i < list.length; i++) {
-        const uni = list[i].icon.indexOf('-') != -1 ? list[i].icon.split('-') : [list[i].icon];
-        let uniCode = '';
-        for (let j = 0; j < uni.length; j++) {
-            uniCode += String.fromCodePoint(parseInt(uni[j], 16));
-        }
+        let uniCode = returnEmoji(list[i].icon);
         const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
         const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
         appendDOM(HTML, '.rooms', false);
     }
     if ($('.rooms--modal')) {
         for (let i = 0; i < list.length; i++) {
-            const uni = list[i].icon.indexOf('-') != -1 ? list[i].icon.split('-') : [list[i].icon];
-            let uniCode = '';
-            for (let j = 0; j < uni.length; j++) {
-                uniCode += String.fromCodePoint(parseInt(uni[j], 16));
-            }
+            let uniCode = returnEmoji(list[i].icon);
             const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
             const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
             appendDOM(HTML, '.rooms--modal', false);
@@ -1077,13 +1041,13 @@ socket.on('userConnected', function socket_userConnected (data) {
     if (data.joined != Cookies.get('clientId')) {
         const time = getTime();
         const HTML = `<li class="joined"><span class="line"></span><span>${escapeHtml(data.username)} ${data.status ? 'joined chat' : 'left chat'} - ${time}</span><span class="line"></span></li>`;
-        appendDOM(HTML, '.panel--middle');
+        appendDOM(HTML, '.panel--middle', true);
     } else {
         if (!location.hash) {
             if(data.roomIcon){
                 $('.rooms--title').innerHTML = ''; 
                 let uniCode = returnEmoji(data.roomIcon);
-                appendDOM(`<i>${uniCode}</i> <span>${data.roomName}</span>`, '.rooms--title');
+                appendDOM(`<i>${uniCode}</i> <span>${data.roomName}</span>`, '.rooms--title', true);
             }
         }
     }

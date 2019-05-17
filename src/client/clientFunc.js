@@ -302,6 +302,119 @@ function returnEmoji(emoji) {
     return uniCode;
 }
 
+function appendImage(socket, files) {
+    if (Cookies.get('user')) {
+        if (socket.io.readyState == 'open') {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+
+                if (file.type.indexOf('image') >= 0) {
+                    const fileReader = new FileReader();
+                    fileReader.onloadend = function(e) {
+                        const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                        const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
+                        const time = getTime();
+                        const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message message--image">
+                                <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+                                <div class="loader"></div>
+                            </div>
+                            <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get('user'))}">${escapeHtml(Cookies.get('user').substring(0, 1).toUpperCase())}</div>
+                        </li>`;
+                        if ($$('.typing').length > 0) $('.typing').remove();
+
+                        const panelMiddle = $('.panel--middle');
+                        getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+                            appendDOM(HTML, '.panel--middle', false);
+                            $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
+
+                            socket.emit('image', {
+                                username: Cookies.get('user'),
+                                type: file.type,
+                                name: file.name,
+                                blob: arrayBuffer,
+                                mid: mid
+                            }, (uploaded) => {
+                                if (uploaded) {
+                                    $(`.from__me[data-mid="${mid}"] .loader`).remove();
+                                }
+                            });
+                            panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+                            if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
+                                panelMiddle.scrollHeight,
+                                panelMiddle.offsetHeight,
+                                panelMiddle.clientHeight
+                            ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } else { panelMiddle.scrollTop = panelMiddle.scrollTop - dims.h; }
+                        });
+                        $('.textField').focus();
+                    };
+                    fileReader.readAsDataURL(file);
+                }
+            }
+        } else {
+            error('Failed sending message');
+            $('.textField').focus();
+        }
+    } else {
+        socket.close();
+        location.href = '/logout';
+    }
+}
+
+function appendMessage(socket) {
+    /* Get value */
+    let val = $('.textField').value.trim();
+    /* Get time */
+    const time = getTime();
+    /* Check if values length != 0 */
+    if (val != '' && Cookies.get('user')) {
+        /* Check if socket is open */
+        if (socket.io.readyState == 'open') {
+            /* Generate unique message id */
+            const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
+            /* Send message */
+            socket.emit('message', {
+                username: Cookies.get('user'),
+                message: val,
+                time: time,
+                mid: mid
+            });
+            /* Sanitaze */
+            val = escapeHtml(val);
+            /* Get links from value */
+            const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
+            /* Swap links with anchors */
+            let preparedText = val.replace(reg, '<a href="$1" target="_blank">$1</a>');
+            /* Message template */
+            const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message">${preparedText}</div>
+                        </li>;`;
+            /* Append message */
+            appendDOM(HTML, '.panel--middle', true);
+            const middleDiv = $('.panel--middle');
+            /* Scroll to bottom */
+            middleDiv.scrollTop = middleDiv.scrollHeight;
+            /* Show message */
+            $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
+            /* Clear text field */
+            $('.textField').value = '';
+            /* Focus text field */
+            $('.textField').focus();
+        } else {
+            /* Display error if socket is closed */
+            error('Failed sending message');
+            $('.textField').focus();
+        }
+    } else if (typeof Cookies.get('user') === 'undefined' || typeof Cookies.get('clientId') === 'undefined') {
+        /* Disconnect and log out if cookies are not set properly */
+        socket.close();
+        location.href = '/logout';
+    }
+}
 
 export {
     $,
@@ -323,5 +436,7 @@ export {
     operations,
     windowWasFocused,
     prependDOM,
-    returnEmoji
+    returnEmoji,
+    appendImage,
+    appendMessage
 };

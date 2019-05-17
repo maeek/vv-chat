@@ -81,7 +81,29 @@ module.exports = function(io) {
                 });
             });
         }
+        
+        function getUsersInRoom(rooms) {
+            /* Initiate promises array */
+            let roomsPromises = [];
 
+            for (let i = 0; i < rooms.list.length; i++) {
+                /* Push promise to the array */
+                roomsPromises.push(new Promise((res) => {
+                    io.of('/chat').in(rooms.list[i].id).clients((error, clients) => {
+                        /* Update online users */
+                        rooms.list[i].online = clients.length;
+                        res();
+                    });
+                }));
+            }
+            
+            return new Promise((res)=>{
+                Promise.all(roomsPromises).then(()=>{
+                    /* Return rooms list with active users */
+                    res(rooms.list);
+                });    
+            });
+        }
 
         /* 
          * Updating session
@@ -312,24 +334,9 @@ module.exports = function(io) {
                             el.online = 0;
                             return el;
                         });
-                        /* Initiate promises array */
-                        let clientsLength = [];
-
-                        for (let i = 0; i < rooms.list.length; i++) {
-                            /* Push promise to the array */
-                            clientsLength.push(new Promise((res) => {
-                                io.of('/chat').in(rooms.list[i].id).clients((error, clients) => {
-                                    rooms.list[i].online = clients.length;
-                                    res();
-                                });
-                            }));
-
-                        }
-                        /* Sent rooms to users when all active users has been counted */
-                        Promise.all(clientsLength).then(() => {
-                            io.of('/chat').emit('roomList', rooms.list);
-                            /* Clear the array */
-                            clientsLength = [];
+                        
+                        getUsersInRoom(rooms).then(data => {                            
+                            io.of('/chat').emit('roomList', data);
                         });
                     }
                 });
@@ -439,24 +446,8 @@ module.exports = function(io) {
                                             icon: icon
                                         });
 
-                                        /* Initiate promises array */
-                                        let clientsLength = [];
-
-                                        for (let i = 0; i < data.list.length; i++) {
-                                            /* Push promise to the array */
-                                            clientsLength.push(new Promise((res) => {
-                                                io.of('/chat').in(data.list[i].id).clients((error, clients) => {
-                                                    data.list[i].online = clients.length;
-                                                    res();
-                                                });
-                                            }));
-
-                                        }
-                                        /* Sent rooms to users when all active users has been counted */
-                                        Promise.all(clientsLength).then(() => {
-                                            io.of('/chat').emit('roomList', data.list);
-                                            /* Clear the array */
-                                            clientsLength = [];
+                                        getUsersInRoom(data).then(rooms => {                            
+                                            io.of('/chat').emit('roomList', rooms);
                                         });
                                     } else {
                                         console.log(`Error: Couldn't write to: ${config.roomsFile} - description:\n ${w_err}`);
@@ -495,23 +486,8 @@ module.exports = function(io) {
 
                                     io.of('/chat').to(roomToDelete).emit('changeRoom', config.defaultRoom.id);
 
-                                    let clientsLength = [];
-
-                                    for (let i = 0; i < data.list.length; i++) {
-                                        /* Push promise to the array */
-                                        clientsLength.push(new Promise((res) => {
-                                            io.of('/chat').in(data.list[i].id).clients((error, clients) => {
-                                                data.list[i].online = clients.length;
-                                                res();
-                                            });
-                                        }));
-
-                                    }
-                                    /* Sent rooms to users when all active users has been counted */
-                                    Promise.all(clientsLength).then(() => {
-                                        io.of('/chat').emit('roomList', data.list);
-                                        /* Clear the array */
-                                        clientsLength = [];
+                                    getUsersInRoom(data).then(rooms => {                            
+                                        io.of('/chat').emit('roomList', rooms);
                                     });
 
                                 } else {
