@@ -65,6 +65,78 @@ const config = {
 };
 */
 
+/*****************************************************************
+ * 
+ * Resize elements
+ * 
+ *****************************************************************/
+
+window.addEventListener('DOMContentLoaded', function DOMLoaded() {
+    
+    const el = $('aside .info');
+    const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+    const panel = $('.panel--middle');
+
+    /* Alert user when using HTTP */
+    if (location.protocol == 'http:' && !localStorage.getItem('useHTTP')) {
+        prependDOM(`<div class="http noselect">
+                <div class="http--icon"><i class="material-icons">warning</i></div>
+                <div class="http--description">Warning: HTTPS is not enabled which means that this page is not secure, use it at own risk. If you're administrator please provide SSL certificates, <a href="https://letsencrypt.org/getting-started/">check how to get them</a>.</div>
+                <i class="material-icons http--close">close</i>
+            </div>`, 'body');
+        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        $('main').style['max-height'] = (wh - $('.http').offsetHeight) + 'px';
+    }
+    /* Close http alert */
+    document.addEventListener('click', function(e) {
+        if (e.target && hasClass(e.target, 'http--close')) {
+            $('main').removeAttribute('style');
+            panel.style['max-height'] = (panel.offsetHeight + $('.http').offsetHeight) + 'px';
+            document.querySelector('.http').remove();
+            localStorage.setItem('useHTTP', true);
+        }
+    });
+
+    if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
+    /* Resize for Desktop */
+        const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+        /* Resize <aside> */
+        el.style['max-height'] = calc + 'px';
+
+        const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+        /* Resize .panel--middle */
+        panel.style['max-height'] = pcalc + 'px';
+    } else {
+    /* Resize for Moblie */
+        const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+        /* Resize .panel--middle */
+        panel.style['max-height'] = pcalc + 'px';
+    }
+
+    /* Window resize listener */    
+    window.addEventListener('resize', function win_resized() {
+        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
+            const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+            /* Resize <aside> */
+            el.style['max-height'] = calc + 'px';
+
+            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            /* Resize .panel--middle */
+            panel.style['max-height'] = pcalc + 'px';
+        } else {
+            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            /* Resize .panel--middle */
+            panel.style['max-height'] = pcalc + 'px';
+        }
+        $('aside').removeAttribute('style');
+        $('aside').removeAttribute('data-hidden');
+    });
+
+    /* Focus text input on page load */
+    $('.textField').focus();
+});
+
 
 window.addEventListener('load', function () {
 
@@ -114,77 +186,7 @@ window.addEventListener('load', function () {
 
 
 
-    /*****************************************************************
- * 
- * Resize elements
- * 
- *****************************************************************/
-
-    window.addEventListener('DOMContentLoaded', function DOMLoaded() {
-    
-        const el = $('aside .info');
-        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        const panel = $('.panel--middle');
-
-        /* Alert user when using HTTP */
-        if (location.protocol == 'http:' && !localStorage.getItem('useHTTP')) {
-            prependDOM(`<div class="http noselect">
-                    <div class="http--icon"><i class="material-icons">warning</i></div>
-                    <div class="http--description">Warning: HTTPS is not enabled which means that this page is not secure, use it at own risk. If you're administrator please provide SSL certificates, <a href="https://letsencrypt.org/getting-started/">check how to get them</a>.</div>
-                    <i class="material-icons http--close">close</i>
-                </div>`, 'body');
-            const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-            $('main').style['max-height'] = (wh - $('.http').offsetHeight) + 'px';
-        }
-        /* Close http alert */
-        document.addEventListener('click', function(e) {
-            if (e.target && hasClass(e.target, 'http--close')) {
-                $('main').removeAttribute('style');
-                panel.style['max-height'] = (panel.offsetHeight + $('.http').offsetHeight) + 'px';
-                document.querySelector('.http').remove();
-                localStorage.setItem('useHTTP', true);
-            }
-        });
-
-        if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
-        /* Resize for Desktop */
-            const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
-            /* Resize <aside> */
-            el.style['max-height'] = calc + 'px';
-
-            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
-            /* Resize .panel--middle */
-            panel.style['max-height'] = pcalc + 'px';
-        } else {
-        /* Resize for Moblie */
-            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
-            /* Resize .panel--middle */
-            panel.style['max-height'] = pcalc + 'px';
-        }
-
-        /* Window resize listener */    
-        window.addEventListener('resize', function win_resized() {
-            const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-            if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
-                const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
-                /* Resize <aside> */
-                el.style['max-height'] = calc + 'px';
-
-                const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
-                /* Resize .panel--middle */
-                panel.style['max-height'] = pcalc + 'px';
-            } else {
-                const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
-                /* Resize .panel--middle */
-                panel.style['max-height'] = pcalc + 'px';
-            }
-            $('aside').removeAttribute('style');
-            $('aside').removeAttribute('data-hidden');
-        });
-    
-        /* Focus text input on page load */
-        $('.textField').focus();
-    });
+   
 
     /*****************************************************************
  * 
