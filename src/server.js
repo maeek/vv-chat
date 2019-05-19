@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 

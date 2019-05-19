@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 
@@ -42,7 +42,7 @@ const fileManip = {
          */
         
         /* Check given data */
-        if(data && typeof data === 'object' && data.users.length > 1){
+        if(data && typeof data === 'object' && data.users.length > 0){
             /* Prepare data */
             data = JSON.stringify(data);
             /* Write data */
@@ -98,11 +98,9 @@ const fileManip = {
          */
         
         /* Check given data */
-        if(typeof data === 'object' && data.list.length > 1){
-            
+        if(typeof data === 'object' && data.list.length > 0){
             /* Prepare data */
             data = JSON.stringify(data);
-            
             /* Write data */
             fs.writeFile(config.roomsFile, data, (err)=>{
                 if(err)

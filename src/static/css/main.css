@@ -527,6 +527,7 @@ input[type="file"] {
     background-size: 500px 500px;
     margin: 0;
     transform: translate3d(0, 0, 0);
+    scroll-behavior: smooth;
 }
 
 .panel--bottom {
@@ -580,24 +581,51 @@ input[type="file"] {
     background: rgba(55, 64, 93, 0.8);
     border-radius: 5px;
     padding: .5rem 0;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
     box-shadow: 0 0 5px #161b2d;
     font-family: 'KoHo', sans-serif;
 }
 
 .emojiList {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
     flex-wrap: wrap;
     transform: translate3d(0, 0, 0);
     scroll-behavior: smooth;
     overflow: hidden auto;
-    height: 100%;
+    flex:1 0 auto;
+    max-height: calc(100% - 1.5rem);
+}
+.emoji--search {
+    width:100%;
+    display: flex;
+    justify-content: center;
+}
+.emoji--search input{
+    flex:1 0 auto;
+    padding: .4rem .6rem;
+    font-size:1rem;
+    background: transparent;
+    color: #FFF;
+    border:0;
+    outline: none;
+    border-bottom: 1px solid #2a3043;
 }
 
-.actions .select__emoji {
+.emoji {
+    height: 1.5rem;
+    vertical-align: -.2rem;
+    margin: 0 .05rem 0 .1rem;
+}
+.icon--prev .emoji {
+    height: 1rem;
+}
+
+.actions .select__emoji, .select__icon {
     padding: .3rem;
     font-style: normal;
     width: 2.5rem;
@@ -613,7 +641,7 @@ input[type="file"] {
     background: #282d42;
 }
 
-.textField {
+.textField, .textIframe{
     width: 100%;
     height: 100%;
     padding: .7rem 1rem;
@@ -1080,7 +1108,7 @@ input[type="file"] {
     /* box-shadow: 0 1px 5px #1b1f2f; */
     /* border-radius: 15px; */
     position: relative;
-    transition: transform .2s, opacity .2s;
+    transition: all .2s;
 }
 
 ul .user--record:nth-of-type(even) {
@@ -1358,6 +1386,9 @@ ul .user--record:nth-of-type(even) {
 .user--remove:hover i {
     color: #ffa0a0;
 }
+.lds-roller:hover {
+    background:transparent;
+}
 
 .lds-roller {
     display: inline-block;
@@ -1578,6 +1609,11 @@ ul .user--record:nth-of-type(even) {
     border-radius: 15px;
 }
 
+.settings__cont input[name="resetPassword"], .settings__cont input[name="server"] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;    
+}
+
 .settings__cont .input__div .input__div--wrapper i:hover {
     background: #0069ab;
     color: #fefefe;
@@ -1593,6 +1629,9 @@ ul .user--record:nth-of-type(even) {
 
 .settings__cont .input__div--wrapper.input__div--wrapper--nobg {
     background: transparent;
+}
+.settings__cont form {
+    width:100%;
 }
 
 .settings__cont .input__div--wrapper i {
@@ -2125,7 +2164,7 @@ aside ul li {
     font-size: .9rem;
     padding: .4rem .5rem;
     cursor: pointer;
-    transition: all .15s;
+    transition: all .4s cubic-bezier(0.08,0.52,0.52,1);
     word-break: break-all;
     display: flex;
     align-items: center;
@@ -2265,7 +2304,7 @@ aside .side--actions {
 }
 
 aside h4 {
-    margin: 1.5rem 0 0 0;
+    margin: 1rem 0 0 0;
     width: 100%;
     font-weight: 400;
     padding: .4rem;

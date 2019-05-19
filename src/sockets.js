@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 
@@ -44,7 +44,8 @@ module.exports = function(io) {
         /* Kick user if not authorized */
         function notAuthorized(socket) {
             socket.emit('invalidSession', true);
-            socket.leave(activeRoom);
+            socket.leaveAll();
+            socket.disconnect(true);
         }
 
         /* 
@@ -418,7 +419,7 @@ module.exports = function(io) {
                             let { name, icon } = newRoom;
 
                             /* Set random icon if not set */
-                            icon = icon ? icon : JSON.parse(fs.readFileSync(__dirname + '/static/js/emoji.json', 'utf-8')).list[Math.floor(Math.random() * 813)];
+                            icon = icon ? icon : '👍';
                             /* Test room name */
                             if (format.test(name) && name.length <= 30) {
                                 /* Create room object */

@@ -14,6 +14,13 @@
     <title>VV-Chat</title>
     <link rel="stylesheet" href="/css/main.min.css">
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <script defer src="/js/js.cookie.min.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <script defer src='/js/bluebird.min.js'></script>
+    <script defer src='/js/json3.min.js'></script>
+    <script defer src='/js/fetch.js'></script>
+    <script defer src='/js/twemoji.min.js'></script>
+    <script defer type="module" src="/js/client.js"></script>
 </head>
 
 <body class="page-chat">
@@ -21,7 +28,7 @@
         <aside>
             <div class="logo__div">
                 <h1 class="title vv noselect"><a href="/chat/"><span class="vv--dots">VV</span></a></h1>
-                <div class="version noselect">1.1.0</div>
+                <div class="version noselect">1.1.1</div>
             </div>
 
             <div class="info">
@@ -65,13 +72,17 @@
             <footer class="panel panel--bottom">
                 <div class="actions noselect">
                     <i class="material-icons photo" title="Send photo">photo</i>
-                    <input type="file" accept="image/*" multiple>
+                    <input type="file" accept="image/*" multiple id="sendFile">
                 </div>
                 <div class="text">
                     <textarea type="text" class="textField" name="textField" placeholder="Type message here..."></textarea>
                 </div>
                 <div class="actions noselect">
                     <div class="sendEmoji" style="display: none">
+                        <div class="emoji--search">
+                            <input type="search" name="searchEmoji" placeholder="Search emoji by name">
+                        </div>
+                        <div class="emoji--recent"></div>
                         <div class="emojiList">
                             <div class="lds-roller">
                                 <div></div>
@@ -92,12 +103,6 @@
             </footer>
         </div>
     </main>
-    <script src="/js/js.cookie.min.js"></script>
-    <script src="/js/socket.io.js"></script>
-    <script src='/js/bluebird.min.js'></script>
-    <script src='/js/json3.min.js'></script>
-    <script src='/js/fetch.js'></script>
-    <script defer type="module" src="/js/client.js"></script>
 </body>
 
 </html>

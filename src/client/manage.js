@@ -9,7 +9,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 
@@ -23,7 +23,6 @@
 import {
     $,
     $$,
-    emojis,
     hasClass,
     appendDOM,
     error,
@@ -119,7 +118,7 @@ socket.on('roomList', (list) => {
     console.log(list);
     for (let i = 0; i < list.length; i++) {
         // Get room utf-8 icon
-        const emoji = returnEmoji(list[i].icon);
+        const emoji = list[i].icon;
         const HTML = `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
                         <i>${emoji}</i> 
                         <div class="room--details">${list[i].name} 
@@ -130,6 +129,7 @@ socket.on('roomList', (list) => {
 
         // Append room to list
         appendDOM(HTML, '.rooms', false);
+        twemoji.parse($('.rooms'));        
     }
     appendDOM('<li class="room--show">Show rooms</li>', '.rooms', false);
     if ($('.rooms--modal')) {
@@ -485,7 +485,7 @@ document.addEventListener('click', (e) => {
                                 <div class="subtitle noselect">Available rooms</div>
                                 <ul class="rooms noselect rooms--modal"></ul>
                                 <div class="footer">
-                                    <div class="branding noselect">1.1.0</div>
+                                    <div class="branding noselect">1.1.1</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
@@ -536,7 +536,7 @@ document.addEventListener('click', (e) => {
                                     <button class="create--room">Create<i class="material-icons">add</i></button>
                                 </div>
                                 <div class="footer">
-                                    <div class="branding noselect">1.1.0</div>
+                                    <div class="branding noselect">1.1.1</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
@@ -544,17 +544,19 @@ document.addEventListener('click', (e) => {
         appendDOM(HTML, 'body', false);
 
         // Get emoji list
-        fetch('/js/emoji.json', {
+        fetch('/js/emojis.json', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
         }).then(res => res.json()).then((emojis) => {
             $('.room__icons').innerHTML = '';
-            for (let i = 0; i < emojis.list.length; i++) {
-                const uniCode = returnEmoji(emojis.list[i]);
-                appendDOM(`<i class="select__icon" data-index="${emojis.list[i]}">${uniCode}</i>`, '.room__icons', false);
+            for (let key in emojis) {
+                const emoji = emojis[key];
+                /* Get UTF-8 emoji */
+                appendDOM(`<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`, '.room__icons', false);
             }
+            //$('.room__icons'));
         }).catch(() => {
             $('.room__icons').innerHTML = '';
             appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.modal__div .room__icons', false);
@@ -563,21 +565,26 @@ document.addEventListener('click', (e) => {
         // Animate modal
         $('.modal__div').classList.add('anim--opacity');
         $('.settings__cont').classList.add('anim--opacity', 'anim--scale');
-    } else if (e.target && hasClass(e.target, 'select__icon')) {
+    } else if (e.target && hasClass(e.target, 'select__icon') || hasClass(e.target.parentNode, 'select__icon')) {
         /*
          * Select icon for new room
          */
+        const btn = hasClass(e.target, 'select__icon')?e.target:e.target.parentNode;
         const icons = $$('.select__icon');
+        
         for (let i = 0; i < icons.length; i++) { icons[i].classList.remove('icon--active'); }
-        e.target.classList.add('icon--active');
-        $('.icon--prev').innerHTML = e.target.innerHTML;
+        
+        btn.classList.add('icon--active');
+        $('.icon--prev').innerHTML = btn.getAttribute('data-char');
+        twemoji.parse($('.icon--prev'));
+        
     } else if (e.target && hasClass(e.target, 'roomDelete')) {
         e.stopPropagation();
         const rid = e.target.parentNode.getAttribute('data-rid');
         socket.emit('deleteRoom', rid);
     } else if (e.target && hasClass(e.target, 'create--room') || hasClass(e.target.parentNode, 'create--room')) {
         const roomName = $('input[name=\'roomName\']').value.trim();
-        const icon = $('.icon--active') ? $('.icon--active').getAttribute('data-index') : null;
+        const icon = $('.icon--active') ? $('.icon--active').getAttribute('data-char') : null;
         socket.emit('addRoom', {
             name: roomName,
             icon: icon,
@@ -685,11 +692,11 @@ if ('serviceWorker' in navigator) {
  *****************************************************************/
 
 window.addEventListener('DOMContentLoaded', () => {
-    const loadedFont = emojis.load();
-    loadedFont.then((loaded_font) => {
-        document.fonts.add(loaded_font);
-        document.body.style.fontFamily = 'KoHo, sans-serif';
-    }).catch(() => console.log('Not supported'));
+    // const loadedFont = emojis.load();
+    // loadedFont.then((loaded_font) => {
+    //     document.fonts.add(loaded_font);
+    //     document.body.style.fontFamily = 'KoHo, sans-serif';
+    // }).catch(() => console.log('Not supported'));
 
 
     if ($$('.settings--popup').length > 0) {

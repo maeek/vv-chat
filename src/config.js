@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  *   Change settings for your own needs
  * 
@@ -24,7 +24,7 @@ const config = {
     defaultRoom: {
         id: 'landing',
         name: 'Main',
-        icon: '0x1f47e' // Icons in /src/static/js/emoji.json
+        icon: '😍' // Icons in /src/static/js/emojis.json
     },
     certificateFiles: {
         cert: 'server.crt',
@@ -108,6 +108,15 @@ if (fs.existsSync(config.usersFile)) {
 /* 
  * Checking if rooms file exists 
  */
+
+/* Due to changed emojis the config.roomsFile must be removed */
+
+if(JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list[0].icon.indexOf('0x') != -1){
+    fs.unlinkSync(config.roomsFile);
+    console.log(`Due to changes in version 1.1.1 ${config.roomsFile} must be removed.`);
+}
+
+ 
 if (fs.existsSync(config.roomsFile)) {
     let roomsFile = fs.readFileSync(config.roomsFile, 'utf-8');
     roomsFile = JSON.parse(roomsFile);
@@ -120,7 +129,7 @@ if (fs.existsSync(config.roomsFile)) {
 
             if (keys.indexOf('icon') == -1 || roomsFile.list[i].icon == null) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "icon", fixing`);
-                roomsFile.list[i].icon = '0x1f44d';
+                roomsFile.list[i].icon = '🚨';
             }
 
             if (keys.indexOf('password') == -1) {

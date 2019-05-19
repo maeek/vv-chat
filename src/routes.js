@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 
@@ -19,17 +19,6 @@ const fileManip = require('./fileManip');
 
 router.get('/', function route_get_main(req, res) {
     res.redirect(301, '/login/');
-});
-
-/* 
- * Allow access to /static/js/manage.js only for root
- */
-router.get('/js/manage.js', function route_get_manageJs(req, res) {
-    if (req.session.valid && req.session.auth == 'root') {
-        res.sendFile(__dirname + '/static/js/manage.js');
-    } else {
-        res.status(404).sendFile(__dirname + '/assets/error.html');
-    }
 });
 
 /* 
@@ -81,7 +70,7 @@ router.route('/manage/')
                                             res.json({ status: true });
                                         else
                                             res.json({ status: false });                                                                            
-                                    })
+                                    });
                                 } else {
                                     res.json({ status: false });
                                 }
@@ -188,7 +177,7 @@ router.route('/manage/')
                         fileManip.readUsers(false, (err, data)=>{
                             if(!err)
                                 createUser(data, user);
-                        })
+                        });
                         
                     })();
                     break;
@@ -331,12 +320,13 @@ router.route('/setup/')
                             }
                         });    
                     } else {
+                        console.log('FAILED');
                         if(req.session.setup) 
                             res.redirect(301, '/setup/');    
                         else
                             res.json({status: false});                        
                     }           
-               } 
+                } 
             });
         }
     });
@@ -369,7 +359,11 @@ router.route('/login/')
             usersFile.users = usersFile.users.filter(user => {
                 return user.username == username;
             });
-
+            if(req.session){
+                req.session.regenerate(err =>{
+                    if (err != null) console.log('ERROR: Session failed to regenerate, description:\n' + err);                    
+                });
+            }
             if (usersFile.users.length == 1) {
                 bcrypt.compare(password, usersFile.users[0].password, (err, result) => {
                     if (err) {
