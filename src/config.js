@@ -73,6 +73,10 @@ if (fs.existsSync(config.usersFile)) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "clientId", fixing.`);
                 usersFile.users[i].clientId = randomString(22);
             }
+            
+            if(usersFile.users[0].clientId != '_root_') {
+                usersFile.users[0].clientId = '_root_';
+            }
 
             if (keys.indexOf('blocked') == -1) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "blocked", fixing.`);
@@ -94,7 +98,7 @@ if (fs.existsSync(config.usersFile)) {
             username: 'root',
             password: hash,
             first: false,
-            clientId: 'root'
+            clientId: '_root_'
         }]
     }));
     console.log(`Created file:  ${config.usersFile}`);
