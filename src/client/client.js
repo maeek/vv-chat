@@ -963,6 +963,7 @@ window.addEventListener('load', function () {
             const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
             appendDOM(HTML, '.rooms', false);
         }
+        twemoji.parse($('.rooms'));
         if ($('.rooms--modal')) {
             for (let i = 0; i < list.length; i++) {
                 let uniCode = list[i].icon;
@@ -970,8 +971,8 @@ window.addEventListener('load', function () {
                 const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
                 appendDOM(HTML, '.rooms--modal', false);
             }
+            twemoji.parse($('.rooms--modal'));            
         }
-        twemoji.parse(document.body);
     });
 
     socket.on('userConnected', function socket_userConnected (data) {
@@ -983,7 +984,7 @@ window.addEventListener('load', function () {
             if (!location.hash) {
                 if(data.roomIcon){
                     $('.rooms--title').innerHTML = ''; 
-                    let uniCode = data.roomIcon;
+                    let uniCode = twemoji.parse(data.roomIcon);
                     appendDOM(`<i>${uniCode}</i> <span>${data.roomName}</span>`, '.rooms--title', true);
                 }
             }
@@ -1002,7 +1003,7 @@ window.addEventListener('load', function () {
                 location.hash = `/${roomInfo.id}`;
             } else {
                 $('.rooms--title').innerHTML = ''; 
-                let uniCode = roomInfo.icon;
+                let uniCode = twemoji.parse(roomInfo.icon);
                 appendDOM(`<i>${uniCode}</i> <span>${roomInfo.name}</span>`, '.rooms--title');
                 appendDOM(
                     `<li class="info--change">
@@ -1033,7 +1034,7 @@ window.addEventListener('load', function () {
             } else {
                 socket.emit('roomList', true);
                 $('.rooms--title').innerHTML = '';        
-                let uniCode = roomInfo.icon;
+                let uniCode = twemoji.parse(roomInfo.icon);
                 appendDOM(`<i>${uniCode}</i> <span>${roomInfo.name}</span>`, '.rooms--title');
                 appendDOM(
                     `<li class="info--change">

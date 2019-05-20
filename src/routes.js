@@ -389,7 +389,7 @@ router.route('/login/')
                                     secure: config.https,
                                     maxAge: 60 * 60 * 1000 * 24
                                 });
-                                if (userData == 'root') {
+                                if (clientId == 'root') {
                                     req.session.auth = 'root';
                                     req.session.save((err) => {
                                         if (!err) {
