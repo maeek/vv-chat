@@ -419,15 +419,17 @@ window.addEventListener('load', function () {
                                 }
                             }).then(res => res.json()).then(emojis => {
                                 $('.emojiList').innerHTML = '';
+                                let list = '';
                                 for (let key in emojis) {
                                     const emoji = emojis[key];
                                     /* Get UTF-8 emoji */
-                                    appendDOM(`<i class="select__emoji" data-keywords="${emoji.keywords.join(',')}" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`, '.emojiList');
+                                    list += `<i class="select__emoji" data-keywords="${emoji.keywords.join(',')}" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
                                 }
+                                appendDOM(list, '.emojiList', false);
                                 // twemoji.parse($('.sendEmoji'));
                             }).catch(() => {
                                 $('.emojiList').innerHTML = '';
-                                appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.emojiList');
+                                appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.emojiList', false);
                             });
                         },0);
                     });
@@ -473,13 +475,13 @@ window.addEventListener('load', function () {
             /* Show message */
             $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
             /* Add image height to scroll bar */
-            middleDiv.scrollTop += dims.h;
+            // middleDiv.scrollTop += dims.h;
             /* Detect if user scrolled up */
-            if (middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
-                middleDiv.scrollHeight,
-                middleDiv.offsetHeight,
-                middleDiv.clientHeight
-            ) - 250) { middleDiv.scrollTop = middleDiv.scrollHeight + dims.h; } else { middleDiv.scrollTop -= dims.h; }
+            if (panelMiddle.scrollTop + panelMiddle.clientHeight + (dims.h>400?400:dims.h) > Math.max(
+                panelMiddle.scrollHeight,
+                panelMiddle.offsetHeight,
+                panelMiddle.clientHeight
+            ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } 
             /* Tost */
             tost(mid, username, false);
         });
@@ -912,12 +914,13 @@ window.addEventListener('load', function () {
                 }
             }).then(res => res.json()).then(emojis => {
                 $('.room__icons').innerHTML = '';
+                let list = '';
                 for (let key in emojis) {
                     const emoji = emojis[key];
                     /* Get UTF-8 emoji */
-                    appendDOM(`<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${emoji['char']}</i>`, '.room__icons');
+                    list+=`<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
                 }
-                twemoji.parse($('.room__icons'));
+                appendDOM(list, '.room__icons', false);                
             }).catch(() => {
                 $('.room__icons').innerHTML = '';
                 appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.room__icons');
@@ -1065,11 +1068,13 @@ window.addEventListener('load', function () {
         navigator.serviceWorker.addEventListener('message', function(event){
             if(event.data.what == 'getEmojis'){
                 $('.emojiList').innerHTML = '';
+                let list = '';
                 for (let key in event.data.emojis) {
                     const emoji = event.data.emojis[key];
                     /* Get UTF-8 emoji */
-                    appendDOM(`<i class="select__emoji" data-keywords="${emoji.keywords.join(',')}" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`, '.emojiList', false);
+                    list += `<i class="select__emoji" data-keywords="${emoji.keywords.join(',')}" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
                 }
+                appendDOM(list, '.emojiList', false);
             }
         });
     }

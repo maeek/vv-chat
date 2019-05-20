@@ -551,11 +551,13 @@ document.addEventListener('click', (e) => {
             },
         }).then(res => res.json()).then((emojis) => {
             $('.room__icons').innerHTML = '';
+            let list = '';
             for (let key in emojis) {
                 const emoji = emojis[key];
                 /* Get UTF-8 emoji */
-                appendDOM(`<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`, '.room__icons', false);
+                list += `<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
             }
+            appendDOM(list, '.room__icons', false);
             //$('.room__icons'));
         }).catch(() => {
             $('.room__icons').innerHTML = '';
