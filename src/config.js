@@ -74,7 +74,7 @@ if (fs.existsSync(config.usersFile)) {
                 usersFile.users[i].clientId = randomString(22);
             }
             
-            if(usersFile.users[0].clientId != '_root_') {
+            if(usersFile.users[0].clientId != '_root_' && usersFile.users[0].username == 'root') {
                 usersFile.users[0].clientId = '_root_';
             }
 
