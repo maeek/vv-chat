@@ -1082,8 +1082,8 @@ window.addEventListener('load', function () {
             if(event.data.what == 'getEmojis'){
                 $('.emojiList').innerHTML = '';
                 let list = '';                          
-                for (let i=0;i<data.event.emojis.length;i++) {
-                    list += `<i class="select__emoji" data-keywords="${data.event.emojis[i].keywords}" data-char="${data.event.emojis[i].char}" data-index="${data.event.emojis[i].no}">${twemoji.parse(data.event.emojis[i].char)}</i>\n`;
+                for (let i=0;i<event.data.emojis.length;i++) {
+                    list += `<i class="select__emoji" data-keywords="${event.data.emojis[i].keywords}" data-char="${event.data.emojis[i].char}" data-index="${event.data.emojis[i].no}">${twemoji.parse(event.data.emojis[i].char)}</i>\n`;
 
                 }
                 appendDOM(list, '.emojiList', false);
