@@ -576,6 +576,7 @@ export {
     hasClass,
     getImageDimensions,
     getTime,
+    domFromText,
     formatSizeUnits,
     appendDOM,
     errTim,

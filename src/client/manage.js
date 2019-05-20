@@ -29,8 +29,7 @@ import {
     openSettings,
     operations,
     settingsInput,
-    prependDOM,
-    returnEmoji,
+    prependDOM
 } from '/js/clientFunc.js';
 
 /*****************************************************************
@@ -115,38 +114,35 @@ socket.on('roomList', (list) => {
     for (let r = 0; r < $$('.rooms').length; r++) {
         $$('.rooms')[r].innerHTML = '';
     }
-    console.log(list);
+    let roomsList = '';
     for (let i = 0; i < list.length; i++) {
         // Get room utf-8 icon
         const emoji = list[i].icon;
-        const HTML = `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
-                        <i>${emoji}</i> 
+        roomsList += `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
+                        <i>${twemoji.parse(emoji)}</i> 
                         <div class="room--details">${list[i].name} 
                             <div class="room--count">Online: ${list[i].online}</div>
                         </div>
                         <i class="material-icons roomDelete">delete</i>
-                    </li>`;
-
-        // Append room to list
-        appendDOM(HTML, '.rooms', false);
-        twemoji.parse($('.rooms'));        
+                    </li>\n`;      
     }
+    appendDOM(roomsList, '.rooms', false);
     appendDOM('<li class="room--show">Show rooms</li>', '.rooms', false);
+    
     if ($('.rooms--modal')) {
+        let roomsList = '';
         for (let i = 0; i < list.length; i++) {
             // Get room utf-8 icon
-            const emoji = returnEmoji(list[i].icon);
-            const HTML = `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
-                            <i>${emoji}</i> 
+            const emoji = list[i].icon;
+            roomsList += `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
+                            <i>${twemoji.parse(emoji)}</i> 
                             <div class="room--details">${list[i].name} 
                                 <div class="room--count">Online: ${list[i].online}</div>
                             </div>
                             <i class="material-icons roomDelete">delete</i>
-                        </li>`;
-
-            // Append room to list
-            appendDOM(HTML, '.rooms--modal', false);
+                        </li>\n`;
         }
+        appendDOM(roomsList, '.rooms--modal', false);
     }
 });
 
@@ -544,22 +540,22 @@ document.addEventListener('click', (e) => {
         appendDOM(HTML, 'body', false);
 
         // Get emoji list
-        fetch('/js/emojis.json', {
+        fetch('/js/emoji.json', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
             },
         }).then(res => res.json()).then((emojis) => {
             $('.room__icons').innerHTML = '';
-            let list = '';
-            for (let key in emojis) {
-                const emoji = emojis[key];
-                /* Get UTF-8 emoji */
-                list += `<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
+            let list = '';                          
+            for (let i=0;i<emojis.length;i++) {
+                list += `<i class="select__icon" data-char="${emojis[i].char}" data-index="${emojis[i].no}">${twemoji.parse(emojis[i].char)}</i>\n`;
+
             }
             appendDOM(list, '.room__icons', false);
             //$('.room__icons'));
-        }).catch(() => {
+        }).catch((e) => {
+            console.log(e);
             $('.room__icons').innerHTML = '';
             appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.modal__div .room__icons', false);
         });

@@ -12,14 +12,14 @@
 
 console.log('WORKER: started');
 
-var version = 'v1.1.16::';
+var version = 'v1.1.17::';
 var CACHE = 'network-or-cache';
 var OFFLINE_PAGE = '/static/offline.html';
 var offlineFundamentals = [
     '/login/',
     '/css/main.min.css',
     '/static/offline.html',
-    '/js/emojis.json',
+    '/js/emoji.json',
     '/js/clientFunc.js',
     '/js/client.js',
     '/js/socket.io.js',
@@ -138,7 +138,7 @@ function send_message_to_client(client, msg){
 self.addEventListener('message', function(event){
     if(event.data == 'getEmojis'){
         self.clients.get(event.source.id).then(client=>{
-            fetch('/js/emojis.json', {
+            fetch('/js/emoji.json', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'

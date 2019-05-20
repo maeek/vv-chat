@@ -412,21 +412,19 @@ window.addEventListener('load', function () {
                     
                     send_message_to_sw('getEmojis').catch(()=>{
                         setTimeout(function() {
-                            fetch('/js/emojis.json', {
+                            fetch('/js/emoji.json', {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 }
                             }).then(res => res.json()).then(emojis => {
                                 $('.emojiList').innerHTML = '';
-                                let list = '';
-                                for (let key in emojis) {
-                                    const emoji = emojis[key];
-                                    /* Get UTF-8 emoji */
-                                    list += `<i class="select__emoji" data-keywords="${emoji.keywords.join(',')}" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
+                                let list = '';                          
+                                for (let i=0;i<emojis.length;i++) {
+                                    list += `<i class="select__emoji" data-keywords="${emojis[i].keywords}" data-char="${emojis[i].char}" data-index="${emojis[i].no}">${twemoji.parse(emojis[i].char)}</i>\n`;
+
                                 }
                                 appendDOM(list, '.emojiList', false);
-                                // twemoji.parse($('.sendEmoji'));
                             }).catch(() => {
                                 $('.emojiList').innerHTML = '';
                                 appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.emojiList', false);
@@ -914,14 +912,26 @@ window.addEventListener('load', function () {
                     'Content-Type': 'application/json'
                 }
             }).then(res => res.json()).then(emojis => {
-                $('.room__icons').innerHTML = '';
+                // $('.room__icons').innerHTML = '';
+                // let list = '';
+                // for (let key in emojis) {
+                //     const emoji = emojis[key];
+                //     /* Get UTF-8 emoji */
+                //     list+=`<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
+                // }
+                // appendDOM(list, '.room__icons', false);                
+                $('.emojiList').innerHTML = '';
                 let list = '';
-                for (let key in emojis) {
-                    const emoji = emojis[key];
+                emojis.forEach((el)=>{
+                    const emoji = el;
                     /* Get UTF-8 emoji */
-                    list+=`<i class="select__icon" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
-                }
-                appendDOM(list, '.room__icons', false);                
+                    console.log(emoji.char);
+                    list += `<i class="select__emoji" data-keywords="${emoji.keywords}" data-char="${emoji.char}" data-index="${el.no}">${twemoji.parse(emoji.char)}</i>`;
+                });
+                // for (let key in event.data.emojis) {
+                    
+                // }
+                appendDOM(list, '.emojiList', false);
             }).catch(() => {
                 $('.room__icons').innerHTML = '';
                 appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.room__icons');
@@ -958,21 +968,22 @@ window.addEventListener('load', function () {
 
     socket.on('roomList', function socket_roomList (list) {
         for (let r = 0; r < $$('.rooms').length; r++) { $$('.rooms')[r].innerHTML = ''; }
+        let roomsList ='';
         for (let i = 0; i < list.length; i++) {
             let uniCode = list[i].icon;
             const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
-            const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
-            appendDOM(HTML, '.rooms', false);
+            roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>\n`;
         }
-        twemoji.parse($('.rooms'));
+        appendDOM(roomsList, '.rooms', false);        
+        // $('.rooms'));
         if ($('.rooms--modal')) {
+            let roomsList ='';
             for (let i = 0; i < list.length; i++) {
                 let uniCode = list[i].icon;
                 const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
-                const HTML = `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${uniCode}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>`;
-                appendDOM(HTML, '.rooms--modal', false);
+                roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>\n`;
             }
-            twemoji.parse($('.rooms--modal'));            
+            appendDOM(roomsList, '.rooms--modal', false);
         }
     });
 
@@ -1070,11 +1081,10 @@ window.addEventListener('load', function () {
         navigator.serviceWorker.addEventListener('message', function(event){
             if(event.data.what == 'getEmojis'){
                 $('.emojiList').innerHTML = '';
-                let list = '';
-                for (let key in event.data.emojis) {
-                    const emoji = event.data.emojis[key];
-                    /* Get UTF-8 emoji */
-                    list += `<i class="select__emoji" data-keywords="${emoji.keywords.join(',')}" data-char="${emoji['char']}" data-index="${key}">${twemoji.parse(emoji['char'])}</i>`;
+                let list = '';                          
+                for (let i=0;i<emojis.length;i++) {
+                    list += `<i class="select__emoji" data-keywords="${emojis[i].keywords}" data-char="${emojis[i].char}" data-index="${emojis[i].no}">${twemoji.parse(emojis[i].char)}</i>\n`;
+
                 }
                 appendDOM(list, '.emojiList', false);
             }
