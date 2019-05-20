@@ -469,6 +469,7 @@ window.addEventListener('load', function () {
                     <div class="who noselect ${fromSelfIcon}" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                 </li>`;
         /* Get actual image dimensions */
+        const panelMiddle = $('.panel--middle');        
         getImageDimensions(`data:${type};base64,${img}`).then(dims => {
         /* Append message */
             appendDOM(HTML, '.panel--middle', false);
