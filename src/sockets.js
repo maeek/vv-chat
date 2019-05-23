@@ -261,11 +261,11 @@ module.exports = function(io) {
         /* 
          * Sending/Receiving images
          */
-        socket.on('image', function socket_image(image, fn) {
+        socket.on('file', function socket_file(file, fn) {
             if (checkSession()) {
-                const { type, name, blob, mid } = image;
-                if (type.indexOf('image') >= 0) {
-                    socket.to(`${activeRoom}`).emit('image', {
+                const { type, name, blob, mid } = file;
+                if (type.indexOf('image') >= 0 || type.indexOf('video') >= 0) {
+                    socket.to(`${activeRoom}`).emit('file', {
                         username: socket.handshake.session.user,
                         name: name ? name : randomString(8),
                         type: type,
@@ -273,7 +273,7 @@ module.exports = function(io) {
                         img: blob,
                         mid: mid
                     });
-                    /* Notify user when image was sent */
+                    /* Notify user when file was sent */
                     fn(true);
                 }
             } else {

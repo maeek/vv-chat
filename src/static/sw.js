@@ -89,9 +89,13 @@ self.addEventListener('fetch', function(event) {
                     return response;
                 }
 
-                function unableToResolve(cache) {
+                function unableToResolve() {
                     console.log('WORKER: fetch request failed in both cache and network.');
-                    return cache.match(OFFLINE_PAGE);
+                    caches
+                        .open(version + 'pages')
+                        .then(function(cache) {
+                            return cache.match(OFFLINE_PAGE);
+                        });
                 }
             }));
 });

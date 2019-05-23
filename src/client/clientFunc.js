@@ -399,36 +399,105 @@ function returnEmoji(emoji) {
     return uniCode;
 }
 
-function appendImage(socket, files, fromClipboard) {
+// function appendImage(socket, files, fromClipboard) {
+//     fromClipboard = fromClipboard?true:false;
+//     if (Cookies.get('user')) {
+//         if (socket.io.readyState == 'open') {
+//             for (let i = 0; i < files.length; i++) {
+//                 const file = files[i];
+//                 const fileType = file.type;
+//                 if (file.type.indexOf('image') >= 0) {
+//                     const fileReader = new FileReader();
+//                     fileReader.onloadend = function(e) {
+//                         const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+//                         const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
+//                         const time = getTime();
+//                         const HTML = `<li class="ms from__me" data-mid="${mid}">
+//                             <div class="time noselect">${time}</div>
+//                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+//                             <div class="message message--image">
+//                                 <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+//                                 <div class="loader"></div>
+//                             </div>
+//                             <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get('user'))}">${escapeHtml(Cookies.get('user').substring(0, 1).toUpperCase())}</div>
+//                         </li>`;
+//                         if ($$('.typing').length > 0) $('.typing').remove();
+                        
+//                         const panelMiddle = $('.panel--middle');
+//                         getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+//                             appendDOM(HTML, '.panel--middle', false);
+//                             $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
+
+//                             socket.emit('image', {
+//                                 username: Cookies.get('user'),
+//                                 type: fileType,
+//                                 name: file.name,
+//                                 blob: arrayBuffer,
+//                                 mid: mid
+//                             }, (uploaded) => {
+//                                 if (uploaded) {
+//                                     $(`.from__me[data-mid="${mid}"] .loader`).remove();
+//                                 }
+//                             });
+//                             // panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+//                             if (panelMiddle.scrollTop + panelMiddle.clientHeight + (dims.h>400?400:dims.h) > Math.max(
+//                                 panelMiddle.scrollHeight,
+//                                 panelMiddle.offsetHeight,
+//                                 panelMiddle.clientHeight
+//                             ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } 
+//                         });
+//                         fileReader.abort();
+//                         $('.textField').focus();
+//                     };
+//                     fileReader.readAsDataURL(fromClipboard?file.getAsFile():file);
+//                 }
+//             }
+//         } else {
+//             error('Failed sending message');
+//             $('.textField').focus();
+//         }
+//     } else {
+//         socket.close();
+//         location.href = '/logout';
+//     }
+// }
+
+
+
+
+
+function appendFile(socket, files, fromClipboard) {
     fromClipboard = fromClipboard?true:false;
     if (Cookies.get('user')) {
-        if (socket.io.readyState == 'open') {
+        if (socket && socket.io.readyState == 'open') {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 const fileType = file.type;
-                if (file.type.indexOf('image') >= 0) {
-                    const fileReader = new FileReader();
+                const fileReader = new FileReader();
+                const panelMiddle = $('.panel--middle');
+                const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
+                const time = getTime();
+                if (file.type.indexOf('image') >= 0 && file.size < 25000000) {
+                    
                     fileReader.onloadend = function(e) {
+                        
                         const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
-                        const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
-                        const time = getTime();
                         const HTML = `<li class="ms from__me" data-mid="${mid}">
                             <div class="time noselect">${time}</div>
                             <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
                             <div class="message message--image">
-                                <img data-type="${file.type}" data-name="${file.name}" src="data:${file.type};base64,${arrayBuffer}">
+                                <img data-type="${fileType}" data-name="${file.name}" src="data:${fileType};base64,${arrayBuffer}">
                                 <div class="loader"></div>
                             </div>
                             <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get('user'))}">${escapeHtml(Cookies.get('user').substring(0, 1).toUpperCase())}</div>
                         </li>`;
-                        if ($$('.typing').length > 0) $('.typing').remove();
                         
-                        const panelMiddle = $('.panel--middle');
                         getImageDimensions(`data:${file.type};base64,${arrayBuffer}`).then(dims => {
+                            if ($$('.typing').length > 0) $('.typing').remove();
                             appendDOM(HTML, '.panel--middle', false);
                             $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
 
-                            socket.emit('image', {
+                            socket.emit('file', {
                                 username: Cookies.get('user'),
                                 type: fileType,
                                 name: file.name,
@@ -439,7 +508,7 @@ function appendImage(socket, files, fromClipboard) {
                                     $(`.from__me[data-mid="${mid}"] .loader`).remove();
                                 }
                             });
-                            // panelMiddle.scrollTop = panelMiddle.scrollTop + dims.h;
+                            
                             if (panelMiddle.scrollTop + panelMiddle.clientHeight + (dims.h>400?400:dims.h) > Math.max(
                                 panelMiddle.scrollHeight,
                                 panelMiddle.offsetHeight,
@@ -447,10 +516,55 @@ function appendImage(socket, files, fromClipboard) {
                             ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } 
                         });
                         fileReader.abort();
-                        $('.textField').focus();
                     };
-                    fileReader.readAsDataURL(fromClipboard?file.getAsFile():file);
+                } else if(file.type.indexOf('video') >= 0 && file.size < 25000000) {
+                    
+                    fileReader.onloadend = function(e) {
+                        
+                        const arrayBuffer = e.target.result.replace(/^data:.+;base64,/, '');
+                        const HTML = `<li class="ms from__me" data-mid="${mid}">
+                            <div class="time noselect">${time}</div>
+                            <div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>
+                            <div class="message message--video">
+                                <video controls data-type="${file.type}" data-name="${file.name}" type="${fileType}"></video>
+                                <div class="loader"></div>
+                            </div>
+                            <div class="who noselect nodisplay" data-user="${escapeHtml(Cookies.get('user'))}">${escapeHtml(Cookies.get('user').substring(0, 1).toUpperCase())}</div>
+                        </li>`;
+                        
+                        if ($$('.typing').length > 0) $('.typing').remove();
+                        
+                        appendDOM(HTML, '.panel--middle', false);
+                        $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
+
+                        socket.emit('file', {
+                            username: Cookies.get('user'),
+                            type: fileType,
+                            name: file.name,
+                            blob: arrayBuffer,
+                            mid: mid
+                        }, (uploaded) => {
+                            if (uploaded) {
+                                $(`.from__me[data-mid="${mid}"] .loader`).remove();
+                            }
+                        });
+                        let video = $(`.from__me[data-mid="${mid}"] video`);
+                        video.src = `data:${fileType};base64,${arrayBuffer}`;
+                        video.onloadedmetadata = function() {
+                            /* Detect if user scrolled up */
+                            if (panelMiddle.scrollTop + panelMiddle.clientHeight + (video.videoHeight>400?400:video.videoHeight)> Math.max(
+                                panelMiddle.scrollHeight,
+                                panelMiddle.offsetHeight,
+                                panelMiddle.clientHeight
+                            ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + 400; }
+                        };
+                        fileReader.abort();
+                    };
+                    
+                } else {
+                    error('Selected file is too big! Limit is 25MB');
                 }
+                fileReader.readAsDataURL(fromClipboard?file.getAsFile():file);                
             }
         } else {
             error('Failed sending message');
@@ -461,6 +575,13 @@ function appendImage(socket, files, fromClipboard) {
         location.href = '/logout';
     }
 }
+
+
+
+
+
+
+
 
 function appendMessage(socket) {
     /* Get value */
@@ -591,7 +712,7 @@ export {
     windowWasFocused,
     prependDOM,
     returnEmoji,
-    appendImage,
+    appendFile,
     appendMessage,
     isUpTimeout,
     tost,

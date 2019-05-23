@@ -35,7 +35,7 @@ import {
     settingsInput,
     operations,
     windowWasFocused,
-    appendImage,
+    appendFile,
     appendMessage,
     tost
 } from '/js/clientFunc.js';
@@ -449,44 +449,72 @@ window.addEventListener('load', function () {
  * 
  *****************************************************************/
 
-    socket.on('image', function socket_image(image) {
+    socket.on('file', function socket_image(file) {
     /* Get time */
         const time = getTime();
     
-        const {username, mid, type, img, name} = image;
+        const {username, mid, type, img, name} = file;
     
         /* Check from whom is the message */
         const fromWho = username == Cookies.get('user') ? 'from__me' : 'to__me';
         const fromSelf = username == Cookies.get('user') ? '<div class="reverse noselect" title="Undo"><i class="material-icons">undo</i></div>' : '';
         const fromSelfIcon = username == Cookies.get('user') ? 'nodisplay' : '';
-        /* Image template */
+        /* File template */
+        let media;
+        if(type.indexOf('image') >= 0)
+            media = `<div class="message message--image"><img data-type="${type}" data-name="${name}" src="data:${type};base64,${img}"></div>`;
+        else if (type.indexOf('video') >= 0)
+            media = `<div class="message message--video"><video controls data-type="${type}" data-name="${name}" type="${type}"></video></div>`;
+            
         const HTML = `<li class="ms ${fromWho}" data-mid="${mid}">
                     <div class="time noselect">${time}</div>
-                    ${fromSelf}
-                    <div class="message message--image"><img data-type="${type}" data-name="${name}" src="data:${type};base64,${img}"></div>
+                    ${fromSelf}\n
+                    ${media}\n
                     <div class="who noselect ${fromSelfIcon}" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                 </li>`;
         /* Get actual image dimensions */
-        const panelMiddle = $('.panel--middle');        
-        getImageDimensions(`data:${type};base64,${img}`).then(dims => {
-        /* Append message */
+        const panelMiddle = $('.panel--middle');   
+        if(type.indexOf('image') >= 0){     
+            getImageDimensions(`data:${type};base64,${img}`).then(dims => {
+            /* Append message */
+                appendDOM(HTML, '.panel--middle', false);
+                /* Show message */
+                $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
+                /* Add image height to scroll bar */
+                // middleDiv.scrollTop += dims.h;
+                /* Detect if user scrolled up */
+                if (panelMiddle.scrollTop + panelMiddle.clientHeight + (dims.h>400?400:dims.h) > Math.max(
+                    panelMiddle.scrollHeight,
+                    panelMiddle.offsetHeight,
+                    panelMiddle.clientHeight
+                ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } 
+                /* Tost */
+                tost(mid, username, false);
+            });
+        } else if (type.indexOf('video') >= 0){
             appendDOM(HTML, '.panel--middle', false);
             /* Show message */
             $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
             /* Add image height to scroll bar */
             // middleDiv.scrollTop += dims.h;
-            /* Detect if user scrolled up */
-            if (panelMiddle.scrollTop + panelMiddle.clientHeight + (dims.h>400?400:dims.h) > Math.max(
-                panelMiddle.scrollHeight,
-                panelMiddle.offsetHeight,
-                panelMiddle.clientHeight
-            ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; } 
-            /* Tost */
-            tost(mid, username, false);
-        });
+            let video = $(`.ms[data-mid="${mid}"] video`);
+            video.src = `data:${type};base64,${img}`;
+            video.onloadedmetadata = function() {
+                /* Detect if user scrolled up */
+                if (panelMiddle.scrollTop + panelMiddle.clientHeight + (video.videoHeight>400?400:video.videoHeight)> Math.max(
+                    panelMiddle.scrollHeight,
+                    panelMiddle.offsetHeight,
+                    panelMiddle.clientHeight
+                ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + 400; } else {
+                    /* Tost */
+                    tost(mid, username, false);    
+                }
+            };
+           
+            
+            
+        }
     
-    
-        newNotf(username, true);
     });
 
     $('#sendFile').addEventListener('input', function send_file_input(e) {
@@ -494,7 +522,7 @@ window.addEventListener('load', function () {
         e.preventDefault();
         let files = e.target.files;
         if (files.length < 5) { 
-            appendImage(socket, files);
+            appendFile(socket, files);
             $('#sendFile').setAttribute('type',''); 
             $('#sendFile').setAttribute('type','file'); 
         } else { error('Selected too many photos, limit is 4'); }
@@ -510,7 +538,7 @@ window.addEventListener('load', function () {
 
     $('.textField').addEventListener('paste', function send_file_paste(pasteEvent) {
         let items = pasteEvent.clipboardData.items;
-        appendImage(socket, items, true);
+        appendFile(socket, items, true);
     }, false);
 
     /*****************************************************************
@@ -617,7 +645,7 @@ window.addEventListener('load', function () {
         let files = evt.dataTransfer.files;
         $('.panel--bottom').removeAttribute('style');
         $('.textField').setAttribute('placeholder', 'Type message here');
-        appendImage(socket, files);
+        appendFile(socket, files);
     }, false);
 
     /*****************************************************************
@@ -696,6 +724,7 @@ window.addEventListener('load', function () {
                     }
                     mess.classList.add('ms--removed');
                     mess.querySelector('.message').classList.remove('message--image');
+                    mess.querySelector('.message').classList.remove('message--video');
                     mess.querySelector('.message').classList.add('italic');
                 }, 200);
             }
@@ -833,7 +862,7 @@ window.addEventListener('load', function () {
                     );
                 }
             });
-        } else if (e.target && hasClass(e.target, 'room--change') || hasClass(e.target.parentNode, 'room--change') || hasClass(e.target.parentNode.parentNode, 'room--change')) {
+        } else if (e.target && (hasClass(e.target, 'room--change') || hasClass(e.target.parentNode, 'room--change') || hasClass(e.target.parentNode.parentNode, 'room--change'))) {
             const btn = hasClass(e.target.parentNode, 'room--change') ? e.target.parentNode : hasClass(e.target.parentNode.parentNode, 'room--change') ? e.target.parentNode.parentNode : e.target;
             if (!hasClass(btn, 'room--active')) {
                 const rid = btn.getAttribute('data-rid');
