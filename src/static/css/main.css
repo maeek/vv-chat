@@ -223,6 +223,9 @@ body {
     justify-content: center;
     align-items: flex-end;
     padding: 1rem;
+}
+
+.settings__cont .footer {
     flex: 1 0 auto;
 }
 
