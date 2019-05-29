@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  *   Change settings for your own needs
  * 
@@ -24,7 +24,7 @@ const config = {
     defaultRoom: {
         id: 'landing',
         name: 'Main',
-        icon: '0x1f47e' // Icons in /src/static/js/emoji.json
+        icon: '😍' // Icons in /src/static/js/emoji.json
     },
     certificateFiles: {
         cert: 'server.crt',
@@ -74,6 +74,10 @@ if (fs.existsSync(config.usersFile)) {
                 usersFile.users[i].clientId = randomString(22);
             }
 
+            if (usersFile.users[0].clientId != '_root_' && usersFile.users[0].username == 'root') {
+                usersFile.users[0].clientId = '_root_';
+            }
+
             if (keys.indexOf('blocked') == -1) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "blocked", fixing.`);
                 usersFile.users[i].blocked = false;
@@ -94,7 +98,7 @@ if (fs.existsSync(config.usersFile)) {
             username: 'root',
             password: hash,
             first: false,
-            clientId: 'root'
+            clientId: '_root_'
         }]
     }));
     console.log(`Created file:  ${config.usersFile}`);
@@ -108,26 +112,44 @@ if (fs.existsSync(config.usersFile)) {
 /* 
  * Checking if rooms file exists 
  */
+
+/* Due to changed emojis the config.roomsFile must be removed or changed */
+
+if (JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list[0].icon.indexOf('0x') != -1) {
+    fs.unlinkSync(config.roomsFile);
+    console.log(`Due to changes in version 1.1.1 ${config.roomsFile} must be removed.`);
+}
+
+
 if (fs.existsSync(config.roomsFile)) {
     let roomsFile = fs.readFileSync(config.roomsFile, 'utf-8');
     roomsFile = JSON.parse(roomsFile);
     if (Object.keys(roomsFile)[0] == 'list') {
         for (let i = 0; i < roomsFile.list.length; i++) {
             const keys = Object.keys(roomsFile.list[i]);
+
             if (keys.indexOf('name') == -1) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "name".`);
             }
 
-            if (keys.indexOf('icon') == -1 || roomsFile.list[i].icon == null) {
+            if (keys.indexOf('icon') == -1 || roomsFile.list[i].icon == null || roomsFile.list[i].icon.indexOf('0x') >= 0) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "icon", fixing`);
-                roomsFile.list[i].icon = '0x1f44d';
+                roomsFile.list[i].icon = '🚨';
             }
 
             if (keys.indexOf('password') == -1) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "password", fixing.`);
                 roomsFile.list[i].password = {
                     required: false,
-                    hash: ''
+                    hash: '',
+                    authorized: []
+                };
+            }
+
+            if (keys.indexOf('permissions') == -1) {
+                roomsFile.list[i].permissions = {
+                    maxUsers: 0,
+                    mod: null
                 };
             }
 
@@ -135,6 +157,7 @@ if (fs.existsSync(config.roomsFile)) {
             if (keys.indexOf('clientId') >= 0) {
                 delete roomsFile.list[i].clientId;
             }
+
             if (keys.indexOf('id') == -1) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "id", fixing.`);
                 if (roomsFile.list[i].name != config.defaultRoom.name)

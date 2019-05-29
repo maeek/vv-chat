@@ -3,7 +3,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 
@@ -44,7 +44,8 @@ module.exports = function(io) {
         /* Kick user if not authorized */
         function notAuthorized(socket) {
             socket.emit('invalidSession', true);
-            socket.leave(activeRoom);
+            socket.leaveAll();
+            socket.disconnect(true);
         }
 
         /* 
@@ -82,6 +83,28 @@ module.exports = function(io) {
             });
         }
 
+        function getUsersInRoom(rooms) {
+            /* Initiate promises array */
+            let roomsPromises = [];
+
+            for (let i = 0; i < rooms.list.length; i++) {
+                /* Push promise to the array */
+                roomsPromises.push(new Promise((res) => {
+                    io.of('/chat').in(rooms.list[i].id).clients((error, clients) => {
+                        /* Update online users */
+                        rooms.list[i].online = clients.length;
+                        res();
+                    });
+                }));
+            }
+
+            return new Promise((res) => {
+                Promise.all(roomsPromises).then(() => {
+                    /* Return rooms list with active users */
+                    res(rooms.list);
+                });
+            });
+        }
 
         /* 
          * Updating session
@@ -129,7 +152,7 @@ module.exports = function(io) {
                             /* Notify users */
                             socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                 status: true,
-                                joined: socket.handshake.session.clientId,
+                                joined: socket.clientId,
                                 username: socket.handshake.session.user,
                                 time: getTime(),
                                 users: clients.length,
@@ -238,11 +261,11 @@ module.exports = function(io) {
         /* 
          * Sending/Receiving images
          */
-        socket.on('image', function socket_image(image, fn) {
+        socket.on('file', function socket_file(file, fn) {
             if (checkSession()) {
-                const { type, name, blob, mid } = image;
-                if (type.indexOf('image') >= 0) {
-                    socket.to(`${activeRoom}`).emit('image', {
+                const { type, name, blob, mid } = file;
+                if (type.indexOf('image') >= 0 || type.indexOf('video') >= 0 || type.indexOf('audio') >= 0) {
+                    socket.to(`${activeRoom}`).emit('file', {
                         username: socket.handshake.session.user,
                         name: name ? name : randomString(8),
                         type: type,
@@ -250,7 +273,7 @@ module.exports = function(io) {
                         img: blob,
                         mid: mid
                     });
-                    /* Notify user when image was sent */
+                    /* Notify user when file was sent */
                     fn(true);
                 }
             } else {
@@ -312,24 +335,9 @@ module.exports = function(io) {
                             el.online = 0;
                             return el;
                         });
-                        /* Initiate promises array */
-                        let clientsLength = [];
 
-                        for (let i = 0; i < rooms.list.length; i++) {
-                            /* Push promise to the array */
-                            clientsLength.push(new Promise((res) => {
-                                io.of('/chat').in(rooms.list[i].id).clients((error, clients) => {
-                                    rooms.list[i].online = clients.length;
-                                    res();
-                                });
-                            }));
-
-                        }
-                        /* Sent rooms to users when all active users has been counted */
-                        Promise.all(clientsLength).then(() => {
-                            io.of('/chat').emit('roomList', rooms.list);
-                            /* Clear the array */
-                            clientsLength = [];
+                        getUsersInRoom(rooms).then(data => {
+                            io.of('/chat').emit('roomList', data);
                         });
                     }
                 });
@@ -363,7 +371,7 @@ module.exports = function(io) {
                             /* Notify clients when user leave */
                             socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                 status: false,
-                                joined: socket.handshake.session.clientId,
+                                joined: socket.clientId,
                                 username: socket.handshake.session.user,
                                 time: getTime(),
                                 users: clients.length - 1
@@ -378,7 +386,7 @@ module.exports = function(io) {
                             io.of('/chat').in(activeRoom).clients((error, clients) => {
                                 socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                                     status: true,
-                                    joined: socket.handshake.session.clientId,
+                                    joined: socket.clientId,
                                     username: socket.handshake.session.user,
                                     time: getTime(),
                                     users: clients.length
@@ -411,7 +419,7 @@ module.exports = function(io) {
                             let { name, icon } = newRoom;
 
                             /* Set random icon if not set */
-                            icon = icon ? icon : JSON.parse(fs.readFileSync(__dirname + '/static/js/emoji.json', 'utf-8')).list[Math.floor(Math.random() * 813)];
+                            icon = icon ? icon : '👍';
                             /* Test room name */
                             if (format.test(name) && name.length <= 30) {
                                 /* Create room object */
@@ -439,24 +447,8 @@ module.exports = function(io) {
                                             icon: icon
                                         });
 
-                                        /* Initiate promises array */
-                                        let clientsLength = [];
-
-                                        for (let i = 0; i < data.list.length; i++) {
-                                            /* Push promise to the array */
-                                            clientsLength.push(new Promise((res) => {
-                                                io.of('/chat').in(data.list[i].id).clients((error, clients) => {
-                                                    data.list[i].online = clients.length;
-                                                    res();
-                                                });
-                                            }));
-
-                                        }
-                                        /* Sent rooms to users when all active users has been counted */
-                                        Promise.all(clientsLength).then(() => {
-                                            io.of('/chat').emit('roomList', data.list);
-                                            /* Clear the array */
-                                            clientsLength = [];
+                                        getUsersInRoom(data).then(rooms => {
+                                            io.of('/chat').emit('roomList', rooms);
                                         });
                                     } else {
                                         console.log(`Error: Couldn't write to: ${config.roomsFile} - description:\n ${w_err}`);
@@ -495,23 +487,8 @@ module.exports = function(io) {
 
                                     io.of('/chat').to(roomToDelete).emit('changeRoom', config.defaultRoom.id);
 
-                                    let clientsLength = [];
-
-                                    for (let i = 0; i < data.list.length; i++) {
-                                        /* Push promise to the array */
-                                        clientsLength.push(new Promise((res) => {
-                                            io.of('/chat').in(data.list[i].id).clients((error, clients) => {
-                                                data.list[i].online = clients.length;
-                                                res();
-                                            });
-                                        }));
-
-                                    }
-                                    /* Sent rooms to users when all active users has been counted */
-                                    Promise.all(clientsLength).then(() => {
-                                        io.of('/chat').emit('roomList', data.list);
-                                        /* Clear the array */
-                                        clientsLength = [];
+                                    getUsersInRoom(data).then(rooms => {
+                                        io.of('/chat').emit('roomList', rooms);
                                     });
 
                                 } else {
@@ -534,7 +511,7 @@ module.exports = function(io) {
                     if (socket.clientId != 'root')
                         socket.nsp.to(`${activeRoom}`).emit('userConnected', {
                             status: false,
-                            joined: socket.handshake.session.clientId,
+                            joined: socket.clientId,
                             username: socket.handshake.session.user,
                             time: getTime(),
                             users: clients.length

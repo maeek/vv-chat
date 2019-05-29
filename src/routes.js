@@ -58,15 +58,15 @@ router.route('/manage/')
                     (function manage_getUsers() {
                         /* Get users list */
                         fileManip.readUsers(true, (err, data) => {
-                            if(!err)
+                            if (!err)
                                 res.json(data.users);
                         });
                     })();
                     break;
                 case 'deleteUser':
                     (function manage_deleteUser() {
-                        function deleteUser(err,data) {
-                            if(!err){
+                        function deleteUser(err, data) {
+                            if (!err) {
                                 /* User to delete */
                                 const user = req.body.user.trim();
                                 /* Check if user is not root */
@@ -76,12 +76,12 @@ router.route('/manage/')
                                         return el.clientId != user;
                                     });
                                     /* Write changes */
-                                    fileManip.writeUsers(data, (error)=>{
-                                        if(!error)
+                                    fileManip.writeUsers(data, (error) => {
+                                        if (!error)
                                             res.json({ status: true });
                                         else
-                                            res.json({ status: false });                                                                            
-                                    })
+                                            res.json({ status: false });
+                                    });
                                 } else {
                                     res.json({ status: false });
                                 }
@@ -92,20 +92,20 @@ router.route('/manage/')
                     break;
                 case 'block':
                     (function manage_blockUsers() {
-                        
+
                         /* Block / Unblock user */
                         function blockUser(data) {
-                            
+
                             /* Array of users ids to block */
                             const uids = req.body.uids;
-                            
+
                             /* Block / Unblock */
                             const toBlock = req.body.block ? true : false;
-                            
+
                             /* Check if array contain root, if not found, proceed*/
-                            if(uids.indexOf('root') != -1){
+                            if (uids.indexOf('root') == -1) {
                                 data.users = data.users.map(el => {
-                            
+
                                     /* Match user to block / unblock in users list */
                                     if (uids.indexOf(el.clientId) != -1) {
                                         /* Change status */
@@ -114,30 +114,32 @@ router.route('/manage/')
                                     /* Return updated data */
                                     return el;
                                 });
-                                
+
                                 /* Write changes */
-                                fileManip.writeUsers(data, (err)=> {
-                                    if(!err)
+                                fileManip.writeUsers(data, (err) => {
+                                    if (!err)
                                         res.json({ status: true, blocked: uids });
-                                    else 
-                                        res.json({ status: false });
+                                    else
+                                        res.json({ status: false, message: 'Failed to write to file' });
                                 });
                             } else {
                                 /* Return if array contain root user */
                                 res.json({ status: false });
                             }
                         }
-                        
+
                         fileManip.readUsers(false, (err, data) => {
-                            if(!err)
-                                blockUser(data); 
+                            if (!err)
+                                blockUser(data);
+                            else
+                                console.log(`Failed to write users: ${err}`);
                         });
                     })();
                     break;
                 case 'createUser':
                     (function manage_createUser() {
                         /* Create new user */
-                        function createUser(data, user){
+                        function createUser(data, user) {
                             /* Username format */
                             const format = /^[a-zA-Z0-9@!.-]+$/;
                             /* Generate salt */
@@ -155,22 +157,22 @@ router.route('/manage/')
                                         clientId: randomString(22),
                                         blocked: false
                                     };
-                                    
+
                                     /* Return user matching new username */
                                     const checkUsers = data.users.filter(el => {
                                         return el.username == user;
                                     });
 
-                                    /* Check if username is taken and satisfy username format */                                    
+                                    /* Check if username is taken and satisfy username format */
                                     if (checkUsers.length == 0 && format.test(user)) {
                                         /* Add new user to the array */
                                         data.users.push(newUser);
-                                        fileManip.writeUsers(data, err=>{
+                                        fileManip.writeUsers(data, err => {
                                             /* If write was successful send new user data */
-                                            if(!err)
+                                            if (!err)
                                                 res.json({ status: true, user: user.toLowerCase().trim(), password: newPassword, clientId: newUser.clientId });
                                             else
-                                                console.log(`ERROR: failed to create user at "/manage" (createUser) - error description:\n${err}`);                                                                        
+                                                console.log(`ERROR: failed to create user at "/manage" (createUser) - error description:\n${err}`);
                                         });
                                     } else {
                                         /* If username was taken or username didn't match the format */
@@ -185,11 +187,11 @@ router.route('/manage/')
                         }
                         /* New username */
                         const user = req.body.user.toLowerCase().trim();
-                        fileManip.readUsers(false, (err, data)=>{
-                            if(!err)
+                        fileManip.readUsers(false, (err, data) => {
+                            if (!err)
                                 createUser(data, user);
-                        })
-                        
+                        });
+
                     })();
                     break;
                 case 'resetPassword':
@@ -203,7 +205,7 @@ router.route('/manage/')
                             /* Hash password */
                             bcrypt.hash(password, salt, function(err, hash) {
                                 if (!err) {
-                                    
+
                                     /* Update password */
                                     data.users = data.users.filter(el => {
                                         if (el.clientId == user) {
@@ -212,26 +214,26 @@ router.route('/manage/')
                                         }
                                         return el;
                                     });
-                                    
+
                                     /* Save changes */
-                                    fileManip.writeUsers(data, error=>{
-                                        if(!error)
+                                    fileManip.writeUsers(data, error => {
+                                        if (!error)
                                             res.json({ status: true, password: password });
                                     });
-                                    
+
                                 } else {
                                     console.log(`ERROR: failed to hash password at "/manage" (resetPassword) for user: "${user}" error description:\n${err}`);
                                     res.json({ status: false });
                                 }
-                            });    
+                            });
                         }
-                        
+
                         const clientId = req.body.user.trim();
-                        fileManip.readUsers(false, (err,data)=> {
-                            if(!err)
+                        fileManip.readUsers(false, (err, data) => {
+                            if (!err)
                                 resetPassword(data, clientId);
                         });
-                        
+
                     })();
                     break;
                 default:
@@ -262,18 +264,18 @@ router.route('/setup/')
             /* Username */
             const name = req.session.user;
             /* Read users list */
-            fileManip.readUsers(false, (err, data)=>{
-                if(!err) {
+            fileManip.readUsers(false, (err, data) => {
+                if (!err) {
                     let changed = false;
                     let newpass;
                     /* Generate salt */
                     const salt = bcrypt.genSaltSync();
-                    
+
                     /* If first login */
-                    if(req.session.setup){
+                    if (req.session.setup) {
                         const password = req.body.password;
                         const repassword = req.body.repassword;
-                        
+
                         /* Check if passwords match */
                         if (password != repassword && password.length < 5) {
                             res.redirect(301, '/setup/');
@@ -284,7 +286,7 @@ router.route('/setup/')
                     } else {
                         const oldPassword = req.body.oldPassword;
                         const password = req.body.password;
-                        
+
                         if (password.length > 4) {
                             const userHash = data.users.filter(user => {
                                 return user.username == req.session.user;
@@ -300,11 +302,11 @@ router.route('/setup/')
                             });
                         }
                     }
-                   
-                    if(changed){
+
+                    if (changed) {
                         /* Hash password */
                         bcrypt.hash(newpass, salt, function setup_first_hash(error, hash) {
-                            if(!error){
+                            if (!error) {
                                 /* Update user */
                                 data.users = data.users.filter(el => {
                                     if (el.username == name) {
@@ -314,9 +316,9 @@ router.route('/setup/')
                                     return el;
                                 });
                                 /* Write changes */
-                                fileManip.writeUsers(data, w_err=>{
-                                    if(!w_err && req.session.setup) {
-                                        req.session.setup = false;                            
+                                fileManip.writeUsers(data, w_err => {
+                                    if (!w_err && req.session.setup) {
+                                        req.session.setup = false;
                                         req.session.save((s_error) => {
                                             if (!s_error) {
                                                 res.redirect(301, '/chat/');
@@ -325,18 +327,18 @@ router.route('/setup/')
                                             }
                                         });
                                     } else {
-                                        res.json({status: true});
+                                        res.json({ status: true });
                                     }
                                 });
                             }
-                        });    
+                        });
                     } else {
-                        if(req.session.setup) 
-                            res.redirect(301, '/setup/');    
+                        if (req.session.setup)
+                            res.redirect(301, '/setup/');
                         else
-                            res.json({status: false});                        
-                    }           
-               } 
+                            res.json({ status: false });
+                    }
+                }
             });
         }
     });

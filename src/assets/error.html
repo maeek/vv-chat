@@ -9,8 +9,8 @@
     <meta name="og:description" content="Chat that doesn't store your messages">
     <meta property="og:url" content="/">
     <meta property="og:title" content="VV-Chat">
-    <meta property="og:image" content="/static/err.jpg">
-    <meta name="theme-color" content="#ff6479">
+    <meta property="og:image" content="/static/vv_cc.png">
+    <meta name="theme-color" content="#13172c">
     <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|KoHo:400,900|Material+Icons" rel="stylesheet">
     <title>VV-Chat - 404</title>
 </head>
@@ -24,10 +24,12 @@
     
     body {
         font-family: 'KoHo', Helvetica, Arial, sans-serif;
-        background: #000 url(/static/err.jpg);
-        background-size: cover;
+        background: #191f3a url(/static/bg.png);
+        background-size: 500px 500px;
         background-position: center;
         cursor: default;
+        display: flex;
+        flex-direction: column;
     }
     
     .noselect {
@@ -45,14 +47,71 @@
         flex-direction: column;
         height: 100%;
         width: 100%;
-        background: rgba(0, 0, 0, 0.8);
         color: #000;
     }
     
     #error {
         font-size: 6.5rem;
         font-weight: 900;
+        position: relative;
+        height: 7rem;
+        width: auto;
+        color: transparent;
+        transform: rotate(-5deg);
+        animation-name: scale;
+        animation-iteration-count: infinite;
+        animation-duration: .1s;
+        animation-timing-function: cubic-bezier(0.23, 1, 0.320, 1)
+    }
+    
+    #error::after,
+    #error::before {
+        content: attr(data-head);
+        position: absolute;
+        left: 0;
         color: #ff6479;
+    }
+    
+    #error::after {
+        top: -2rem;
+        -webkit-clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+        clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+        animation-name: frac;
+        animation-iteration-count: infinite;
+        animation-duration: .2s;
+        animation-direction: reverse;
+        animation-timing-function: cubic-bezier(0.23, 1, 0.320, 1);
+    }
+    
+    #error::before {
+        transform: translateX(.2rem);
+        bottom: 0;
+        -webkit-clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+        clip-path: polygon(0 50%, 100% 50%, 100% 100%, 0 100%);
+        animation-name: frac;
+        animation-iteration-count: infinite;
+        animation-duration: .2s;
+        animation-timing-function: cubic-bezier(0.23, 1, 0.320, 1);
+        color: #f98998;
+    }
+    
+    @keyframes scale {
+        from {
+            transform: scale(1) rotate(-5deg);
+        }
+        to {
+            transform: scale(1.03) rotate(-5deg);
+        }
+    }
+    
+    @keyframes frac {
+        0%,
+        100% {
+            transform: translate(0);
+        }
+        50% {
+            transform: translate(.05rem);
+        }
     }
     
     i.error {
@@ -71,11 +130,14 @@
     .link {
         margin: 1rem 0;
         font-size: 1.2rem;
-        color: #fff301;
+        color: #eff8ff;
     }
     
     .link a {
         color: #fff;
+        background-color: #363f65;
+        padding: .5rem 1rem;
+        border-radius: 15px;
     }
     
     .title {
@@ -174,6 +236,32 @@
         top: 2rem;
         left: 4rem;
     }
+    
+    .footer {
+        flex-direction: row;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        padding: 1rem;
+    }
+    
+    .branding {
+        font-size: .8rem;
+        margin: .5rem .3rem;
+        color: #888;
+        font-family: 'KoHo', sans-serif;
+    }
+    
+    .branding a {
+        color: #1fa9ff;
+        padding: .2rem .6rem;
+        transition: background .2s, color .2s;
+        text-decoration: none;
+    }
+    
+    .branding a:hover {
+        color: #4bbaff;
+    }
 </style>
 
 <body class="noselect">
@@ -181,22 +269,27 @@
         <div class="logo__div">
             <h1 class="title vv noselect"><span class="vv--dots">VV</span></h1>
         </div>
-        <div id="error">404</div>
-        <div class="message">NOT FOUND</div>
-        <div class="link">Requested resource was not found</div>
+        <div id="error" data-head="404">404</div>
+        <div class="message">Oops...</div>
+        <div class="link desc">There's nothing here</div>
         <div class="link"><a href="/">Go back</a></div>
     </div>
+    <div class="footer">
+        <div class="branding noselect">VV-Chat</div>
+        <div class="branding noselect">1.1.0</div>
+        <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
+    </div>
     <script defer>
-        const hash = location.hash;
+        let hash = location.hash.substring(1);
         if (hash.length > 0 && hash != "") {
-            const errCode = parseInt(hash, 10);
+            document.querySelector("#error").setAttribute('data-head', hash);
             document.querySelector("#error").innerHTML = hash;
 
         }
         window.addEventListener('hashchange', function() {
-            const hash = location.hash;
+            let hash = location.hash.substring(1);
             if (hash.length > 0 && hash != "") {
-                const errCode = parseInt(hash, 10);
+                document.querySelector("#error").setAttribute('data-head', hash);
                 document.querySelector("#error").innerHTML = hash;
             }
         })

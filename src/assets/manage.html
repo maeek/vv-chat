@@ -21,12 +21,16 @@
         <aside>
             <div class="logo__div">
                 <h1 class="title vv noselect"><a href="/manage/"><span class="vv--dots">VV</span></a></h1>
-                <div class="version noselect">1.1.0</div>
+                <div class="version noselect">1.1.1</div>
+                <div class="loggedUser">...</div>
             </div>
 
             <div class="info">
                 <h4 class="noselect">Chat rooms<i class="addRoom material-icons">control_point</i></h4>
-
+                <div class="search--room">
+                    <i class="material-icons noselect">search</i>
+                    <input type="search" name="searchRoom" placeholder="Search room">
+                </div>
                 <ul class="rooms noselect">
                     <li class="loader__div">
                         <div class="lds-roller">
@@ -113,6 +117,7 @@
     <script src='/js/bluebird.min.js'></script>
     <script src='/js/json3.min.js'></script>
     <script src='/js/fetch.js'></script>
+    <script src='/js/twemoji.min.js'></script>
     <script defer type="module" src="/js/manage.js"></script>
 </body>
 

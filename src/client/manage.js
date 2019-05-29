@@ -9,7 +9,7 @@
  *   Author: maeek
  *   Description: No history simple websocket chat
  *   Github: https://github.com/maeek/vv-chat
- *   Version: 1.1.0
+ *   Version: 1.1.1
  * 
  */
 
@@ -23,15 +23,13 @@
 import {
     $,
     $$,
-    emojis,
     hasClass,
     appendDOM,
     error,
     openSettings,
     operations,
     settingsInput,
-    prependDOM,
-    returnEmoji,
+    prependDOM
 } from '/js/clientFunc.js';
 
 /*****************************************************************
@@ -116,37 +114,35 @@ socket.on('roomList', (list) => {
     for (let r = 0; r < $$('.rooms').length; r++) {
         $$('.rooms')[r].innerHTML = '';
     }
-    console.log(list);
+    let roomsList = '';
     for (let i = 0; i < list.length; i++) {
         // Get room utf-8 icon
-        const emoji = returnEmoji(list[i].icon);
-        const HTML = `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
-                        <i>${emoji}</i> 
+        const emoji = list[i].icon;
+        roomsList += `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
+                        <i>${twemoji.parse(emoji)}</i> 
                         <div class="room--details">${list[i].name} 
                             <div class="room--count">Online: ${list[i].online}</div>
                         </div>
                         <i class="material-icons roomDelete">delete</i>
-                    </li>`;
-
-        // Append room to list
-        appendDOM(HTML, '.rooms', false);
+                    </li>\n`;
     }
+    appendDOM(roomsList, '.rooms', false);
     appendDOM('<li class="room--show">Show rooms</li>', '.rooms', false);
+
     if ($('.rooms--modal')) {
+        let roomsList = '';
         for (let i = 0; i < list.length; i++) {
             // Get room utf-8 icon
-            const emoji = returnEmoji(list[i].icon);
-            const HTML = `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
-                            <i>${emoji}</i> 
+            const emoji = list[i].icon;
+            roomsList += `<li class="room--change" data-icon="${emoji}" data-rid="${list[i].id}">
+                            <i>${twemoji.parse(emoji)}</i> 
                             <div class="room--details">${list[i].name} 
                                 <div class="room--count">Online: ${list[i].online}</div>
                             </div>
                             <i class="material-icons roomDelete">delete</i>
-                        </li>`;
-
-            // Append room to list
-            appendDOM(HTML, '.rooms--modal', false);
+                        </li>\n`;
         }
+        appendDOM(roomsList, '.rooms--modal', false);
     }
 });
 
@@ -244,6 +240,7 @@ window.addEventListener('DOMContentLoaded', () => {
      *  Load users list 
      */
     getUsers();
+    $('.loggedUser').innerHTML = Cookies.get('user');
 });
 
 
@@ -483,9 +480,13 @@ document.addEventListener('click', (e) => {
                                 <div class="title noselect">Rooms</div>
                                 <p class="description noselect">Change chat room.</p>
                                 <div class="subtitle noselect">Available rooms</div>
+                                <div class="search--room">
+                                    <i class="material-icons noselect">search</i>
+                                    <input type="search" name="searchRoom" placeholder="Search room">
+                                </div>
                                 <ul class="rooms noselect rooms--modal"></ul>
                                 <div class="footer">
-                                    <div class="branding noselect">1.1.0</div>
+                                    <div class="branding noselect">1.1.1</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
@@ -536,7 +537,7 @@ document.addEventListener('click', (e) => {
                                     <button class="create--room">Create<i class="material-icons">add</i></button>
                                 </div>
                                 <div class="footer">
-                                    <div class="branding noselect">1.1.0</div>
+                                    <div class="branding noselect">1.1.1</div>
                                     <div class="branding"><a href="https://github.com/maeek/vv-chat">Github</a></div>
                                 </div>
                             </div>
@@ -551,11 +552,15 @@ document.addEventListener('click', (e) => {
             },
         }).then(res => res.json()).then((emojis) => {
             $('.room__icons').innerHTML = '';
-            for (let i = 0; i < emojis.list.length; i++) {
-                const uniCode = returnEmoji(emojis.list[i]);
-                appendDOM(`<i class="select__icon" data-index="${emojis.list[i]}">${uniCode}</i>`, '.room__icons', false);
+            let list = '';
+            for (let i = 0; i < emojis.length; i++) {
+                list += `<i class="select__icon" data-char="${emojis[i].char}" data-index="${emojis[i].no}">${twemoji.parse(emojis[i].char)}</i>\n`;
+
             }
-        }).catch(() => {
+            appendDOM(list, '.room__icons', false);
+            //$('.room__icons'));
+        }).catch((e) => {
+            console.log(e);
             $('.room__icons').innerHTML = '';
             appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.modal__div .room__icons', false);
         });
@@ -563,21 +568,26 @@ document.addEventListener('click', (e) => {
         // Animate modal
         $('.modal__div').classList.add('anim--opacity');
         $('.settings__cont').classList.add('anim--opacity', 'anim--scale');
-    } else if (e.target && hasClass(e.target, 'select__icon')) {
+    } else if (e.target && hasClass(e.target, 'select__icon') || hasClass(e.target.parentNode, 'select__icon')) {
         /*
          * Select icon for new room
          */
+        const btn = hasClass(e.target, 'select__icon') ? e.target : e.target.parentNode;
         const icons = $$('.select__icon');
+
         for (let i = 0; i < icons.length; i++) { icons[i].classList.remove('icon--active'); }
-        e.target.classList.add('icon--active');
-        $('.icon--prev').innerHTML = e.target.innerHTML;
+
+        btn.classList.add('icon--active');
+        $('.icon--prev').innerHTML = btn.getAttribute('data-char');
+        twemoji.parse($('.icon--prev'));
+
     } else if (e.target && hasClass(e.target, 'roomDelete')) {
         e.stopPropagation();
         const rid = e.target.parentNode.getAttribute('data-rid');
         socket.emit('deleteRoom', rid);
     } else if (e.target && hasClass(e.target, 'create--room') || hasClass(e.target.parentNode, 'create--room')) {
         const roomName = $('input[name=\'roomName\']').value.trim();
-        const icon = $('.icon--active') ? $('.icon--active').getAttribute('data-index') : null;
+        const icon = $('.icon--active') ? $('.icon--active').getAttribute('data-char') : null;
         socket.emit('addRoom', {
             name: roomName,
             icon: icon,
@@ -658,6 +668,23 @@ document.addEventListener('input', (e) => {
         const clientId = e.target.value;
         const isChecked = e.target.checked;
         block(clientId, isChecked);
+    } else if (e.target && e.target.getAttribute('name') == 'searchRoom') {
+        e.preventDefault();
+        let rooms = $$('.room--change');
+        let val = e.target.value.trim().toLowerCase();
+        if (val.length != 0 || val != '') {
+            for (let i = 0; i < rooms.length; i++) {
+                if (rooms[i].querySelector('.room--details').innerText.toLowerCase().replace(/online:\s\d+/g).indexOf(val) == -1) {
+                    rooms[i].style.display = 'none';
+                } else {
+                    rooms[i].removeAttribute('style');
+                }
+            }
+        } else {
+            for (let i = 0; i < rooms.length; i++) {
+                rooms[i].removeAttribute('style');
+            }
+        }
     }
 });
 
@@ -685,11 +712,11 @@ if ('serviceWorker' in navigator) {
  *****************************************************************/
 
 window.addEventListener('DOMContentLoaded', () => {
-    const loadedFont = emojis.load();
-    loadedFont.then((loaded_font) => {
-        document.fonts.add(loaded_font);
-        document.body.style.fontFamily = 'KoHo, sans-serif';
-    }).catch(() => console.log('Not supported'));
+    // const loadedFont = emojis.load();
+    // loadedFont.then((loaded_font) => {
+    //     document.fonts.add(loaded_font);
+    //     document.body.style.fontFamily = 'KoHo, sans-serif';
+    // }).catch(() => console.log('Not supported'));
 
 
     if ($$('.settings--popup').length > 0) {

@@ -14,6 +14,13 @@
     <title>VV-Chat</title>
     <link rel="stylesheet" href="/css/main.min.css">
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <script defer src="/js/js.cookie.min.js"></script>
+    <script defer src="/js/socket.io.js"></script>
+    <script defer src='/js/bluebird.min.js'></script>
+    <script defer src='/js/json3.min.js'></script>
+    <script defer src='/js/fetch.js'></script>
+    <script defer src='/js/twemoji.min.js'></script>
+    <script defer type="module" src="/js/client.js"></script>
 </head>
 
 <body class="page-chat">
@@ -21,12 +28,16 @@
         <aside>
             <div class="logo__div">
                 <h1 class="title vv noselect"><a href="/chat/"><span class="vv--dots">VV</span></a></h1>
-                <div class="version noselect">1.1.0</div>
+                <div class="version noselect">1.1.1</div>
+                <div class="loggedUser">...</div>
             </div>
 
             <div class="info">
                 <h4 class="noselect">Chat rooms</h4>
-
+                <div class="search--room">
+                    <i class="material-icons noselect">search</i>
+                    <input type="search" name="searchRoom" placeholder="Search room">
+                </div>
                 <ul class="rooms noselect">
                     <li class="loader__div">
                         <div class="lds-roller">
@@ -64,40 +75,40 @@
             <ul class="panel panel--middle"></ul>
             <footer class="panel panel--bottom">
                 <div class="actions noselect">
-                    <i class="material-icons photo" title="Send photo">photo</i>
-                    <input type="file" accept="image/*" multiple>
+                    <i class="material-icons photo" title="Send photo">library_add</i>
+                    <input type="file" accept="image/*, video/*, audio/*" multiple id="sendFile">
                 </div>
-                <div class="text">
-                    <textarea type="text" class="textField" name="textField" placeholder="Type message here..."></textarea>
-                </div>
-                <div class="actions noselect">
-                    <div class="sendEmoji" style="display: none">
-                        <div class="emojiList">
-                            <div class="lds-roller">
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                                <div></div>
-                            </div>
-                        </div>
-
+                <div class="sendWrap">
+                    <div class="text">
+                        <textarea type="text" class="textField" name="textField" placeholder="Type message here..."></textarea>
                     </div>
-                    <i class="material-icons emojis" title="Emojis">tag_faces</i>
-                    <i class="material-icons send" title="Send message">send</i>
+                    <div class="actions noselect">
+                        <div class="sendEmoji" style="display: none">
+                            <div class="emoji--search">
+                                <input type="search" name="searchEmoji" placeholder="Search emoji">
+                            </div>
+                            <div class="emoji--recent"></div>
+                            <div class="emojiList">
+                                <div class="lds-roller">
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                    <div></div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <i class="material-icons emojis" title="Emojis">tag_faces</i>
+                        <i class="material-icons send" title="Send message">send</i>
+                    </div>
                 </div>
             </footer>
         </div>
     </main>
-    <script src="/js/js.cookie.min.js"></script>
-    <script src="/js/socket.io.js"></script>
-    <script src='/js/bluebird.min.js'></script>
-    <script src='/js/json3.min.js'></script>
-    <script src='/js/fetch.js'></script>
-    <script defer type="module" src="/js/client.js"></script>
 </body>
 
 </html>
