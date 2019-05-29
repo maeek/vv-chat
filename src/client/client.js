@@ -72,7 +72,6 @@ const config = {
  *****************************************************************/
 
 window.addEventListener('DOMContentLoaded', function DOMLoaded() {
-
     const el = $('aside .info');
     const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
     const panel = $('.panel--middle');

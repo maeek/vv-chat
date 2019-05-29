@@ -79,7 +79,6 @@ function appendDOM(HTML, element, scroll) {
     for (let i = 0; i < childNodes.length; i++) {
         $(element).append(childNodes[i]);
     }
-
     /* Scroll to bottom */
     if ((middleDiv.scrollTop + middleDiv.clientHeight > Math.max(
         middleDiv.scrollHeight,
@@ -425,16 +424,6 @@ function settingsInput(e) {
     }
 }
 
-function returnEmoji(emoji) {
-    let uni = emoji.indexOf('-') != -1 ? emoji.split('-') : [emoji];
-    let uniCode = '';
-    for (let j = 0; j < uni.length; j++) {
-        uniCode += String.fromCodePoint(parseInt(uni[j], 16));
-    }
-    return uniCode;
-}
-
-
 
 
 function appendFile(socket, files, fromClipboard) {
@@ -727,7 +716,6 @@ export {
     operations,
     windowWasFocused,
     prependDOM,
-    returnEmoji,
     appendFile,
     appendMessage,
     isUpTimeout,

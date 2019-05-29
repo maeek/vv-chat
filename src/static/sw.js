@@ -12,7 +12,7 @@
 
 console.log('WORKER: started');
 
-var version = 'v1.1.17::';
+var version = 'v1.1.18::';
 var CACHE = 'network-or-cache';
 var OFFLINE_PAGE = '/static/offline.html';
 var offlineFundamentals = [

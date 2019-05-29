@@ -78,6 +78,10 @@ if (fs.existsSync(config.usersFile)) {
                 usersFile.users[0].clientId = '_root_';
             }
 
+            if (usersFile.users[0].clientId != '_root_' && usersFile.users[0].username == 'root') {
+                usersFile.users[0].clientId = '_root_';
+            }
+
             if (keys.indexOf('blocked') == -1) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "blocked", fixing.`);
                 usersFile.users[i].blocked = false;
@@ -119,7 +123,6 @@ if (JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list[0].icon.indexOf(
     fs.unlinkSync(config.roomsFile);
     console.log(`Due to changes in version 1.1.1 ${config.roomsFile} must be removed.`);
 }
-
 
 if (fs.existsSync(config.roomsFile)) {
     let roomsFile = fs.readFileSync(config.roomsFile, 'utf-8');

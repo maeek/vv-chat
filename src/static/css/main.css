@@ -1447,6 +1447,10 @@ ul .user--record:nth-of-type(even) {
     background: transparent;
 }
 
+.lds-roller:hover {
+    background: transparent;
+}
+
 .lds-roller {
     display: inline-block;
     position: relative;
@@ -1734,6 +1738,10 @@ ul .user--record:nth-of-type(even) {
 
 .settings__cont .input__div--wrapper.input__div--wrapper--nobg {
     background: transparent;
+}
+
+.settings__cont form {
+    width: 100%;
 }
 
 .settings__cont form {
