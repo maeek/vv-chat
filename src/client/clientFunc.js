@@ -568,7 +568,7 @@ function appendFile(socket, files, fromClipboard) {
                 }
                 if (file && file.size < 25000000)
                     fileReader.readAsDataURL(fromClipboard ? file.getAsFile() : file);
-                else
+                else if (file && file.size > 25000000)
                     error('Selected file is too big! Limit is 25MB');
             }
         } else {

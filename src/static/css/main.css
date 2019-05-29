@@ -223,6 +223,7 @@ body {
     justify-content: center;
     align-items: flex-end;
     padding: 1rem;
+    flex: 1 0 auto;
 }
 
 .page-login .container {
