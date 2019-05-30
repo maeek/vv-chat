@@ -387,9 +387,11 @@ function operations(e) {
     } else if (e.target && hasClass(e.target, 'wrap--aside') || hasClass(e.target.parentNode, 'wrap--aside')) {
         if ($('aside').getAttribute('data-hidden') == 'yes') {
             $('aside').style.flex = '0 0 250px';
+            $('.textField').style.width = ($('.textField').offsetWidth - 250) + 'px';
             $('aside').setAttribute('data-hidden', 'no');
         } else {
             $('aside').style.flex = '0 0 0';
+            $('.textField').style.width = ($('.textField').offsetWidth + 250) + 'px';
             $('aside').setAttribute('data-hidden', 'yes');
         }
     }
@@ -437,7 +439,7 @@ function appendFile(socket, files, fromClipboard) {
                 const panelMiddle = $('.panel--middle');
                 const mid = `ms-${randomString()}-${Cookies.get('clientId')}`;
                 const time = getTime();
-                if (file.type.indexOf('image') >= 0 && file.size < 25000000) {
+                if (file.type.indexOf('image') >= 0) {
 
                     fileReader.onloadend = function(e) {
 
@@ -477,7 +479,7 @@ function appendFile(socket, files, fromClipboard) {
                         });
                         fileReader.abort();
                     };
-                } else if (file.type.indexOf('video') >= 0 && file.size < 25000000) {
+                } else if (file.type.indexOf('video') >= 0) {
 
                     fileReader.onloadend = function(e) {
 
@@ -521,7 +523,7 @@ function appendFile(socket, files, fromClipboard) {
                         fileReader.abort();
                     };
 
-                } else if (file.type.indexOf('audio') >= 0 && file.size < 25000000) {
+                } else if (file.type.indexOf('audio') >= 0) {
 
                     fileReader.onloadend = function(e) {
 
@@ -566,10 +568,8 @@ function appendFile(socket, files, fromClipboard) {
                     };
 
                 }
-                if (file && file.size < 25000000)
+                if (file.type.indexOf('audio') >= 0 || file.type.indexOf('image') >= 0 || file.type.indexOf('video') >= 0 || file.type.indexOf('text/uri-list') >= 0)
                     fileReader.readAsDataURL(fromClipboard ? file.getAsFile() : file);
-                else if (file && file.size > 25000000)
-                    error('Selected file is too big! Limit is 25MB');
             }
         } else {
             error('Failed sending message');
@@ -590,7 +590,10 @@ function appendFile(socket, files, fromClipboard) {
 
 function appendMessage(socket) {
     /* Get value */
-    let val = $('.textField').value.trim();
+    let val = $('.textField').innerHTML.trim()
+        .replace(/<br>/g, '\n')
+        .replace(/<img.*?alt=".*?/g, '').replace(/".?src=.*?>/g, '')
+        .replace(/<div>/g, '').replace(/<\/div>/g, '');
     /* Get time */
     const time = getTime();
     /* Check if values length != 0 */
@@ -627,9 +630,26 @@ function appendMessage(socket) {
             /* Show message */
             $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
             /* Clear text field */
-            $('.textField').value = '';
+            $('.textField').innerHTML = '';
             /* Focus text field */
             $('.textField').focus();
+            const el = $('aside .info');
+            const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+            const panel = $('.panel--middle');
+
+            if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
+                const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+                /* Resize <aside> */
+                el.style['max-height'] = calc + 'px';
+
+                const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+                /* Resize .panel--middle */
+                panel.style['max-height'] = pcalc + 'px';
+            } else {
+                const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+                /* Resize .panel--middle */
+                panel.style['max-height'] = pcalc + 'px';
+            }
         } else {
             /* Display error if socket is closed */
             error('Failed sending message');

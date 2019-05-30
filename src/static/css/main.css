@@ -120,11 +120,12 @@ body {
     height: 10px;
     padding: 5px;
     overflow: auto;
-    background-color: #24283a;
+    background-color: rgba(36, 40, 58, 0);
 }
 
 ::-webkit-scrollbar-thumb {
     background: #636a86;
+    border: 2px solid rgba(0, 0, 0, 0);
     border-radius: 20px;
 }
 
@@ -132,7 +133,7 @@ body {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     width: 100%;
     height: 100%;
 }
@@ -556,15 +557,15 @@ input[type="file"] {
 .panel--bottom {
     display: flex;
     flex: 0 0 auto;
-    justify-content: space-between;
-    align-items: center;
-    background: #282f4c;
-    transition: background .3s;
+    justify-content: flex-start;
+    align-items: flex-start;
+    background: #191f33;
+    transition: all .3s;
     color: #F0F0F0;
     position: relative;
     /* border-top: 4px solid #2d3246; */
     /* border-top: 1px solid #2b324e; */
-    height: 4.6rem;
+    max-height: 10rem;
     z-index: 2;
     /* border-top-left-radius: 10px;
     border-top-right-radius: 10px; */
@@ -572,7 +573,7 @@ input[type="file"] {
 
 .panel--bottom .text {
     flex: 1 0 auto;
-    height: 4.4rem;
+    overflow-y: auto;
 }
 
 .panel--bottom a {
@@ -600,7 +601,8 @@ input[type="file"] {
 .sendWrap {
     flex: 1 0 auto;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    max-width: 97%;
 }
 
 .sendEmoji {
@@ -678,20 +680,33 @@ input[type="file"] {
 
 .textField,
 .textIframe {
-    width: 100%;
+    max-width: 100%;
     height: 100%;
     padding: .7rem 1rem;
     border: 0;
     /* border-right: 1px solid #2f344a; */
     font-size: 1.1rem;
-    background: transparent;
     outline: none;
     color: #F0F0F0;
     resize: none;
     font-family: 'KoHo', sans-serif;
+    -webkit-user-modify: read-write-plaintext-only;
+    cursor: text;
+    overflow-y: auto;
+    overflow-x: hidden;
+    user-select: text;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    background: #282f4c;
+    border-radius: 20px;
+    margin: .35rem 0;
+    max-height: 8rem;
+    scroll-behavior: smooth;
+    transition: all .2s;
 }
 
-::-ms-input-placeholder {
+.textField[placeholder]:empty:before {
+    content: attr(placeholder);
     color: #7289a0;
 }
 
@@ -742,7 +757,7 @@ input[type="file"] {
     white-space: pre-wrap;
     cursor: default;
     transition: all .3s;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .from__me .message {
@@ -2166,7 +2181,7 @@ main {
 aside {
     flex: 0 0 250px;
     height: 100%;
-    background-color: #161b2d;
+    background-color: #1b2031;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -2179,9 +2194,10 @@ aside {
 aside .logo__div {
     flex-direction: column;
     margin: .3rem;
-    background: #1b213a;
+    background: #1b213a url(/static/bg.png) repeat 0 0;
     border-radius: 5px;
     padding: .6rem 0;
+    background-size: 500px 500px;
 }
 
 aside .logo__div .loggedUser {
@@ -2395,7 +2411,23 @@ aside .info span.rooms--status i {
     background: #27304c;
     color: #c6e1ff;
     position: relative;
-    border-left: 3px solid #344FA9;
+    /* border-left: 3px solid #344FA9; */
+}
+
+.room--active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: .2rem;
+    height: 100%;
+    border-radius: 5px;
+    background: #0361b5;
+    transition: all .3s;
+}
+
+.room--active:hover::before {
+    background: #0574e2;
 }
 
 .room--active i {
@@ -2651,6 +2683,10 @@ aside .side--actions>a {
     color: #ABABAB;
 }
 
+.settings__cont .search--room i {
+    color: #1f2233;
+}
+
 .search--room input {
     background: transparent;
     border: 0;
@@ -2661,6 +2697,22 @@ aside .side--actions>a {
     max-width: 90%;
     box-sizing: content-box;
     color: #FFF;
+}
+
+.search--room input::-ms-input-placeholder {
+    color: #4c5471;
+}
+
+.search--room input::placeholder {
+    color: #4c5471;
+}
+
+.settings__cont .search--room input::placeholder {
+    color: #1f2233;
+}
+
+.settings__cont .search--room input::-ms-input-placeholder {
+    color: #1f2233;
 }
 
 @keyframes lds-roller {
