@@ -107,7 +107,7 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
         const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
         /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
-        textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth;
+        textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth - $('.side--info').offsetWidth;
 
     } else {
         /* Resize for Moblie */
@@ -119,7 +119,7 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
 
     $('.textField').style.width = textFieldWidth + 'px';
     twemoji.parse($('.textField'));
-    // twemoji.parse($('.side--info'));
+    twemoji.parse($('.side--info'));
 
     /* Window resize listener */
     window.addEventListener('resize', function win_resized() {
@@ -134,7 +134,7 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
             const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
-            textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth;
+            textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth - $('.side--info').offsetWidth;
         } else {
             const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - $('aside').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */

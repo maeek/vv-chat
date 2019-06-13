@@ -70,12 +70,13 @@
                 <div class="info">
                     <div class="users noselect" title="Online users"><i class="material-icons">people</i><span id="uc">0</span></div>
                     <i class="material-icons noselect clear_chat" title="Delete local chat history">delete_sweep</i>
+                    <i class="material-icons noselect room--show--info" title="Show info">info</i>
                 </div>
             </nav>
             <ul class="panel panel--middle"></ul>
             <footer class="panel panel--bottom">
                 <div class="actions noselect">
-                    <i class="material-icons photo" title="Send photo">library_add</i>
+                    <i class="material-icons photo" title="Send photo, video or audio">library_add</i>
                     <input type="file" accept="image/*, video/*, audio/*" multiple id="sendFile">
                 </div>
                 <div class="sendWrap">
@@ -107,6 +108,199 @@
                     </div>
                 </div>
             </footer>
+        </div>
+        <style>
+            .side--info {
+                height: 100%;
+                flex: 0 0 350px;
+                max-width: 350px;
+                overflow-x: hidden;
+                overflow-y: auto;
+                background: #1a1f33;
+                color: #FFF;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-content: flex-start;
+                font-family: 'KoHo', sans-serif;
+            }
+            
+            .side--info .title {
+                margin: 0;
+                justify-content: center;
+                padding: .4rem .8rem;
+                font-family: 'KoHo', sans-serif;
+                font-size: 1.5rem;
+                font-weight: 400;
+                flex-direction: column;
+                margin: 1rem 0;
+                font-weight: 900;
+                color: #F0F0F0;
+            }
+            
+            .side--info .title .icon {
+                border-radius: 50%;
+                background-color: #163b60;
+                border: 2px solid #134b80;
+                padding: .7rem;
+                display: flex;
+                margin: .3rem 0;
+            }
+            
+            .side--info .title .online {
+                color: #ABABAB;
+                font-size: .7rem;
+                font-weight: 100;
+            }
+            
+            .side--info .title .icon .emoji {
+                height: 72px;
+                width: 72px;
+            }
+            
+            .side--info .subtitle {
+                width: 100%;
+                padding: .9rem;
+                border-top: 1px solid #20263f;
+                font-size: .9rem;
+                font-weight: 900;
+                color: #ABABAB;
+                background-color: #1e243a;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                cursor: default;
+                transition: all .3s;
+                height: 2.5rem;
+            }
+            
+            .side--info .subtitle:hover {
+                background: #262c44;
+            }
+            
+            .field {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: 100;
+                color: #d4d4d4;
+                padding: .5rem .9rem;
+                cursor: default;
+                font-size: .9rem;
+            }
+            
+            .field--self {
+                font-weight: 900;
+            }
+            
+            .info--media {
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-start;
+                align-content: flex-start;
+                flex-wrap: wrap;
+                width: 100%;
+                padding: .3rem;
+                flex: 1 0 auto;
+                background-color: #202740;
+            }
+            
+            .info--media .item {
+                width: calc(33.3333333% - .2rem);
+                margin: .1rem;
+                height: 116px;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                transition: all .3s;
+                border-radius: 5px;
+                background: #1e243c;
+            }
+            
+            .info--media .item:hover {
+                background-color: #29314c;
+            }
+            
+            .info--media .item:hover img {
+                transform: scale(1.1);
+            }
+            
+            .info--media .item img {
+                max-height: 150%;
+                transition: all .3s;
+                max-width: 300%;
+            }
+            
+            .info--media .item i {
+                font-size: 3rem;
+                cursor: pointer;
+            }
+            
+            .info--media .item span {
+                max-width: 100%;
+                word-wrap: break-word;
+                font-size: .9rem;
+                text-align: center;
+                padding: 0 .1rem;
+            }
+        </style>
+        <div class="side--info">
+            <div class="title noselect">
+                <i class="icon">😍</i>
+                <div>Main</div>
+                <div class="online">Online: just you</div>
+            </div>
+            <div class="subtitle">OPTIONS <i class="material-icons noselect">keyboard_arrow_up</i></div>
+            <div class="field--group">
+                <div class="field">
+                    <div class="field--name">Search in conversation</div>
+                    <div class="field--action"><i class="material-icons noselect">search</i></div>
+                </div>
+                <div class="field">
+                    <div class="field--name">Change name</div>
+                    <div class="field--action">Main</div>
+                </div>
+                <div class="field">
+                    <div class="field--name">Change icon</div>
+                    <div class="field--action">😍</div>
+                </div>
+            </div>
+
+            <div class="subtitle">USERS <i class="material-icons noselect">keyboard_arrow_up</i></div>
+            <div class="field--group">
+                <div class="field">
+                    <div class="field--name field--self">You</div>
+                    <div class="field--action"><i class="material-icons noselect">more_horiz</i></div>
+                </div>
+                <div class="field">
+                    <div class="field--name">policeman</div>
+                    <div class="field--action"><i class="material-icons noselect">more_horiz</i></div>
+                </div>
+            </div>
+            <div class="subtitle">FILES</div>
+            <div class="info--media noselect">
+                <div class="item">
+                    <img src="/static/vv-chat.png">
+                </div>
+                <div class="item">
+                    <img src="https://cdn-images-1.medium.com/max/1400/0*49xhYHk2wDaQLRIH.jpg">
+                </div>
+                <div class="item">
+                    <img src="https://cdn-images-1.medium.com/max/1400/0*NNajfbKqdT8SRxqw.jpg">
+                </div>
+                <div class="item">
+                    <i class="material-icons">music_note</i>
+                </div>
+                <div class="item">
+                    <i class="material-icons">videocam</i>
+                </div>
+                <div class="item">
+                    <i class="material-icons">description</i>
+                    <span>mineeeeeeeeecraft.exe</span>
+                </div>
+            </div>
         </div>
     </main>
 </body>
