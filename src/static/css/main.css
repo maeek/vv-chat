@@ -90,6 +90,8 @@
 
 * {
     box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 html {
@@ -485,7 +487,8 @@ input[type="file"] {
 .users,
 .logout,
 .settings,
-.clear_chat {
+.clear_chat,
+.room--show--info {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -498,7 +501,8 @@ input[type="file"] {
 
 .logout,
 .clear_chat,
-.settings {
+.settings,
+.room--show--info {
     cursor: pointer;
     background: #373d56;
 }
@@ -527,7 +531,8 @@ input[type="file"] {
 }
 
 .clear_chat:hover,
-.settings:hover {
+.settings:hover,
+.room--show--info:hover {
     background: #66caff;
     color: #0E0E0E;
 }
@@ -558,7 +563,7 @@ input[type="file"] {
     display: flex;
     flex: 0 0 auto;
     justify-content: flex-start;
-    align-items: flex-start;
+    align-items: flex-end;
     background: #191f33;
     transition: all .3s;
     color: #F0F0F0;
@@ -584,7 +589,7 @@ input[type="file"] {
     padding: .7rem .4rem .7rem .3rem;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .actions i {
@@ -601,7 +606,7 @@ input[type="file"] {
 .sendWrap {
     flex: 1 0 auto;
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     max-width: 97%;
 }
 
@@ -682,7 +687,7 @@ input[type="file"] {
 .textIframe {
     max-width: 100%;
     height: 100%;
-    padding: .7rem 1rem;
+    padding: .6rem 1rem;
     border: 0;
     /* border-right: 1px solid #2f344a; */
     font-size: 1.1rem;
@@ -758,6 +763,7 @@ input[type="file"] {
     cursor: default;
     transition: all .3s;
     font-size: 1.2rem;
+    line-height: 1.25rem;
 }
 
 .from__me .message {
@@ -1806,7 +1812,7 @@ ul .user--record:nth-of-type(even) {
     padding-inline-start: 0;
     padding-left: 0;
     margin: .2rem;
-    max-height: 10rem;
+    /* max-height: 10rem; */
     overflow: auto;
 }
 
@@ -1968,7 +1974,17 @@ input[type="checkbox"]~.checkboxWrapper::after {
 input[type="checkbox"]:checked~.checkboxWrapper::after {
     content: "";
     left: 1.7rem;
-    background: #ABABAB;
+    background: #686c7d;
+}
+
+input[type="checkbox"]~.checkboxWrapper.checkboxWrapper--rev::after {
+    left: 1.7rem;
+    background: #0069ab;
+}
+
+input[type="checkbox"]:checked~.checkboxWrapper.checkboxWrapper--rev::after {
+    left: 0;
+    background: #686c7d;
 }
 
 .user--record input[type="checkbox"]~.checkboxWrapper {
@@ -2006,7 +2022,7 @@ input[type="checkbox"]:checked~.checkboxWrapper::after {
     content: "block";
     left: 1rem;
     color: #000;
-    background: #ABABAB;
+    background: #686c7d;
 }
 
 .user--title {

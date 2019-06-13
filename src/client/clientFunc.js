@@ -286,33 +286,41 @@ function openSettings() {
                                 </div>
                             </div>
                             <div class="settings__cont--col">
-                                <div class="subtitle noselect">Expand images</div>
+                                <div class="subtitle noselect">Messages</div>
                                 <div class="input__div">
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
                                         <span>Don't clip bottom of the image</span>
-                                        <label><input type="checkbox" name="expandImages" class="expandImages"><div class="checkboxWrapper"></div></label>
+                                        <label><input type="checkbox" name="expandImages" class="expandImages" checked><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
+                                    </div>
+                                    <div class="input__div--wrapper input__div--wrapper--nobg">
+                                        <span>Hide removed messages</span>
+                                        <label><input type="checkbox" name="remRev" class="remRev" checked><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
+                                    </div>
+                                    <div class="input__div--wrapper input__div--wrapper--nobg">
+                                        <span>Mute media</span>
+                                        <label><input type="checkbox" name="remRev" class="remRev" checked><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
                                     </div>
                                 </div>
                                 <div class="input__div">
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
                                         <span>Option #1</span>
-                                        <label><input type="checkbox" name="opt1" class="opt1"><div class="checkboxWrapper"></div></label>
+                                        <label><input type="checkbox" name="opt1" class="opt1"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
                                     </div>
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
                                         <span>Option #2</span>
-                                        <label><input type="checkbox" name="opt2" class="opt2"><div class="checkboxWrapper"></div></label>
+                                        <label><input type="checkbox" name="opt2" class="opt2"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
                                     </div>
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
                                         <span>Option #3</span>
-                                        <label><input type="checkbox" name="opt3" class="opt3"><div class="checkboxWrapper"></div></label>
+                                        <label><input type="checkbox" name="opt3" class="opt3"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
                                     </div>
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
                                         <span>Option #4</span>
-                                        <label><input type="checkbox" name="opt4" class="opt4"><div class="checkboxWrapper"></div></label>
+                                        <label><input type="checkbox" name="opt4" class="opt4"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
                                     </div>
                                     <div class="input__div--wrapper input__div--wrapper--nobg">
                                         <span>Option #5</span>
-                                        <label><input type="checkbox" name="opt5" class="opt5"><div class="checkboxWrapper"></div></label>
+                                        <label><input type="checkbox" name="opt5" class="opt5"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
                                     </div>
                                 </div>
                             </div>
@@ -590,10 +598,9 @@ function appendFile(socket, files, fromClipboard) {
 
 function appendMessage(socket) {
     /* Get value */
-    let val = $('.textField').innerHTML.trim()
+    let val = decodeURI($('.textField').innerHTML.trim()
         .replace(/<br>/g, '\n')
-        .replace(/<img.*?alt=".*?/g, '').replace(/".?src=.*?>/g, '')
-        .replace(/<div>/g, '').replace(/<\/div>/g, '');
+        .replace(/<img.*?alt=".*?/g, '').replace(/".?src=.*?>/g, ''));
     /* Get time */
     const time = getTime();
     /* Check if values length != 0 */
@@ -610,7 +617,7 @@ function appendMessage(socket) {
                 mid: mid
             });
             /* Sanitaze */
-            val = escapeHtml(val);
+            // val = escapeHtml(val);
             /* Get links from value */
             const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
             /* Swap links with anchors */
@@ -626,7 +633,7 @@ function appendMessage(socket) {
             twemoji.parse($('.panel--middle'));
             const middleDiv = $('.panel--middle');
             /* Scroll to bottom */
-            middleDiv.scrollTop = middleDiv.scrollHeight;
+            middleDiv.scrollTop = middleDiv.scrollHeight + $(`.ms[data-mid="${mid}"]`).clientHeight;
             /* Show message */
             $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
             /* Clear text field */
@@ -669,7 +676,7 @@ let isUpTimeout;
 function tost(mid, username, message) {
     const middleDiv = $('.panel--middle');
     const isFile = !message ? true : false;
-    message = !message ? 'Sent photo' : escapeHtml(message.length > 25 ? message.substring(0, 25) + '...' : message);
+    message = !message ? 'Sent photo' : message.length > 25 ? message.substring(0, 25) + '...' : message;
     const isUp = `<div data-mid="${mid}" class="tost noselect">
                 <div class="who">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
                 <div class="text">${message}</div>

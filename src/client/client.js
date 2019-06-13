@@ -73,7 +73,7 @@ const config = {
 
 window.addEventListener('DOMContentLoaded', function DOMLoaded() {
     const el = $('aside .info');
-    const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+    const wh = document.height !== undefined ? document.height : document.body.clientHeight;
     const panel = $('.panel--middle');
 
     /* Alert user when using HTTP */
@@ -83,14 +83,14 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
                 <div class="http--description">Warning: HTTPS is not enabled which means that this page is not secure, use it at own risk. If you're administrator please provide SSL certificates, <a href="https://letsencrypt.org/getting-started/">check how to get them</a>.</div>
                 <i class="material-icons http--close">close</i>
             </div>`, 'body');
-        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
-        $('main').style['max-height'] = (wh - $('.http').offsetHeight) + 'px';
+        const wh = document.height !== undefined ? document.height : document.body.clientHeight;
+        $('main').style['max-height'] = (wh - $('.http').clientHeight) + 'px';
     }
     /* Close http alert */
     document.addEventListener('click', function(e) {
         if (e.target && hasClass(e.target, 'http--close')) {
             $('main').removeAttribute('style');
-            panel.style['max-height'] = (panel.offsetHeight + $('.http').offsetHeight) + 'px';
+            panel.style['max-height'] = (panel.clientHeight + $('.http').clientHeight) + 'px';
             document.querySelector('.http').remove();
             localStorage.setItem('useHTTP', true);
         }
@@ -100,18 +100,18 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
     let textFieldWidth;
     if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
         /* Resize for Desktop */
-        const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+        const calc = wh - $('aside .logo__div').clientHeight - $('aside .side--actions').clientHeight;
         /* Resize <aside> */
         el.style['max-height'] = calc + 'px';
 
-        const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+        const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
         /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
-        textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth;
+        textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth - $('.side--info').offsetWidth;
 
     } else {
         /* Resize for Moblie */
-        const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+        const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - $('aside').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
         /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
         textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth;
@@ -119,23 +119,24 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
 
     $('.textField').style.width = textFieldWidth + 'px';
     twemoji.parse($('.textField'));
+    twemoji.parse($('.side--info'));
 
     /* Window resize listener */
     window.addEventListener('resize', function win_resized() {
-        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        const wh = document.height !== undefined ? document.height : document.body.clientHeight;
         const ww = document.width !== undefined ? document.width : document.body.offsetWidth;
         let textFieldWidth;
         if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
-            const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+            const calc = wh - $('aside .logo__div').clientHeight - $('aside .side--actions').clientHeight;
             /* Resize <aside> */
             el.style['max-height'] = calc + 'px';
 
-            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
-            textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth;
+            textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth - $('.side--info').offsetWidth;
         } else {
-            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - $('aside').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
             textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth;
@@ -321,12 +322,13 @@ window.addEventListener('load', function() {
              * Receiveing messages
              */
     socket.on('message', function socket_message(data) {
+        const middleDiv = $('.panel--middle');
         let message = data.message;
         const { mid, time, username } = data;
         /* Get links from message */
         const reg = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#/%?=~_|!:,.;]*[-A-Z0-9+&@#/%=~_|])/gim;
         /* Trim message */
-        message = escapeHtml(message.trim());
+        message = message.trim();
         /* Replace links with anchors */
         let preparedText = message.replace(reg, '<a href="$1" target="_blank">$1</a>');
         /* Check from whom is the message and properly set class */
@@ -346,11 +348,22 @@ window.addEventListener('load', function() {
 
         /* Append message */
         appendDOM(HTML, '.panel--middle');
+
+
         twemoji.parse($('.panel--middle'));
+        if ((middleDiv.scrollTop + middleDiv.clientHeight + $(`.ms[data-mid="${mid}"]`).offsetHeight > Math.max(
+            middleDiv.scrollHeight,
+            middleDiv.offsetHeight,
+            middleDiv.clientHeight
+        ) - ($(`.ms[data-mid="${mid}"]`).offsetHeight) + 250)) {
+            middleDiv.scrollTop = middleDiv.scrollHeight + $(`.ms[data-mid="${mid}"]`).offsetHeight;
+        } else {
+            /* Detect if user scrolled up */
+            tost(mid, username, message);
+        }
         /* Show message */
         $(`.ms[data-mid="${mid}"]`).classList.add('transition-X');
-        /* Detect if user scrolled up */
-        tost(mid, username, message);
+
         /* Notify user */
         newNotf(username);
     });
@@ -360,18 +373,18 @@ window.addEventListener('load', function() {
 
     $('.textField').addEventListener('input', function resize_textField() {
         const el = $('aside .info');
-        const wh = document.height !== undefined ? document.height : document.body.offsetHeight;
+        const wh = document.height !== undefined ? document.height : document.body.clientHeight;
         const panel = $('.panel--middle');
         if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
-            const calc = wh - $('aside .logo__div').offsetHeight - $('aside .side--actions').offsetHeight;
+            const calc = wh - $('aside .logo__div').clientHeight - $('aside .side--actions').clientHeight;
             /* Resize <aside> */
             el.style['max-height'] = calc + 'px';
 
-            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
         } else {
-            const pcalc = wh - $('.panel--top').offsetHeight - $('.panel--bottom').offsetHeight - $('aside').offsetHeight - ($('.http') ? $('.http').offsetHeight : 0);
+            const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - $('aside').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
         }
@@ -524,7 +537,7 @@ window.addEventListener('load', function() {
                 /* Detect if user scrolled up */
                 if (panelMiddle.scrollTop + panelMiddle.clientHeight + (dims.h > 400 ? 400 : dims.h) > Math.max(
                     panelMiddle.scrollHeight,
-                    panelMiddle.offsetHeight,
+                    panelMiddle.clientHeight,
                     panelMiddle.clientHeight
                 ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + dims.h; }
                 /* Tost */
@@ -542,7 +555,7 @@ window.addEventListener('load', function() {
                 /* Detect if user scrolled up */
                 if (panelMiddle.scrollTop + panelMiddle.clientHeight + (video.videoHeight > 400 ? 400 : video.videoHeight) > Math.max(
                     panelMiddle.scrollHeight,
-                    panelMiddle.offsetHeight,
+                    panelMiddle.clientHeight,
                     panelMiddle.clientHeight
                 ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight + 400; } else {
                     /* Tost */
@@ -561,7 +574,7 @@ window.addEventListener('load', function() {
                 /* Detect if user scrolled up */
                 if (panelMiddle.scrollTop + panelMiddle.clientHeight > Math.max(
                     panelMiddle.scrollHeight,
-                    panelMiddle.offsetHeight,
+                    panelMiddle.clientHeight,
                     panelMiddle.clientHeight
                 ) - 250) { panelMiddle.scrollTop = panelMiddle.scrollHeight; } else {
                     /* Tost */
@@ -1072,7 +1085,7 @@ window.addEventListener('load', function() {
         for (let i = 0; i < list.length; i++) {
             let uniCode = list[i].icon;
             const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
-            roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>\n`;
+            roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online == 1?'just you':list[i].online}</div></div></li>\n`;
         }
         appendDOM(roomsList, '.rooms', false);        
         // $('.rooms'));
@@ -1081,7 +1094,7 @@ window.addEventListener('load', function() {
             for (let i = 0; i < list.length; i++) {
                 let uniCode = list[i].icon;
                 const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
-                roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online}</div></div></li>\n`;
+                roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online == 1?'just you':list[i].online}</div></div></li>\n`;
             }
             appendDOM(roomsList, '.rooms--modal', false);
         }
