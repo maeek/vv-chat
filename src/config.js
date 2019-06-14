@@ -102,7 +102,8 @@ if (fs.existsSync(config.usersFile)) {
             username: 'root',
             password: hash,
             first: false,
-            clientId: '_root_'
+            clientId: '_root_',
+            blocked: false
         }]
     }));
     console.log(`Created file:  ${config.usersFile}`);
@@ -119,10 +120,7 @@ if (fs.existsSync(config.usersFile)) {
 
 /* Due to changed emojis the config.roomsFile must be removed or changed */
 
-if (JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list[0].icon.indexOf('0x') != -1) {
-    fs.unlinkSync(config.roomsFile);
-    console.log(`Due to changes in version 1.1.1 ${config.roomsFile} must be removed.`);
-}
+
 
 if (fs.existsSync(config.roomsFile)) {
     let roomsFile = fs.readFileSync(config.roomsFile, 'utf-8');
@@ -170,6 +168,12 @@ if (fs.existsSync(config.roomsFile)) {
             }
         }
         fs.writeFileSync(config.roomsFile, JSON.stringify(roomsFile));
+
+        if (JSON.parse(fs.readFileSync(config.roomsFile, 'utf-8')).list[0].icon.indexOf('0x') != -1) {
+            fs.unlinkSync(config.roomsFile);
+            console.log(`Due to changes in version 1.1.1 ${config.roomsFile} must be removed.`);
+        }
+
     } else {
         console.log(`ERROR: Invalid ${config.roomsFile} file structure. Fix the problem or create new file.`);
         process.exit(1);
