@@ -119,7 +119,6 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
 
     $('.textField').style.width = textFieldWidth + 'px';
     twemoji.parse($('.textField'));
-    // twemoji.parse($('.side--info'));
 
     /* Window resize listener */
     window.addEventListener('resize', function win_resized() {
@@ -178,6 +177,7 @@ window.addEventListener('load', function() {
 
     (function(arr) {
         arr.forEach(function(item) {
+            // eslint-disable-next-line no-prototype-builtins
             if (item.hasOwnProperty('append')) {
                 return;
             }

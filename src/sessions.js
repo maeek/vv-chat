@@ -22,7 +22,7 @@ let session = expressSession({
     cookie: {
         httpOnly: true,
         secure: config.https,
-        maxAge: 60 * 60 * 1000 * 24
+        maxAge: 60 * 60 * 1000 * 24 * 365
     }
 });
 

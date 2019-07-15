@@ -13,7 +13,6 @@ const bcrypt = require('bcryptjs');
 const express = require('express');
 const MobileDetect = require('mobile-detect');
 const router = express.Router();
-const Store = require('./Store');
 const randomString = require('./randomString');
 const fileManip = require('./fileManip');
 
@@ -39,8 +38,10 @@ router.route('/manage/')
     .get(function route_get_manage(req, res) {
         if (req.session.auth == 'root') {
             res.sendFile(__dirname + '/assets/manage.html');
-        } else {
+        } else if (req.session.auth != 'root') {
             res.redirect(301, '/chat/');
+        } else {
+            res.redirect(301, '/login/');
         }
     })
     .post(function route_post_manage(req, res) {
@@ -368,20 +369,20 @@ router.route('/login/')
                 password = req.body.password.trim();
             const usersFile = JSON.parse(fs.readFileSync(config.usersFile));
 
-            usersFile.users = usersFile.users.filter(user => {
+            const foundUser = usersFile.users.find(user => {
                 return user.username == username;
             });
 
-            if (usersFile.users.length == 1) {
-                bcrypt.compare(password, usersFile.users[0].password, (err, result) => {
+            if (foundUser) {
+                bcrypt.compare(password, foundUser.password, (err, result) => {
                     if (err) {
                         console.log(`ERROR: failed to hash password at "/login/" for user: "${username}" error description:\n${err}`);
                         res.redirect(301, '/login/#error');
                     } else {
                         if (result === true) {
-                            if (!usersFile.users[0].blocked) {
-                                const userData = usersFile.users[0].username,
-                                    clientId = usersFile.users[0].clientId;
+                            if (!foundUser.blocked) {
+                                const userData = foundUser.username,
+                                    clientId = foundUser.clientId;
                                 const os = new MobileDetect(req.headers['user-agent']).os();
                                 req.session.os = os == null ? 'PC' : os;
                                 req.session.user = userData;
@@ -390,12 +391,12 @@ router.route('/login/')
                                 res.cookie('user', userData, {
                                     path: '/',
                                     secure: config.https,
-                                    maxAge: 60 * 60 * 1000 * 24
+                                    maxAge: 60 * 60 * 1000 * 24 * 365
                                 });
                                 res.cookie('clientId', clientId, {
                                     path: '/',
                                     secure: config.https,
-                                    maxAge: 60 * 60 * 1000 * 24
+                                    maxAge: 60 * 60 * 1000 * 24 * 365
                                 });
                                 if (userData == 'root') {
                                     req.session.auth = 'root';
@@ -408,7 +409,7 @@ router.route('/login/')
                                     });
                                 } else {
                                     req.session.auth = 'user';
-                                    if (usersFile.users[0].first) {
+                                    if (foundUser.first) {
                                         req.session.setup = true;
                                         res.redirect(301, '/setup/');
                                     } else {
@@ -461,9 +462,6 @@ router.get('/chat/', function route_get_chat(req, res) {
  */
 router.get('/logout', function route_get_logout(req, res) {
     if (req.session.valid) {
-        Store.destroy(req.session.id, (err) => {
-            if (err != null) console.log('ERROR: Session already destroyed, description:\n' + err);
-        });
         req.session.destroy((err) => {
             if (err != null) console.log('ERROR: Session already destroyed, description:\n' + err);
         });

@@ -56,20 +56,20 @@ if (fs.existsSync(config.usersFile)) {
     if (Object.keys(usersFile)[0] == 'users') {
         for (let i = 0; i < usersFile.users.length; i++) {
             const keys = Object.keys(usersFile.users[i]);
-            if (keys.indexOf('username') == -1) {
+            if (!keys.includes('username')) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "username".`);
             }
 
-            if (keys.indexOf('password') == -1) {
+            if (!keys.includes('password')) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "password".`);
             }
 
-            if (keys.indexOf('first') == -1) {
+            if (!keys.includes('first')) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "first", fixing.`);
                 usersFile.users[i].first = true;
             }
 
-            if (keys.indexOf('clientId') == -1) {
+            if (!keys.includes('clientId')) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "clientId", fixing.`);
                 usersFile.users[i].clientId = randomString(22);
             }
@@ -82,7 +82,7 @@ if (fs.existsSync(config.usersFile)) {
                 usersFile.users[0].clientId = '_root_';
             }
 
-            if (keys.indexOf('blocked') == -1) {
+            if (!keys.includes('blocked')) {
                 console.log(`WARNING: file ${config.usersFile} is broken. Object: ${JSON.stringify(usersFile.users[i])} is missing "blocked", fixing.`);
                 usersFile.users[i].blocked = false;
             }
@@ -129,16 +129,16 @@ if (fs.existsSync(config.roomsFile)) {
         for (let i = 0; i < roomsFile.list.length; i++) {
             const keys = Object.keys(roomsFile.list[i]);
 
-            if (keys.indexOf('name') == -1) {
+            if (!keys.includes('name')) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "name".`);
             }
 
-            if (keys.indexOf('icon') == -1 || roomsFile.list[i].icon == null || roomsFile.list[i].icon.indexOf('0x') >= 0) {
+            if (!keys.includes('icon') || roomsFile.list[i].icon == null || roomsFile.list[i].icon.indexOf('0x') >= 0) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "icon", fixing`);
                 roomsFile.list[i].icon = '🚨';
             }
 
-            if (keys.indexOf('password') == -1) {
+            if (!keys.includes('password')) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "password", fixing.`);
                 roomsFile.list[i].password = {
                     required: false,
@@ -147,7 +147,7 @@ if (fs.existsSync(config.roomsFile)) {
                 };
             }
 
-            if (keys.indexOf('permissions') == -1) {
+            if (!keys.includes('permissions')) {
                 roomsFile.list[i].permissions = {
                     maxUsers: 0,
                     mod: null
@@ -155,11 +155,11 @@ if (fs.existsSync(config.roomsFile)) {
             }
 
             /* Clean for previous commit */
-            if (keys.indexOf('clientId') >= 0) {
+            if (!keys.includes('clientId') >= 0) {
                 delete roomsFile.list[i].clientId;
             }
 
-            if (keys.indexOf('id') == -1) {
+            if (!keys.includes('id')) {
                 console.log(`WARNING: file ${config.roomsFile} is broken. Object: ${JSON.stringify(roomsFile.list[i])} is missing "id", fixing.`);
                 if (roomsFile.list[i].name != config.defaultRoom.name)
                     roomsFile.list[i].id = randomString(22);
@@ -178,6 +178,8 @@ if (fs.existsSync(config.roomsFile)) {
         console.log(`ERROR: Invalid ${config.roomsFile} file structure. Fix the problem or create new file.`);
         process.exit(1);
     }
+    config.defaultRoom.icon = roomsFile.list.find(el => el.id == 'landing').icon;
+    config.defaultRoom.name = roomsFile.list.find(el => el.id == 'landing').name;
 } else {
     console.log(`${config.roomsFile} not found, creating.`);
     fs.writeFileSync(config.roomsFile, JSON.stringify({
@@ -188,6 +190,10 @@ if (fs.existsSync(config.roomsFile)) {
             password: { // Not yet implemented
                 required: false,
                 hash: ''
+            },
+            permissions: {
+                maxUsers: 0,
+                mod: null
             }
         }]
     }));

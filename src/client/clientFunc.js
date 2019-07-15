@@ -115,6 +115,7 @@ function clone(obj) {
     if (obj instanceof Object) {
         copy = {};
         for (var attr in obj) {
+            // eslint-disable-next-line no-prototype-builtins
             if (obj.hasOwnProperty(attr)) copy[attr] = clone(obj[attr]);
         }
         return copy;
@@ -285,45 +286,7 @@ function openSettings() {
                                     </form>
                                 </div>
                             </div>
-                            <div class="settings__cont--col">
-                                <div class="subtitle noselect">Messages</div>
-                                <div class="input__div">
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Don't clip bottom of the image</span>
-                                        <label><input type="checkbox" name="expandImages" class="expandImages" checked><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Hide removed messages</span>
-                                        <label><input type="checkbox" name="remRev" class="remRev" checked><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Mute media</span>
-                                        <label><input type="checkbox" name="remRev" class="remRev" checked><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                </div>
-                                <div class="input__div">
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Option #1</span>
-                                        <label><input type="checkbox" name="opt1" class="opt1"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Option #2</span>
-                                        <label><input type="checkbox" name="opt2" class="opt2"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Option #3</span>
-                                        <label><input type="checkbox" name="opt3" class="opt3"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Option #4</span>
-                                        <label><input type="checkbox" name="opt4" class="opt4"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                    <div class="input__div--wrapper input__div--wrapper--nobg">
-                                        <span>Option #5</span>
-                                        <label><input type="checkbox" name="opt5" class="opt5"><div class="checkboxWrapper checkboxWrapper--rev"></div></label>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="settings__cont--col"></div>
                         </div>
                         <div class="settings__cont--sessions">
                             <div class="subtitle noselect">Your active sessions</div>
@@ -395,11 +358,13 @@ function operations(e) {
     } else if (e.target && hasClass(e.target, 'wrap--aside') || hasClass(e.target.parentNode, 'wrap--aside')) {
         if ($('aside').getAttribute('data-hidden') == 'yes') {
             $('aside').style.flex = '0 0 250px';
-            $('.textField').style.width = ($('.textField').offsetWidth - 250) + 'px';
+            if ($('.textField'))
+                $('.textField').style.width = ($('.textField').offsetWidth - 250) + 'px';
             $('aside').setAttribute('data-hidden', 'no');
         } else {
             $('aside').style.flex = '0 0 0';
-            $('.textField').style.width = ($('.textField').offsetWidth + 250) + 'px';
+            if ($('.textField'))
+                $('.textField').style.width = ($('.textField').offsetWidth + 250) + 'px';
             $('aside').setAttribute('data-hidden', 'yes');
         }
     }
