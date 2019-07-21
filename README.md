@@ -60,7 +60,7 @@ Change this settings for your own needs
 | Session Secret | chattyPatty |
 | Users File | src/users.json |
 | Rooms File | src/rooms.json |
-| Default room values | ```{id: "landing", name: "Main", icon: "0x1f47e"} //👾``` |
+| Default room values | ```{id: "landing", name: "Main", icon: "👾"}``` |
 | Certificates | ```./server.[crt, csr, key]``` |
 
 #### src/users.json
@@ -70,7 +70,7 @@ File structure
     "users": [{
             "username": "",
             "password": "", // hash
-            "first": true/false, // If true user will be asked for new password
+            "first": true/false, // If true user will be asked for new password on login
             "clientId": "" // Random string, default length is 22 characters
         }]
 }
@@ -83,7 +83,7 @@ File structure
     "list": [{
             "id": "landing", // Random string, default length 10 characters
             "name": "Main",
-            "icon": "0x1f47e", //👾
+            "icon": "👾",
             "password": { // Not yet implemented
                 "required": false,
                 "hash": ""
