@@ -25,6 +25,9 @@ Websocket chat written in javascript
 ### Compatible with all modern browsers
 Including Microsoft Edge >= 13
 
+#### Known bugs
+ - Sending files doesn't work on IOS
+
 ### Requiremets
 
   - [Node.js](https://nodejs.org/) >= 10.15.3
