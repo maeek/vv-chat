@@ -563,10 +563,12 @@ function appendFile(socket, files, fromClipboard) {
 
 function appendMessage(socket) {
     /* Get value */
-    let val = decodeURI($('.textField').innerHTML.trim()
+    let val = $('.textField').innerHTML.trim().replace(/%/g, '%25');
+    val = decodeURI(val
         .replace(/<br>/g, '\n')
         .replace(/<img.*?alt=".*?/g, '').replace(/".?src=.*?>/g, ''));
     /* Get time */
+    console.log(val);
     const time = getTime();
     /* Check if values length != 0 */
     if (val != '' && Cookies.get('user')) {

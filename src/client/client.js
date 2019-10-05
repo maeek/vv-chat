@@ -220,9 +220,9 @@ window.addEventListener('load', function() {
         }
 
         const HTML = `<li class="error">
-                    <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
-                    <div class="errorCont">Connection Error</div>
-                </li>`;
+            <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
+            <div class="errorCont">Connection Error</div>
+        </li>`;
         /* Display Error */
         appendDOM(HTML, '.panel--middle', true);
         $('#uc').innerHTML = 0;
@@ -234,9 +234,9 @@ window.addEventListener('load', function() {
         }
 
         const HTML = `<li class="error">
-                    <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
-                    <div class="errorCont">Connection Error</div>
-                </li>`;
+            <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
+            <div class="errorCont">Connection Error</div>
+        </li>`;
         /* Display Error */
         appendDOM(HTML, '.panel--middle', true);
         $('#uc').innerHTML = 0;
@@ -249,9 +249,9 @@ window.addEventListener('load', function() {
         }
 
         const HTML = `<li class="error">
-                    <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
-                    <div class="errorCont">Connection timeout</div>
-                </li>`;
+            <div class="who noselect who--smaller"><i class="material-icons">warning</i></div>
+            <div class="errorCont">Connection timeout</div>
+        </li>`;
         /* Display Error */
         appendDOM(HTML, '.panel--middle', true);
         $('#uc').innerHTML = 0;
@@ -263,9 +263,9 @@ window.addEventListener('load', function() {
     socket.on('reconnecting', function socket_reconnecting(at) {
         const errorEl = $$('.reconnect');
         const HTML = `<li class="error reconnect">
-                    <div class="who noselect recAttemps">${at}/10</div>
-                    <div class="errorCont">Reconnection attempt...</div>
-                </li>`;
+            <div class="who noselect recAttemps">${at}/10</div>
+            <div class="errorCont">Reconnection attempt...</div>
+        </li>`;
         /* Display Error */
         if (errorEl.length > 0) { $('.recAttemps').innerHTML = at + '/10'; } else { appendDOM(HTML, '.panel--middle', true); }
         $('#uc').innerHTML = 0;
@@ -273,9 +273,9 @@ window.addEventListener('load', function() {
     socket.on('reconnect_failed', function socket_reconnect_failed() {
         const errorEl = $$('.reconnect');
         const HTML = `<li class="error reconnect">
-            <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
-            <div class="errorCont">Reconnecting failed, <span class="man-rec">Click to reconnect manually</span></div>
-        </li>`;
+    <div class="who noselect recAttemps"><i class="material-icons">error</i></div>
+    <div class="errorCont">Reconnecting failed, <span class="man-rec">Click to reconnect manually</span></div>
+</li>`;
         /* Display Error */
         if (errorEl.length > 0) {
             $('.recAttemps').innerHTML = '';
@@ -337,11 +337,11 @@ window.addEventListener('load', function() {
         const fromSelfIcon = username == Cookies.get('user') ? '' : '<div class="who noselect" data-user="' + escapeHtml(username) + '">' + escapeHtml(username.substring(0, 1).toUpperCase()) + '</div>';
         /* Message template */
         const HTML = `<li class="ms ${fromWho}" data-mid="${escapeHtml(mid)}">
-                <div class="time noselect">${time}</div>
-                ${fromSelf}
-                <div class="message">${preparedText}</div>
-                ${fromSelfIcon}
-            </li>;`;
+        <div class="time noselect">${time}</div>
+        ${fromSelf}
+        <div class="message">${preparedText}</div>
+        ${fromSelfIcon}
+    </li>;`;
 
         /* Remove user typing info */
         if ($$('.typing').length > 0) $('.typing').remove();
@@ -519,11 +519,11 @@ window.addEventListener('load', function() {
             media = `<div class="message message--audio"><audio controls data-type="${type}" data-name="${name}" type="${type}"></audio></div>`;
 
         const HTML = `<li class="ms ${fromWho}" data-mid="${mid}">
-                    <div class="time noselect">${time}</div>
-                    ${fromSelf}\n
-                    ${media}\n
-                    <div class="who noselect ${fromSelfIcon}" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
-                </li>`;
+            <div class="time noselect">${time}</div>
+            ${fromSelf}\n
+            ${media}\n
+            <div class="who noselect ${fromSelfIcon}" data-user="${escapeHtml(username)}">${escapeHtml(username.substring(0, 1).toUpperCase())}</div>
+        </li>`;
         /* Get actual image dimensions */
         const panelMiddle = $('.panel--middle');
         if (type.indexOf('image') >= 0) {
@@ -620,20 +620,23 @@ window.addEventListener('load', function() {
             const data = e.target.getAttribute('src');
             const type = e.target.getAttribute('data-type');
             const name = e.target.getAttribute('data-name');
+            history.pushState({
+                image: true
+            }, name, '?image');
             const user = e.target.parentNode.parentNode.querySelector('.who').getAttribute('data-user');
             const mid = e.target.parentNode.parentNode.getAttribute('data-mid');
             const fileSize = (data.length * (3 / 4)) - (data[data.length - 3] + data[data.length - 2] == '==' ? 2 : data[data.length - 2] == '=' ? 1 : 0);
             const HTML = `<div class="modal__div" data-mid="${mid}">
-                        <div class="gallery__cont">
-                            <div class="modal__exit noselect"><i class="material-icons">close</i></div>
-                            <div class="gallery__download noselect" data-type="${type}" data-name="${name}"><i class="material-icons">save</i></div>
-                            <div class="modal__fileinfo">${formatSizeUnits(fileSize)}</div>
-                            <div class="who noselect modal__who">${user.substring(0, 1).toLowerCase()}</div>
-                            <div class="img__div">
-                                <img class="gallery__img">
-                            </div>
-                        </div>
-                    </div>`;
+                <div class="gallery__cont">
+                    <div class="modal__exit noselect"><i class="material-icons">close</i></div>
+                    <div class="gallery__download noselect" data-type="${type}" data-name="${name}"><i class="material-icons">save</i></div>
+                    <div class="modal__fileinfo">${formatSizeUnits(fileSize)}</div>
+                    <div class="who noselect modal__who">${user.substring(0, 1).toLowerCase()}</div>
+                    <div class="img__div">
+                        <img class="gallery__img">
+                    </div>
+                </div>
+            </div>`;
             appendDOM(HTML, 'body');
             $('.modal__div').classList.add('anim--opacity');
             $('.gallery__cont').classList.add('anim--opacity');
@@ -901,6 +904,9 @@ window.addEventListener('load', function() {
                 else e.target.parentNode.remove();
             }, 300);
         } else if (e.target && hasClass(e.target, 'modal__exit') || hasClass(e.target.parentNode, 'modal__exit')) {
+            if($('.gallery__cont')) {
+                history.back();
+            }
             $('.gallery__cont').classList.remove('anim--opacity');
             $('.img__div').classList.remove('anim--slideUp');
             $('.img__div').classList.remove('anim--scale');
@@ -1277,3 +1283,15 @@ window.addEventListener('load', function() {
         });
     }
 });
+ 
+window.onpopstate = function(event) {
+    if((!event.state || !event.state.image) && $('.modal__div')) {
+        $('.gallery__cont').classList.remove('anim--opacity');
+        $('.img__div').classList.remove('anim--slideUp');
+        $('.img__div').classList.remove('anim--scale');
+        $('.modal__div').classList.remove('anim--opacity');
+        setTimeout(function modal_exit () {
+            $('.modal__div').remove();
+        }, 300);
+    }
+};
