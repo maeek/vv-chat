@@ -568,7 +568,6 @@ function appendMessage(socket) {
         .replace(/<br>/g, '\n')
         .replace(/<img.*?alt=".*?/g, '').replace(/".?src=.*?>/g, ''));
     /* Get time */
-    console.log(val);
     const time = getTime();
     /* Check if values length != 0 */
     if (val != '' && Cookies.get('user')) {

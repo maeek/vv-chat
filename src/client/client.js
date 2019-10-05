@@ -456,10 +456,10 @@ window.addEventListener('load', function() {
         } else if (e.target && hasClass(e.target, 'emojis')) {
             /* Display emojis */
             if ($('.sendEmoji').style['display'] == 'none') {
+                history.pushState({ emoji: true }, null, null);
                 $('.sendEmoji').style['display'] = 'flex';
                 if ($$('.select__emoji').length < 5) {
                     /* Get emoji list */
-
                     send_message_to_sw('getEmojis').catch(() => {
                         setTimeout(function() {
                             fetch('/js/emoji.json', {
@@ -483,10 +483,12 @@ window.addEventListener('load', function() {
                     });
                 }
             } else {
+                if ($('.sendEmoji').style['display'] != 'none') history.back();
                 $('.sendEmoji').style['display'] = 'none';
             }
         } else if (e.target && !$('.sendEmoji').contains(e.target)) {
             /* Close emojis container */
+            if ($('.sendEmoji').style['display'] != 'none') history.back();
             $('.sendEmoji').style['display'] = 'none';
         }
     });
@@ -622,7 +624,7 @@ window.addEventListener('load', function() {
             const name = e.target.getAttribute('data-name');
             history.pushState({
                 image: true
-            }, name, '?image');
+            }, name, null);
             const user = e.target.parentNode.parentNode.querySelector('.who').getAttribute('data-user');
             const mid = e.target.parentNode.parentNode.getAttribute('data-mid');
             const fileSize = (data.length * (3 / 4)) - (data[data.length - 3] + data[data.length - 2] == '==' ? 2 : data[data.length - 2] == '=' ? 1 : 0);
@@ -788,6 +790,9 @@ window.addEventListener('load', function() {
                     $('.gallery__cont').classList.remove('anim--opacity');
                     $('.img__div').classList.remove('anim--scale');
                     $('.modal__div').classList.remove('anim--opacity');
+                    if ($('.gallery__cont')) {
+                        history.back();
+                    }
                     setTimeout(function remove_image_popup() {
                         mess.remove();
                     }, 200);
@@ -1264,26 +1269,27 @@ window.addEventListener('load', function() {
         document.addEventListener('input', settingsInput, false);
     }
     
-    function send_message_to_sw(msg){
-        return new Promise(function(resolve, reject){
-            // Create a Message Channel
-            var msg_chan = new MessageChannel();
-    
-            // Handler for recieving message reply from service worker
-            msg_chan.port1.onmessage = function(event){
-                if(event.data.error){
-                    reject(event.data.error);
-                }else{
-                    resolve(event.data);
-                }
-            };
-    
-            // Send message to service worker along with port for reply
-            navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
-        });
-    }
 });
  
+function send_message_to_sw(msg){
+    return new Promise(function(resolve, reject){
+        // Create a Message Channel
+        var msg_chan = new MessageChannel();
+
+        // Handler for recieving message reply from service worker
+        msg_chan.port1.onmessage = function(event){
+            if(event.data.error){
+                reject(event.data.error);
+            }else{
+                resolve(event.data);
+            }
+        };
+
+        // Send message to service worker along with port for reply
+        navigator.serviceWorker.controller.postMessage(msg, [msg_chan.port2]);
+    });
+}
+
 window.onpopstate = function(event) {
     if((!event.state || !event.state.image) && $('.modal__div')) {
         $('.gallery__cont').classList.remove('anim--opacity');
@@ -1293,5 +1299,35 @@ window.onpopstate = function(event) {
         setTimeout(function modal_exit () {
             $('.modal__div').remove();
         }, 300);
+    }
+    else if((!event.state || !event.state.emoji) && $('.sendEmoji')) {
+        $('.sendEmoji').style['display'] = 'none';
+    }
+    else if(event.state && event.state.emoji) {
+        $('.sendEmoji').style['display'] = 'flex';
+        if ($$('.select__emoji').length < 5) {
+            /* Get emoji list */
+            send_message_to_sw('getEmojis').catch(() => {
+                setTimeout(function() {
+                    fetch('/js/emoji.json', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(res => res.json()).then(emojis => {
+                        $('.emojiList').innerHTML = '';
+                        let list = '';
+                        for (let i = 0; i < emojis.length; i++) {
+                            list += `<i class="select__emoji" data-keywords="${emojis[i].keywords}" data-char="${emojis[i].char}" data-index="${emojis[i].no}">${twemoji.parse(emojis[i].char)}</i>\n`;
+
+                        }
+                        appendDOM(list, '.emojiList', false);
+                    }).catch(() => {
+                        $('.emojiList').innerHTML = '';
+                        appendDOM('<i class="material-icons noselect failed-to-fetch">warning</i>', '.emojiList', false);
+                    });
+                }, 0);
+            });
+        }
     }
 };
