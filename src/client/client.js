@@ -119,7 +119,6 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
     /* Window resize listener */
     window.addEventListener('resize', function win_resized() {
         const wh = document.height !== undefined ? document.height : document.body.clientHeight;
-        const ww = document.width !== undefined ? document.width : document.body.offsetWidth;
     
         if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
             const calc = wh - $('aside .logo__div').clientHeight - $('aside .side--actions').clientHeight;
@@ -601,6 +600,11 @@ window.addEventListener('load', function() {
 
     $('.textField').addEventListener('paste', function send_file_paste(pasteEvent) {
         let items = pasteEvent.clipboardData.items;
+        let pasteText = pasteEvent.clipboardData.getData('text');
+        pasteEvent.preventDefault();
+        if (pasteText.length > 0) {
+            $('.textField').innerText += pasteText;
+        }
         appendFile(socket, items, true);
     }, false);
 
@@ -1088,8 +1092,9 @@ window.addEventListener('load', function() {
         let roomsList ='';
         for (let i = 0; i < list.length; i++) {
             let uniCode = list[i].icon;
-            const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
-            roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online == 1?'just you':list[i].online}</div></div></li>\n`;
+            const currRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? true : false : i == 0 ? true : false;
+            const activeRoom = currRoom ? 'room--active' : '';
+            roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online == 1 && currRoom ?'just you':list[i].online}</div></div></li>\n`;
         }
         appendDOM(roomsList, '.rooms', false);        
         // $('.rooms'));
@@ -1097,8 +1102,9 @@ window.addEventListener('load', function() {
             let roomsList ='';
             for (let i = 0; i < list.length; i++) {
                 let uniCode = list[i].icon;
-                const activeRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? 'room--active' : '' : i == 0 ? 'room--active' : '';
-                roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online == 1?'just you':list[i].online}</div></div></li>\n`;
+                const currRoom = location.hash ? decodeURIComponent(location.hash.substring(2)) == list[i].id ? true : false : i == 0 ? true : false;
+                const activeRoom = currRoom ? 'room--active' : '';
+                roomsList += `<li class="room--change ${activeRoom}" data-icon="${uniCode}" data-rid="${list[i].id}"><i>${twemoji.parse(uniCode)}</i> <div class="room--details">${list[i].name} <div class="room--count">Online: ${list[i].online == 1 && currRoom ?'just you':list[i].online}</div></div></li>\n`;
             }
             appendDOM(roomsList, '.rooms--modal', false);
         }

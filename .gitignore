@@ -71,7 +71,8 @@ src/rooms.json
 
 #Builds
 
-/src/static/js/client*
+src/static/js/client.js
+src/static/js/clientFunc.js
 server.crt
 server.key
 
