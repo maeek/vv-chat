@@ -608,6 +608,7 @@ input[type="file"] {
     display: flex;
     align-items: flex-end;
     max-width: 97%;
+    min-width: 0;
 }
 
 .sendEmoji {
@@ -686,6 +687,7 @@ input[type="file"] {
 .textField,
 .textIframe {
     max-width: 100%;
+    min-width: 0;
     height: 100%;
     padding: .6rem 1rem;
     border: 0;

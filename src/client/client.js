@@ -96,8 +96,7 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
         }
     });
 
-    const ww = document.width !== undefined ? document.width : document.body.offsetWidth;
-    let textFieldWidth;
+
     if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
         /* Resize for Desktop */
         const calc = wh - $('aside .logo__div').clientHeight - $('aside .side--actions').clientHeight;
@@ -107,24 +106,21 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
         const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
         /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
-        textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth;
 
     } else {
         /* Resize for Moblie */
         const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - $('aside').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
         /* Resize .panel--middle */
         panel.style['max-height'] = pcalc + 'px';
-        textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth;
     }
 
-    $('.textField').style.width = textFieldWidth + 'px';
     twemoji.parse($('.textField'));
 
     /* Window resize listener */
     window.addEventListener('resize', function win_resized() {
         const wh = document.height !== undefined ? document.height : document.body.clientHeight;
         const ww = document.width !== undefined ? document.width : document.body.offsetWidth;
-        let textFieldWidth;
+    
         if (document.width !== undefined ? document.width : document.body.offsetWidth > 900) {
             const calc = wh - $('aside .logo__div').clientHeight - $('aside .side--actions').clientHeight;
             /* Resize <aside> */
@@ -133,16 +129,13 @@ window.addEventListener('DOMContentLoaded', function DOMLoaded() {
             const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
-            textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth - $('aside').offsetWidth;
         } else {
             const pcalc = wh - $('.panel--top').clientHeight - $('.panel--bottom').clientHeight - $('aside').clientHeight - ($('.http') ? $('.http').clientHeight : 0);
             /* Resize .panel--middle */
             panel.style['max-height'] = pcalc + 'px';
-            textFieldWidth = ww - $('.panel--bottom .actions').offsetWidth - $('.panel--bottom .sendWrap .actions').offsetWidth;
         }
         $('aside').removeAttribute('style');
         $('aside').removeAttribute('data-hidden');
-        $('.textField').style.width = textFieldWidth + 'px';
 
     });
 
