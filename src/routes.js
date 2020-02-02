@@ -36,6 +36,7 @@ router.get('/js/manage.js', function route_get_manageJs(req, res) {
  */
 router.route('/manage/')
     .get(function route_get_manage(req, res) {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         if (req.session.auth == 'root') {
             res.sendFile(__dirname + '/assets/manage.html');
         } else if (req.session.auth != 'root') {
