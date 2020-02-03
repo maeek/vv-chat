@@ -358,13 +358,9 @@ function operations(e) {
     } else if (e.target && hasClass(e.target, 'wrap--aside') || hasClass(e.target.parentNode, 'wrap--aside')) {
         if ($('aside').getAttribute('data-hidden') == 'yes') {
             $('aside').style.flex = '0 0 250px';
-            if ($('.textField'))
-                $('.textField').style.width = ($('.textField').offsetWidth - 250) + 'px';
             $('aside').setAttribute('data-hidden', 'no');
         } else {
             $('aside').style.flex = '0 0 0';
-            if ($('.textField'))
-                $('.textField').style.width = ($('.textField').offsetWidth + 250) + 'px';
             $('aside').setAttribute('data-hidden', 'yes');
         }
     }
