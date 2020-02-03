@@ -359,7 +359,7 @@ function operations(e) {
         if ($('aside').getAttribute('data-hidden') == 'yes') {
             $('aside').style.flex = '0 0 250px';
             if ($('.textField'))
-                $('.textField').style['max-width'] = $('.textField').offsetWidth  + 'px';
+                $('.textField').style['max-width'] = ($('.textField').offsetWidth - 250) + 'px';
             $('aside').setAttribute('data-hidden', 'no');
         } else {
             $('aside').style.flex = '0 0 0';
