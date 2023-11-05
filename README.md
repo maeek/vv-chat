@@ -1,3 +1,5 @@
+>This app is no longer maintained
+
 # VV-CHAT
 Websocket chat written in javascript
 
